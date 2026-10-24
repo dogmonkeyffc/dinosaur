@@ -1,0 +1,25 @@
+/data/
+/bin/
+/coverage.out
+.env
+*.db
+*.db-shm
+*.db-wal
+
+# Local configuration and credentials
+.env.*
+!.env.example
+/setup-token
+*.pem
+*.key
+
+# Media, generated files and frontend build caches
+/media/
+/posters/
+/node_modules/
+/ui/node_modules/
+/ui/dist/
+__pycache__/
+*.pyc
+*.log
+.DS_Store

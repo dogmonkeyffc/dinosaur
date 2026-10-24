@@ -1,0 +1,145 @@
+/* The app has two regions: a persistent sidebar and the remaining content. */
+.app-shell {
+  display:grid;
+  grid-template-columns:225px minmax(0,1fr);
+  height:100dvh;
+  min-height:0;
+  overflow:hidden;
+}
+.sidebar {
+  position:relative;
+  height:100%;
+  min-height:0;
+  overflow-y:auto;
+}
+.content {
+  display:grid;
+  grid-template-rows:83px minmax(0,1fr);
+  height:100%;
+  min-height:0;
+  min-width:0;
+}
+.main-content {
+  width:100%;
+  height:100%;
+  min-height:0;
+  max-width:none;
+  margin:0;
+  overflow-y:auto;
+}
+.main-content>section:not(#player-section),
+.main-content>.workspace-footer {
+  max-width:1400px;
+  margin-inline:auto;
+}
+.content.is-playing {
+  grid-template-rows:minmax(0,1fr);
+}
+.content.is-playing>.topbar,
+.content.is-playing .workspace-footer {
+  display:none;
+}
+.content.is-playing>.main-content {
+  padding:0;
+  overflow:hidden;
+}
+@media(max-width:1000px) {
+  .app-shell {
+    grid-template-columns:195px minmax(0,1fr);
+  }
+}
+@media(max-width:720px) {
+  .app-shell {
+    grid-template-columns:64px minmax(0,1fr);
+  }
+  .sidebar {
+    display:flex;
+    flex-direction:column;
+    flex-wrap:nowrap;
+    align-items:center;
+    justify-content:flex-start;
+    padding:21px 10px;
+    gap:30px;
+  }
+  .sidebar>.brand {
+    padding:0;
+  }
+  .sidebar .brand>span:not(.brand-mark),
+  .sidebar .workspace-label,
+  .sidebar .nav-label,
+  .sidebar .sidebar-bottom,
+  .sidebar .nav-count {
+    display:none;
+  }
+  .sidebar nav {
+    flex:none;
+    display:flex;
+    flex-direction:column;
+    flex-wrap:nowrap;
+    align-items:center;
+    gap:10px;
+    width:100%;
+  }
+  .sidebar .nav-item {
+    justify-content:center;
+    width:44px;
+    height:44px;
+    margin:0;
+    padding:0;
+    gap:0;
+    font-size:0;
+  }
+  .sidebar .nav-item .icon {
+    width:19px;
+    height:19px;
+  }
+  .content {
+    grid-template-rows:66px minmax(0,1fr);
+  }
+  .content.is-playing {
+    grid-template-rows:minmax(0,1fr);
+  }
+}
+@media(max-width:720px) {
+  .content>.topbar {
+    padding:0 12px;
+  }
+  .content .breadcrumb {
+    gap:8px;
+    font-size:9px;
+  }
+  .content .user-area {
+    gap:6px;
+  }
+  .content .user-area div>strong {
+    max-width:55px;
+  }
+  .content .logout-button {
+    margin-left:0;
+  }
+  .content>.main-content {
+    padding:24px 16px 0;
+  }
+  .content.is-playing>.main-content {
+    padding:0;
+  }
+  .content .page-heading,
+  .content .list-toolbar,
+  .content .movie-toolbar {
+    flex-wrap:wrap;
+  }
+  .content .search-field {
+    width:100%;
+    max-width:none;
+  }
+  .content .library-grid {
+    grid-template-columns:minmax(0,1fr);
+  }
+  .content .library-card,
+  .content .account-card {
+    padding:18px;
+  }
+  .content .info-banner>div {
+    min-width:0;
+  }
+}

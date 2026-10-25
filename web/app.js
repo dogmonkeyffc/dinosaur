@@ -3,6 +3,15 @@
 const $ = id => document.getElementById(id);
 const state = { section: null, user: null, csrf: '', setup: false, libraries: [], filter: 'all', editing: null, deleting: null, toastTimer: null };
 const errors = {
+  scrape_running: '已有刮削任务运行中，请完成后重试。',
+  invalid_scrape: '刮削参数有误，请重新选择影片。',
+  invalid_metadata_query: '请检查片名与年份，年份 0 表示不限。',
+  scraper_unavailable: '刮削服务正在退出，请稍后重试。',
+  invalid_metadata_settings: '凭据类型、语言或格式有误；切换类型时请填写新凭据。',
+  tmdb_not_configured: '请先填写 TMDB 凭据。',
+  tmdb_invalid_credential: 'TMDB 凭据无效，请检查是否选择了正确的类型并完整复制。',
+  tmdb_unavailable: '无法连接 TMDB，请检查服务器网络后重试。',
+  tmdb_rate_limited: 'TMDB 请求过于频繁，请稍后重试。',
   invalid_playback: '播放参数有误，或视频信息不完整，请重新扫描后重试。',
   media_unavailable: '视频文件不存在或当前无法读取。',
   invalid_progress: '观看进度无效，请重试。',
@@ -76,6 +85,10 @@ async function busy(button, label, action) {
   }
 }
 function showAuth(setup) {
+  resetMetadataSettings();
+  stopScrapePolling();
+  resetScrapeAdmin();
+  movieDetailRequest++;
   if (state.section === 'player') closePlayer();
   state.section = null;
   state.setup = setup; state.user = null; state.csrf = ''; state.libraries = []; stopScanPolling();
@@ -101,6 +114,9 @@ async function showApp(data) {
   $('user-avatar').textContent = data.user.username.slice(0, 1).toUpperCase();
   $('user-role').textContent = data.user.role === 'admin' ? '管理员' : '普通用户';
   const admin = data.user.role === 'admin';
+  $('metadata-nav').hidden = !admin;
+  $('scrape-admin-nav').hidden = !admin;
+  $('scrape-movies').hidden = !admin;
   $('scan-movies').hidden = !admin;
   $('add-library').hidden = !admin; $('empty-add').hidden = !admin;
   $('library-hint').textContent = admin ? '添加服务器上的媒体目录，配置会自动保存。媒体扫描会自动开始，也可以手动重新扫描。' : '查看管理员配置的媒体库。添加、编辑和移除目录需要管理员权限。';

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"net/http"
@@ -53,8 +54,14 @@ func (s *Server) scanError(w http.ResponseWriter, r *http.Request, err error) bo
 	return true
 }
 
-func (s *Server) StartScanning() error { return s.scanner.Start() }
+func (s *Server) StartScanning() error {
+	if err := s.store.InterruptScrapes(context.Background()); err != nil {
+		return err
+	}
+	return s.scanner.Start()
+}
 func (s *Server) Close() {
 	s.scanner.Close()
+	s.scraper.Close()
 	s.transcoder.Close()
 }

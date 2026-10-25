@@ -11,11 +11,19 @@
   <script src="/assets/vendor/artplayer.js" defer></script>
   <script src="/assets/app.js" defer></script>
   <script src="/assets/navigation.js" defer></script>
+  <script src="/assets/metadata-settings.js" defer></script>
+  <link rel="stylesheet" href="/assets/metadata-settings.css">
   <script src="/assets/libraries.js" defer></script>
   <script src="/assets/scans.js" defer></script>
   <script src="/assets/movie-cards.js" defer></script>
   <script src="/assets/movies.js" defer></script>
   <script src="/assets/movie-detail.js" defer></script>
+  <script src="/assets/scraping.js" defer></script>
+  <script src="/assets/scrape-admin-view.js" defer></script>
+  <script src="/assets/scrape-admin.js" defer></script>
+  <link rel="stylesheet" href="/assets/scrape-admin.css">
+  <script src="/assets/movie-metadata.js" defer></script>
+  <link rel="stylesheet" href="/assets/movie-metadata.css">
   <script src="/assets/artplayer-timeline.js" defer></script>
   <script src="/assets/player-settings.js" defer></script>
   <script src="/assets/artplayer-adapter.js" defer></script>
@@ -29,6 +37,7 @@
   <link rel="stylesheet" href="/assets/watch-progress.css">
   <link rel="stylesheet" href="/assets/layout.css">
   <link rel="stylesheet" href="/assets/player-page.css">
+  <link rel="stylesheet" href="/assets/player-options.css">
 </head>
 <body>
 <svg class="icon-definitions" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs>
@@ -77,6 +86,8 @@
     <span class="nav-label">媒体空间</span><nav aria-label="媒体空间">
       <button class="nav-item" data-section="movies" aria-label="我的电影" title="我的电影"><svg class="icon"><use href="#i-film"/></svg>我的电影</button>
       <button class="nav-item active" data-section="libraries" aria-label="媒体库设置" title="媒体库设置"><svg class="icon"><use href="#i-folder"/></svg>媒体库设置<span id="nav-count" class="nav-count">0</span></button>
+      <button id="scrape-admin-nav" class="nav-item" data-section="scraping" aria-label="刮削管理" title="刮削管理"><svg class="icon"><use href="#i-film"/></svg>刮削管理</button>
+      <button id="metadata-nav" class="nav-item" data-section="metadata" aria-label="元数据设置" title="元数据设置"><svg class="icon"><use href="#i-info"/></svg>元数据设置</button>
       <button class="nav-item" data-section="account" aria-label="账户安全" title="账户安全"><svg class="icon"><use href="#i-lock"/></svg>账户安全</button>
     </nav>
     <div class="sidebar-bottom"><div class="server-health"><span id="health-dot" class="status-dot"></span><div><strong id="health-text">正在连接</strong><span>Dinosaur Server</span></div></div><p>好故事，值得好好收藏。</p></div>
@@ -84,8 +95,9 @@
   <div id="content" class="workspace content"><header class="topbar"><div class="breadcrumb">控制台<span>/</span><strong id="breadcrumb-current">系统设置</strong></div><div class="user-area"><span class="avatar" id="user-avatar">A</span><div><strong id="user-name"></strong><span id="user-role"></span></div><button id="logout" class="icon-button logout-button" aria-label="退出登录" title="退出登录"><svg class="icon"><use href="#i-logout"/></svg></button></div></header>
     <main id="content-main" class="main-content">
       <section id="movies-section" hidden>
-        <div class="page-heading"><div><span class="small-label">YOUR PERSONAL COLLECTION</span><h1>我的电影<span class="collection-count" id="movie-total">0</span></h1><p class="muted">收藏的每一个故事，都值得再次相遇。</p></div><button id="scan-movies" class="button secondary">扫描媒体库</button></div>
+        <div class="page-heading"><div><span class="small-label">YOUR PERSONAL COLLECTION</span><h1>我的电影<span class="collection-count" id="movie-total">0</span></h1><p class="muted">收藏的每一个故事，都值得再次相遇。</p></div><div class="metadata-actions"><button id="scan-movies" class="button secondary">扫描媒体库</button><button id="scrape-movies" class="button secondary">刮削未识别影片</button></div></div>
         <div id="movie-scan-status" class="info-banner movie-scan-status" role="status" hidden></div>
+        <p id="movie-scrape-status" class="scrape-status" role="status" hidden></p>
         <section id="continue-section" class="continue-section" hidden><h2>继续观看</h2><div id="continue-grid" class="movie-grid continue-grid"></div></section>
         <div class="movie-toolbar"><label class="library-select"><span class="sr-only">选择媒体库</span><select id="movie-library-filter"><option value="">全部媒体库</option></select></label><label class="search-field"><svg class="icon"><use href="#i-search"/></svg><input id="movie-search" type="search" maxlength="128" placeholder="搜索你的电影" aria-label="搜索电影"></label></div>
         <p id="movie-error" class="form-error" role="alert" hidden></p>
@@ -101,6 +113,46 @@
         <div id="library-list" class="library-grid" aria-live="polite"></div>
         <div id="empty-state" class="empty-state" hidden><div class="empty-illustration"><span class="empty-folder-back"></span><span class="empty-folder"><svg class="icon"><use href="#i-film"/></svg></span><span class="empty-plus">+</span></div><h2 id="empty-title">你的媒体故事，从这里开始</h2><p id="empty-description">添加第一个媒体库，把收藏的电影和剧集整理在一起。</p><button id="empty-add" class="button secondary"><svg class="icon"><use href="#i-plus"/></svg>添加第一个媒体库</button></div>
         <div class="section-footnote"><svg class="icon"><use href="#i-lock"/></svg>媒体文件保留在原目录，移除媒体库不会删除你的文件。</div>
+      </section>
+      <section id="scraping-section" hidden>
+        <div class="page-heading"><div><span class="small-label">METADATA ACTIVITY</span><h1>刮削管理</h1><p class="muted">查看识别结果、处理异常并追踪每次任务。</p></div><div class="metadata-actions"><button id="scrape-admin-config" class="text-button">TMDB 设置</button><button id="scrape-admin-refresh" class="button secondary">刷新状态</button><button id="scrape-admin-start" class="button primary">刮削未识别影片</button></div></div>
+        <div class="scrape-admin-tabs" role="tablist" aria-label="刮削管理视图"><button class="button secondary" role="tab" data-admin-tab="records" aria-selected="true" aria-controls="scrape-admin-records">影片状态</button><button class="button secondary" role="tab" data-admin-tab="jobs" aria-selected="false" aria-controls="scrape-admin-jobs">任务历史</button></div>
+        <p id="scrape-admin-error" class="form-error" role="alert" hidden></p>
+        <div id="scrape-summary" class="scrape-summary" aria-label="识别状态统计"></div>
+        <div id="scrape-admin-records" role="tabpanel">
+          <form id="scrape-record-filters" class="scrape-admin-filters"><label>媒体库<select id="scrape-admin-library"><option value="">全部媒体库</option></select></label><label>识别状态<select id="scrape-admin-state"><option value="">全部状态</option><option value="matched">已识别</option><option value="unmatched">未识别</option><option value="needs_review">待确认</option><option value="failed">失败</option><option value="warning">已识别但有提示</option></select></label><label>搜索影片<input id="scrape-admin-query" type="search" maxlength="128" placeholder="片名、别名或文件名"></label></form>
+          <p class="field-help">统计遵循媒体库和搜索条件。“有提示”包含在已识别数量内；批量刮削只处理所选媒体库中的未识别影片。</p>
+          <div class="scrape-table-wrap" role="region" aria-label="影片识别结果" tabindex="0"><table class="scrape-table"><thead><tr><th>影片 / 文件</th><th>媒体库</th><th>状态 / 提示</th><th>TMDB / 语言</th><th>更新时间</th><th>操作</th></tr></thead><tbody id="scrape-record-body"></tbody></table></div>
+          <p id="scrape-record-empty" class="scrape-admin-empty" hidden>没有符合筛选条件的影片。</p>
+          <div class="scrape-pagination"><span id="scrape-records-page"></span><button class="button secondary" data-admin-prev="records">上一页</button><button class="button secondary" data-admin-next="records">下一页</button></div>
+        </div>
+        <div id="scrape-admin-jobs" role="tabpanel" hidden>
+          <form id="scrape-history-filter" class="scrape-admin-filters"><label>任务状态<select id="scrape-job-state"><option value="">全部任务</option><option value="queued">排队中</option><option value="running">运行中</option><option value="completed">已完成</option><option value="failed">失败</option><option value="interrupted">已中断</option></select></label></form>
+          <div class="scrape-table-wrap" role="region" aria-label="刮削任务历史" tabindex="0"><table class="scrape-table"><thead><tr><th>任务 / 范围</th><th>状态 / 进度</th><th>结果 / 提示</th><th>开始 / 结束时间</th><th>操作</th></tr></thead><tbody id="scrape-history-body"></tbody></table></div>
+          <p id="scrape-history-empty" class="scrape-admin-empty" hidden>还没有刮削任务。</p>
+          <div class="scrape-pagination"><span id="scrape-jobs-page"></span><button class="button secondary" data-admin-prev="jobs">上一页</button><button class="button secondary" data-admin-next="jobs">下一页</button></div>
+          <section id="scrape-job-detail" class="scrape-job-detail" hidden><h2 id="scrape-job-title"></h2><p id="scrape-job-description" class="scrape-status"></p><p class="field-help">以下是任务执行时保存的结果；操作会以影片当前资料为准。</p>
+            <div class="scrape-table-wrap" role="region" aria-label="任务逐片结果" tabindex="0"><table class="scrape-table"><thead><tr><th>影片 / 文件</th><th>当时状态 / 提示</th><th>TMDB ID</th><th>记录时间</th><th>操作</th></tr></thead><tbody id="scrape-job-body"></tbody></table></div>
+            <p id="scrape-job-empty" class="scrape-admin-empty" hidden></p><div class="scrape-pagination"><span id="scrape-detail-page"></span><button class="button secondary" data-admin-prev="detail">上一页</button><button class="button secondary" data-admin-next="detail">下一页</button></div>
+          </section>
+        </div>
+      </section>
+      <section id="metadata-section" hidden>
+        <div class="page-heading"><div><span class="small-label">METADATA</span><h1>元数据设置</h1><p class="muted">配置电影资料来源和首选语言。</p></div></div>
+        <div class="metadata-card">
+          <h2>TMDB</h2><p id="tmdb-state" role="status">正在读取配置…</p>
+          <p class="muted">在 <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener noreferrer">TMDB 账号的 API 设置</a>申请凭据。推荐使用 API Read Access Token。</p>
+          <form id="tmdb-form"><fieldset id="tmdb-fields" disabled>
+            <label>凭据类型<select id="tmdb-type"><option value="bearer">API Read Access Token（推荐）</option><option value="api_key">API Key</option></select></label>
+            <label>凭据<input id="tmdb-credential" type="password" maxlength="4096" autocomplete="off" spellcheck="false" placeholder="粘贴 TMDB 凭据"><span class="field-help">留空保留已保存的凭据；切换凭据类型时请重新填写。</span></label>
+            <label>首选资料语言<select id="tmdb-language"><option value="zh-CN">简体中文</option><option value="zh-TW">繁体中文（台湾）</option><option value="zh-HK">繁体中文（香港）</option><option value="en-US">英语</option></select></label>
+            <div class="metadata-actions"><button class="button primary" type="submit">保存配置</button><button id="tmdb-test" class="button secondary" type="button">测试连接</button><button id="tmdb-clear" class="text-button" type="button" disabled>移除凭据</button></div>
+          </fieldset></form>
+          <p id="tmdb-message" role="status"></p><p id="tmdb-error" class="form-error" role="alert" hidden></p><button id="tmdb-reload" class="button secondary" type="button" hidden>重新读取配置</button>
+          <p class="field-help">扫描完成后会自动识别未匹配影片。已匹配资料会保留；更改语言后，可在电影详情主动刷新资料。</p>
+          <button id="scrape-all" class="button secondary" type="button">刮削所有未识别影片</button><p id="settings-scrape-status" class="scrape-status" role="status" hidden></p>
+          <div class="tmdb-attribution"><a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer"><img src="/assets/vendor/tmdb-logo.svg" alt="TMDB"></a><strong>资料来源与致谢</strong><p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p></div>
+        </div>
       </section>
       <section id="account-section" hidden><div class="page-heading"><div><span class="small-label">ACCOUNT & SECURITY</span><h1>账户安全</h1><p class="muted">管理登录密码，保护你的私人空间。</p></div></div><div class="account-card"><h2>修改密码</h2><p class="muted">密码更新后，所有设备都需要重新登录。</p><form id="password-form"><label>当前密码<input name="current_password" type="password" autocomplete="current-password" required maxlength="1024"></label><label>新密码<input name="new_password" type="password" autocomplete="new-password" required maxlength="1024"><span class="field-help">至少 12 字节，建议使用较长的密码短语。</span></label><label>确认新密码<input name="confirm_password" type="password" autocomplete="new-password" required maxlength="1024"></label><p id="password-error" class="form-error" role="alert" hidden></p><button class="button primary" type="submit">更新密码</button></form></div></section>
       <section id="player-section" class="player-page" aria-label="电影播放器" hidden>

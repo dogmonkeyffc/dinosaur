@@ -23,8 +23,7 @@
 }
 @media(max-width:720px) {
   #player-art .art-control-back-ten,
-  #player-art .art-control-forward-ten,
-  #player-art .art-control-pip {
+  #player-art .art-control-forward-ten {
     display:none;
   }
 }

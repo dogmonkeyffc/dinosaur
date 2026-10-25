@@ -14,7 +14,9 @@ async function loadLibraries(quiet = false) {
     state.libraries = result.libraries;
     renderLibraries();
     syncMovieLibraries();
+    syncScrapeAdminLibraries();
     scheduleScanPolling();
+    if (state.user.role === 'admin') loadScrapeJobs();
   } catch (error) {
     if (!quiet) $('library-list').replaceChildren();
     handleError(error, 'library-load-error');

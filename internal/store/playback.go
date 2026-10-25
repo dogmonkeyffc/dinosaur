@@ -56,7 +56,7 @@ func (s *Store) AddPlaybackProgress(ctx context.Context, userID int64, items []m
 	return rows.Err()
 }
 func (s *Store) ContinueWatching(ctx context.Context, userID int64) ([]media.Item, error) {
-	rows, err := s.DB.QueryContext(ctx, `SELECT `+mediaColumns+` FROM media_items m JOIN libraries l ON l.id=m.library_id JOIN playback_progress p ON p.media_id=m.id WHERE p.user_id=? AND p.position>0 AND p.watched=0 AND m.missing=0 AND l.type='movie' ORDER BY p.updated_at DESC,p.media_id DESC LIMIT 12`, userID)
+	rows, err := s.DB.QueryContext(ctx, `SELECT `+mediaColumns+mediaFrom+` JOIN playback_progress p ON p.media_id=m.id WHERE p.user_id=? AND p.position>0 AND p.watched=0 AND m.missing=0 AND l.type='movie' ORDER BY p.updated_at DESC,p.media_id DESC LIMIT 12`, userID)
 	if err != nil {
 		return nil, err
 	}

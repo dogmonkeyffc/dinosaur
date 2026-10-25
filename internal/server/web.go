@@ -23,7 +23,7 @@ func (s *Server) mountWeb(mux *http.ServeMux) error {
 			s.logger.Error("render web page", "error", err)
 		}
 	}
-	for _, path := range []string{"GET /{$}", "GET /login", "GET /setup", "GET /settings", "GET /movies", "GET /watch/{id}"} {
+	for _, path := range []string{"GET /{$}", "GET /login", "GET /setup", "GET /settings", "GET /settings/metadata", "GET /settings/scraping", "GET /movies", "GET /watch/{id}"} {
 		mux.HandleFunc(path, render)
 	}
 	mux.HandleFunc("GET /assets/{name}", func(w http.ResponseWriter, r *http.Request) { serveAsset(w, r, "") })
@@ -35,6 +35,7 @@ func serveAsset(w http.ResponseWriter, r *http.Request, prefix string) {
 	name := r.PathValue("name")
 	kinds := map[string]string{".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8"}
 	if prefix == "vendor/" {
+		kinds[".svg"] = "image/svg+xml"
 		kinds[".txt"] = "text/plain; charset=utf-8"
 		kinds[".json"] = "application/json"
 	}

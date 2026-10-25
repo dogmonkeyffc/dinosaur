@@ -3,7 +3,7 @@
 const player = {
   info: null, position: 0, offset: 0, ready: false, loading: false,
   revision: 0, released: false, pauseTimer: null, progressTimer: null,
-  seekTimer: null, seekTarget: null, audio: null, mode: 'auto', subtitle: '',
+  seekTimer: null, seekTarget: null, audio: null, mode: 'auto', subtitle: '', rate: 1,
 };
 let video = null;
 const playerClock = seconds => {
@@ -34,6 +34,7 @@ async function openPlayer(id, fromBeginning = false, replace = false) {
     player.audio = info.plan.audio;
     player.mode = 'auto';
     player.subtitle = '';
+    player.rate = 1;
     createPlayerUI();
     startPlayerStream(fromBeginning ? 0 : info.resume_position);
     clearInterval(player.progressTimer);
@@ -61,6 +62,8 @@ function startPlayerStream(position) {
   video.onloadedmetadata = () => {
     if (!player.info) return;
     if (player.info.plan.mode === 'direct') setNativeCurrentTime(player.position);
+    art.playbackRate = player.rate;
+    syncPlaybackOptions();
     player.ready = true;
     player.loading = false;
     applyPlayerSubtitle();

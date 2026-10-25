@@ -31,6 +31,9 @@ func (m *Manager) run(item library.Library, job library.ScanJob) {
 		}
 		m.logger.Error("library scan failed", "library_id", item.ID, "error", err)
 	}
+	if err == nil && m.AfterScan != nil {
+		m.AfterScan()
+	}
 	job.FinishedAt = time.Now().Unix()
 	// Job completion must survive cancellation of the worker's context.
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

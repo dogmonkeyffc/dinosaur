@@ -64,7 +64,7 @@ func TestPersistenceAndSQLiteConstraints(t *testing.T) {
 	if err := db.DB.QueryRow(`SELECT count(*) FROM schema_migrations`).Scan(&count); err != nil {
 		t.Fatal(err)
 	}
-	if count != 4 {
+	if count != 7 {
 		t.Fatalf("migrations=%d", count)
 	}
 	if err := db.ChangePassword(ctx, u.ID, "new-hash"); err != nil {

@@ -16,8 +16,10 @@ import (
 	"dinosaur/internal/auth"
 	"dinosaur/internal/config"
 	"dinosaur/internal/scanner"
+	"dinosaur/internal/scraping"
 	"dinosaur/internal/store"
 	"dinosaur/internal/streaming"
+	"dinosaur/internal/tmdb"
 )
 
 const cookieName = "dinosaur_session"
@@ -37,6 +39,8 @@ type Server struct {
 	handler    http.Handler
 	scanner    *scanner.Manager
 	transcoder *streaming.Transcoder
+	tmdb       *tmdb.Client
+	scraper    *scraping.Manager
 }
 
 func New(c config.Config, db *store.Store, logger *slog.Logger) (*Server, error) {
@@ -52,6 +56,9 @@ func New(c config.Config, db *store.Store, logger *slog.Logger) (*Server, error)
 	s := &Server{config: c, store: db, logger: logger, hasher: h, limiter: auth.NewLimiter(), dummyHash: dummy}
 	s.scanner = scanner.New(db, c, logger)
 	s.transcoder = streaming.New(c.FFmpegPath)
+	s.tmdb = tmdb.New()
+	s.scraper = scraping.New(db, s.tmdb, c.DataDir)
+	s.scanner.AfterScan = s.scraper.Schedule
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health/live", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, map[string]string{"status": "ok"}) })
 	mux.HandleFunc("GET /health/ready", s.ready)
@@ -74,6 +81,8 @@ func New(c config.Config, db *store.Store, logger *slog.Logger) (*Server, error)
 	mux.Handle("GET /api/media/{id}", s.require(false, http.HandlerFunc(s.getMedia)))
 	mux.Handle("GET /api/media/{id}/poster", s.require(false, http.HandlerFunc(s.mediaPoster)))
 	s.mountPlayback(mux)
+	s.mountMetadataSettings(mux)
+	s.mountScraping(mux)
 	if err := s.mountWeb(mux); err != nil {
 		return nil, err
 	}

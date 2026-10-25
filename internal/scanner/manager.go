@@ -17,16 +17,18 @@ var ErrUnsupported = errors.New("only movie libraries are supported")
 var ErrClosed = errors.New("scanner is shutting down")
 
 type Manager struct {
-	db      *store.Store
-	config  config.Config
-	logger  *slog.Logger
-	ctx     context.Context
-	cancel  context.CancelFunc
-	mu      sync.Mutex
-	active  map[int64]bool
-	closed  bool
-	slots   chan struct{}
-	workers sync.WaitGroup
+	// AfterScan is configured before Start and never performs network work inline.
+	AfterScan func()
+	db        *store.Store
+	config    config.Config
+	logger    *slog.Logger
+	ctx       context.Context
+	cancel    context.CancelFunc
+	mu        sync.Mutex
+	active    map[int64]bool
+	closed    bool
+	slots     chan struct{}
+	workers   sync.WaitGroup
 }
 
 func New(db *store.Store, c config.Config, logger *slog.Logger) *Manager {

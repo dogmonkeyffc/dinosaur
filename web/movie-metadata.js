@@ -10,6 +10,7 @@ function movieMetadataHTML(item) {
   const statusHTML = `<p class="movie-metadata-status">${status} ${source}</p>${info?.message ? `<p class="field-help">${escapeHTML(scrapeMessage(info.message))}</p>` : ''}`;
   if (state.user?.role !== 'admin') return original + description + statusHTML;
   return `${original}${description}${statusHTML}
+    ${candidatePreview(item.id, info?.candidates || [], info?.message || '')}
     <div class="metadata-detail-actions"><button class="text-button" data-scrape-media="${item.id}" data-refresh="${matched}">${matched ? '刷新已匹配资料' : '自动识别'}</button></div>
     <details class="movie-matching"><summary>匹配 / 更正电影</summary>
       <form id="movie-match-search" data-media="${item.id}"><label>电影名<input id="movie-match-query" maxlength="128" placeholder="留空使用文件名"></label><label>年份<input id="movie-match-year" type="number" min="0" max="2100" value="${item.year || ''}" placeholder="0 表示不限年份"></label><button class="button secondary" type="submit">搜索候选</button></form>
@@ -20,8 +21,6 @@ function movieMetadataHTML(item) {
 $('movie-detail').addEventListener('click', event => {
   const button = event.target.closest('[data-scrape-media]');
   if (button) startScraping({ media_id: Number(button.dataset.scrapeMedia), refresh: button.dataset.refresh === 'true' }, button);
-  const candidate = event.target.closest('[data-match-tmdb]');
-  if (candidate) startScraping({ media_id: movieDetailID, tmdb_id: Number(candidate.dataset.matchTmdb) }, candidate);
 });
 $('movie-detail').addEventListener('submit', async event => {
   const form = event.target;
@@ -43,8 +42,7 @@ $('movie-detail').addEventListener('submit', async event => {
     try {
       const result = await api(`/api/admin/media/${mediaID}/metadata/candidates?${query}`);
       if (!active()) return;
-      $('movie-match-results').innerHTML = result.candidates.length ? result.candidates.map(item => `
-        <article class="metadata-candidate"><strong>${escapeHTML(item.title)} (${item.year || '年份未知'})</strong><span>${escapeHTML(item.original_title)}</span><p>${escapeHTML(item.overview)}</p><button class="button secondary" type="button" data-match-tmdb="${item.id}">选择此电影 · ${item.id}</button></article>`).join('') : '<p class="field-help">未找到候选，可换一个关键词、将年份设为 0，或直接填写 TMDB ID。</p>';
+      $('movie-match-results').innerHTML = result.candidates.length ? candidateCards(result.candidates, mediaID) : '<p class="field-help">未找到候选，可换一个关键词、将年份设为 0，或直接填写 TMDB ID。</p>';
     } catch (error) {
       if (active()) handleError(error, 'movie-match-error');
     }

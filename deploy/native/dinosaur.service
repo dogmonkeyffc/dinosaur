@@ -1,0 +1,15 @@
+[Unit]
+Description=Dinosaur media server
+
+[Service]
+Type=simple
+WorkingDirectory=%h/.local/share/dinosaur
+EnvironmentFile=%h/.local/share/dinosaur/dinosaur.env
+ExecStart=%h/.local/share/dinosaur/current/dinosaur
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=30
+UMask=0077
+
+[Install]
+WantedBy=default.target

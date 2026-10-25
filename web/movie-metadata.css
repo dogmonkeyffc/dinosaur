@@ -89,3 +89,31 @@
   height:auto;
   margin-bottom:8px;
 }
+
+.candidate-preview {
+  margin:18px 0;
+  padding:16px;
+  background:#f0f4ec;
+  border:1px solid var(--line);
+  border-radius:8px;
+}
+.candidate-preview h3 {
+  margin:0 0 10px;
+  font-size:12px;
+}
+.candidate-preview .metadata-candidate:last-child {
+  border-bottom:0;
+}
+.candidate-preview[data-compact="true"] {
+  min-width:180px;
+  max-width:280px;
+  padding:10px;
+  margin:10px 0 0;
+}
+.candidate-compact {
+  gap:5px;
+  padding:10px 0;
+}
+.candidate-compact strong {
+  font-size:12px;
+}

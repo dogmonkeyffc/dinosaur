@@ -35,11 +35,7 @@ func (m *Manager) scrape(ctx context.Context, settings metadata.Settings, reques
 		var matched bool
 		id, matched = metadata.AutoMatch(query, year, candidates)
 		if !matched {
-			message := "ambiguous"
-			if len(candidates) == 0 {
-				message = "not_found"
-			}
-			err := m.repo.RecordScrapeFailure(ctx, item.ID, "needs_review", message)
+			err := m.repo.RecordScrapeReview(ctx, item.ID, metadata.TopCandidates(query, year, candidates))
 			return "review", err
 		}
 	}

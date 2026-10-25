@@ -13,19 +13,22 @@ import (
 const mediaFrom = ` FROM media_items m JOIN libraries l ON l.id=m.library_id LEFT JOIN movie_metadata md ON md.media_id=m.id`
 const displayTitle = `COALESCE(NULLIF(md.title,''),m.title)`
 const mediaColumns = `m.id,m.library_id,l.name,m.relative_path,` + displayTitle + `,COALESCE(NULLIF(md.year,0),m.year),m.size,m.modified_ns,m.duration,m.format,m.video_codec,m.width,m.height,m.tracks_json,COALESCE(NULLIF(md.poster_key,''),m.poster_key),m.probe_error,m.missing,
- COALESCE(md.tmdb_id,0),COALESCE(md.original_title,''),COALESCE(md.overview,''),COALESCE(md.release_date,''),COALESCE(md.language,''),COALESCE(md.status,''),COALESCE(md.message,''),COALESCE(md.updated_at,0)`
+ COALESCE(md.tmdb_id,0),COALESCE(md.original_title,''),COALESCE(md.overview,''),COALESCE(md.release_date,''),COALESCE(md.language,''),COALESCE(md.status,''),COALESCE(md.message,''),COALESCE(md.updated_at,0),COALESCE(md.candidates_json,'[]')`
 
 func scanMedia(row interface{ Scan(...any) error }) (media.Item, error) {
 	var item media.Item
-	var tracks string
+	var tracks, candidates string
 	var info metadata.Movie
-	err := row.Scan(&item.ID, &item.LibraryID, &item.LibraryName, &item.RelativePath, &item.Title, &item.Year, &item.Size, &item.ModifiedNS, &item.Duration, &item.Format, &item.VideoCodec, &item.Width, &item.Height, &tracks, &item.PosterKey, &item.ProbeError, &item.Missing, &info.TMDBID, &info.OriginalTitle, &info.Overview, &info.ReleaseDate, &info.Language, &info.Status, &info.Message, &info.UpdatedAt)
+	err := row.Scan(&item.ID, &item.LibraryID, &item.LibraryName, &item.RelativePath, &item.Title, &item.Year, &item.Size, &item.ModifiedNS, &item.Duration, &item.Format, &item.VideoCodec, &item.Width, &item.Height, &tracks, &item.PosterKey, &item.ProbeError, &item.Missing, &info.TMDBID, &info.OriginalTitle, &info.Overview, &info.ReleaseDate, &info.Language, &info.Status, &info.Message, &info.UpdatedAt, &candidates)
 	if err != nil {
 		return item, err
 	}
 	item.Filename = filepath.Base(item.RelativePath)
 	if info.Status != "" {
 		info.Title, info.Year = item.Title, item.Year
+		if err := json.Unmarshal([]byte(candidates), &info.Candidates); err != nil {
+			return item, err
+		}
 		item.Metadata = &info
 	}
 	err = json.Unmarshal([]byte(tracks), &item.Tracks)

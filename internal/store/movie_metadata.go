@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"dinosaur/internal/media"
@@ -9,14 +10,18 @@ import (
 )
 
 func (s *Store) SaveMovieMetadata(ctx context.Context, id int64, movie metadata.Movie) error {
-	_, err := s.DB.ExecContext(ctx, `INSERT INTO movie_metadata
- (media_id,tmdb_id,title,original_title,overview,year,release_date,language,poster_key,aliases,status,message,updated_at)
- VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(media_id) DO UPDATE SET
+	candidates, err := json.Marshal(movie.Candidates)
+	if err != nil {
+		return err
+	}
+	_, err = s.DB.ExecContext(ctx, `INSERT INTO movie_metadata
+ (media_id,tmdb_id,title,original_title,overview,year,release_date,language,poster_key,aliases,status,message,updated_at,candidates_json)
+ VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(media_id) DO UPDATE SET
  tmdb_id=excluded.tmdb_id,title=excluded.title,original_title=excluded.original_title,overview=excluded.overview,
  year=excluded.year,release_date=excluded.release_date,language=excluded.language,poster_key=excluded.poster_key,
- aliases=excluded.aliases,status=excluded.status,message=excluded.message,updated_at=excluded.updated_at`,
+ aliases=excluded.aliases,status=excluded.status,message=excluded.message,updated_at=excluded.updated_at,candidates_json=excluded.candidates_json`,
 		id, movie.TMDBID, movie.Title, movie.OriginalTitle, movie.Overview, movie.Year, movie.ReleaseDate,
-		movie.Language, movie.PosterKey, movie.Aliases, movie.Status, movie.Message, time.Now().Unix())
+		movie.Language, movie.PosterKey, movie.Aliases, movie.Status, movie.Message, time.Now().Unix(), string(candidates))
 	return err
 }
 
@@ -57,4 +62,21 @@ func (s *Store) ScrapeTargets(ctx context.Context, request metadata.ScrapeReques
 		items = append(items, item)
 	}
 	return items, rows.Err()
+}
+
+// RecordScrapeReview caches suggestions without overwriting a concurrent match.
+func (s *Store) RecordScrapeReview(ctx context.Context, id int64, candidates []metadata.Candidate) error {
+	message := "ambiguous"
+	if len(candidates) == 0 {
+		message = "not_found"
+	}
+	data, err := json.Marshal(candidates)
+	if err != nil {
+		return err
+	}
+	_, err = s.DB.ExecContext(ctx, `INSERT INTO movie_metadata(media_id,status,message,candidates_json,updated_at)
+ VALUES (?,'needs_review',?,?,?) ON CONFLICT(media_id) DO UPDATE SET
+ status=excluded.status,message=excluded.message,candidates_json=excluded.candidates_json,updated_at=excluded.updated_at
+ WHERE movie_metadata.tmdb_id=0`, id, message, string(data), time.Now().Unix())
+	return err
 }

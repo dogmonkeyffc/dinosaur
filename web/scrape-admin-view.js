@@ -21,7 +21,7 @@ function renderScrapeRecords(page) {
   $('scrape-record-body').innerHTML = page.items.map(item => `<tr>
     <td><strong>${escapeHTML(item.title)}</strong><small>${escapeHTML(item.filename)}</small></td>
     <td>${escapeHTML(item.library_name)}</td>
-    <td>${scrapeStateBadge(item.status)}${item.message ? `<p class="scrape-row-note">${escapeHTML(scrapeMessage(item.message))}</p>` : ''}</td>
+    <td>${scrapeStateBadge(item.status)}${item.message ? `<p class="scrape-row-note">${escapeHTML(scrapeMessage(item.message))}</p>` : ''}${candidatePreview(item.media_id, item.candidates || [], item.message, true)}</td>
     <td>${item.tmdb_id || '—'}<small>${escapeHTML(item.language)}</small></td>
     <td>${scrapeTime(item.updated_at)}</td><td>${scrapeAdminActions(item)}</td>
   </tr>`).join('');

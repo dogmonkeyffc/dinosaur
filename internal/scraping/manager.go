@@ -27,6 +27,7 @@ type Repository interface {
 	SaveScrapeJob(context.Context, metadata.Job) error
 	SaveMovieMetadata(context.Context, int64, metadata.Movie) error
 	RecordScrapeFailure(context.Context, int64, string, string) error
+	RecordScrapeReview(context.Context, int64, []metadata.Candidate) error
 }
 
 type Provider interface {

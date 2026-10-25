@@ -43,6 +43,7 @@ async function openMovie(id, { replace = false } = {}) {
           </details>
         </article>
       </div>`;
+    loadLegacyMovieCandidates(item);
     $('movie-detail').querySelector('img')?.addEventListener('error', event => { event.currentTarget.hidden = true; });
   } catch (error) {
     if (!active()) return;

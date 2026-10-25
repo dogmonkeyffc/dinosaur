@@ -3,7 +3,7 @@ from pathlib import Path
 import sys
 
 extensions = {'.go', '.js', '.cjs', '.mjs', '.jsx', '.ts', '.tsx', '.css', '.html', '.py', '.sql'}
-roots = ['cmd', 'internal', 'web', 'scripts']
+roots = ['cmd', 'internal', 'web', 'scripts', 'deploy']
 violations = []
 for root in roots:
     for path in Path(root).rglob('*'):

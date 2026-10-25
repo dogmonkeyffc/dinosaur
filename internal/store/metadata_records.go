@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"encoding/json"
 	"path/filepath"
 	"strings"
 
@@ -60,13 +61,18 @@ func (s *Store) MetadataRecords(ctx context.Context, filter metadata.ReportFilte
 		page.Total = page.Summary[filter.Status]
 	}
 	args = append(args, filter.PageSize, (filter.Page-1)*filter.PageSize)
-	rows, err = tx.QueryContext(ctx, `SELECT m.id,m.library_id,l.name,`+displayTitle+`,m.relative_path,COALESCE(md.tmdb_id,0),COALESCE(md.language,''),`+recordStatus+`,COALESCE(md.message,''),COALESCE(md.updated_at,0)`+mediaFrom+where+` ORDER BY m.id LIMIT ? OFFSET ?`, args...)
+	rows, err = tx.QueryContext(ctx, `SELECT m.id,m.library_id,l.name,`+displayTitle+`,m.relative_path,COALESCE(md.tmdb_id,0),COALESCE(md.language,''),`+recordStatus+`,COALESCE(md.message,''),COALESCE(md.updated_at,0),COALESCE(md.candidates_json,'[]')`+mediaFrom+where+` ORDER BY m.id LIMIT ? OFFSET ?`, args...)
 	if err != nil {
 		return page, err
 	}
 	for rows.Next() {
 		var item metadata.Record
-		if err := rows.Scan(&item.MediaID, &item.LibraryID, &item.LibraryName, &item.Title, &item.Filename, &item.TMDBID, &item.Language, &item.Status, &item.Message, &item.UpdatedAt); err != nil {
+		var candidates string
+		if err := rows.Scan(&item.MediaID, &item.LibraryID, &item.LibraryName, &item.Title, &item.Filename, &item.TMDBID, &item.Language, &item.Status, &item.Message, &item.UpdatedAt, &candidates); err != nil {
+			rows.Close()
+			return page, err
+		}
+		if err := json.Unmarshal([]byte(candidates), &item.Candidates); err != nil {
 			rows.Close()
 			return page, err
 		}

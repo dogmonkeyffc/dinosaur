@@ -20,7 +20,6 @@ function switchSection(section, mediaID = null, { replace = false } = {}) {
     else button.removeAttribute('aria-current');
   });
   const titles = { movies: '我的电影', libraries: '媒体库设置', account: '账户安全', metadata: '元数据设置', scraping: '刮削管理', player: '正在播放', detail: '电影详情' };
-  $('breadcrumb-current').textContent = ['movies', 'detail', 'player'].includes(section) ? '我的电影' : '系统设置';
   document.title = `${titles[section]} · Dinosaur`;
   const path = section === 'detail' ? `/movies/${mediaID}` : section === 'player' ? `/watch/${mediaID}` : section === 'movies' ? '/movies' : section === 'metadata' ? '/settings/metadata' : section === 'scraping' ? '/settings/scraping' : '/settings';
   if (location.pathname !== path) {

@@ -67,29 +67,6 @@
   .nav-count {
     display:none;
   }
-  .topbar {
-    height:66px;
-    padding:0 23px;
-  }
-  .breadcrumb {
-    font-size:10px;
-    gap:10px;
-  }
-  .user-area {
-    gap:7px;
-  }
-  .user-area div>strong {
-    font-size:10px;
-    max-width:80px;
-  }
-  .avatar {
-    width:28px;
-    height:28px;
-    font-size:10px;
-  }
-  .logout-button {
-    margin-left:3px;
-  }
   .main-content {
     padding:29px 22px 0;
   }

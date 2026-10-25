@@ -1,7 +1,3 @@
-.content.is-detail {
-  grid-template-rows:minmax(0,1fr);
-}
-.content.is-detail>.topbar,
 .content.is-detail .workspace-footer {
   display:none;
 }

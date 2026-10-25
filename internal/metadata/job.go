@@ -2,6 +2,7 @@ package metadata
 
 // Job records durable progress for one background scraping operation.
 type Job struct {
+	MediaType string `json:"media_type"`
 	ID        int64  `json:"id"`
 	LibraryID int64  `json:"library_id"`
 	MediaID   int64  `json:"media_id"`
@@ -18,8 +19,9 @@ type Job struct {
 }
 
 type ScrapeRequest struct {
-	LibraryID int64 `json:"library_id"`
-	MediaID   int64 `json:"media_id"`
-	TMDBID    int64 `json:"tmdb_id"`
-	Refresh   bool  `json:"refresh"`
+	MediaType string `json:"-"`
+	LibraryID int64  `json:"library_id"`
+	MediaID   int64  `json:"media_id"`
+	TMDBID    int64  `json:"tmdb_id"`
+	Refresh   bool   `json:"refresh"`
 }

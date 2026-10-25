@@ -41,6 +41,7 @@ type Server struct {
 	transcoder *streaming.Transcoder
 	tmdb       *tmdb.Client
 	scraper    *scraping.Manager
+	tvScraper  *scraping.Manager
 }
 
 func New(c config.Config, db *store.Store, logger *slog.Logger) (*Server, error) {
@@ -58,7 +59,8 @@ func New(c config.Config, db *store.Store, logger *slog.Logger) (*Server, error)
 	s.transcoder = streaming.New(c.FFmpegPath)
 	s.tmdb = tmdb.New()
 	s.scraper = scraping.New(db, s.tmdb, c.DataDir)
-	s.scanner.AfterScan = s.scraper.Schedule
+	s.tvScraper = scraping.NewTelevision(store.TelevisionRepository{Store: db}, tmdb.Television{Client: s.tmdb}, c.DataDir)
+	s.scanner.AfterScan = func() { s.scraper.Schedule(); s.tvScraper.Schedule() }
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health/live", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, map[string]string{"status": "ok"}) })
 	mux.HandleFunc("GET /health/ready", s.ready)
@@ -81,13 +83,15 @@ func New(c config.Config, db *store.Store, logger *slog.Logger) (*Server, error)
 	mux.Handle("GET /api/media/{id}", s.require(false, http.HandlerFunc(s.getMedia)))
 	mux.Handle("GET /api/media/{id}/poster", s.require(false, http.HandlerFunc(s.mediaPoster)))
 	s.mountPlayback(mux)
+	s.mountTelevision(mux)
+	s.mountTelevisionScraping(mux)
 	s.mountMetadataSettings(mux)
 	s.mountScraping(mux)
 	if err := s.mountWeb(mux); err != nil {
 		return nil, err
 	}
 	// These boundaries also cover future media, artwork, subtitles and playback routes.
-	for _, prefix := range []string{"/api/media/", "/api/playback/"} {
+	for _, prefix := range []string{"/api/media/", "/api/playback/", "/api/series/"} {
 		mux.Handle(prefix, s.require(false, http.HandlerFunc(s.notImplemented)))
 	}
 	mux.Handle("/api/admin/", s.require(true, http.HandlerFunc(s.notImplemented)))

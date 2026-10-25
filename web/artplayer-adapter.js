@@ -20,8 +20,8 @@ function createPlayerUI() {
     setting: false,
     layers: [{
       name: 'navigation',
-      html: `<button class="player-back" type="button" aria-label="返回电影列表" title="返回电影列表"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m10 5-7 7 7 7M3 12h18"/></svg></button><span>${escapeHTML(player.info.item.title)}</span>`,
-      mounted: element => element.querySelector('button').addEventListener('click', () => switchSection('movies', null, { replace: true })),
+      html: `<button class="player-back" type="button" aria-label="返回" title="返回"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m10 5-7 7 7 7M3 12h18"/></svg></button><span>${escapeHTML(playbackTitle(player.info.item))}</span>`,
+      mounted: element => element.querySelector('button').addEventListener('click', returnFromPlayer),
     }],
     playbackRate: false,
     fullscreen: true,
@@ -42,6 +42,7 @@ function createPlayerUI() {
     }),
     controls: [
       ...playerSettingsControls(),
+      ...nextEpisodeControl(),
       { name: 'back-ten', position: 'left', index: 11, html: '−10秒', tooltip: '后退10秒', click: () => queuePlayerSeek(playbackPosition() - 10) },
       { name: 'forward-ten', position: 'left', index: 12, html: '+10秒', tooltip: '前进10秒', click: () => queuePlayerSeek(playbackPosition() + 10) },
     ],

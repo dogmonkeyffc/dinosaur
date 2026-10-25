@@ -6,9 +6,20 @@ import (
 
 	"dinosaur/internal/library"
 	"dinosaur/internal/media"
+	"dinosaur/internal/television"
 )
 
 func (m *Manager) index(item library.Library, relative string, old media.Item, job *library.ScanJob) error {
+	var episode television.EpisodeName
+	if item.Type == "tv" {
+		var ok bool
+		episode, ok = television.ParseEpisode(relative)
+		if !ok {
+			job.Errors++
+			m.logger.Warn("skip unrecognized episode name", "library_id", item.ID, "relative_path", relative)
+			return nil
+		}
+	}
 	path, err := media.ResolveFile(item.RootPath, relative)
 	if err != nil {
 		job.Errors++
@@ -37,6 +48,9 @@ func (m *Manager) index(item library.Library, relative string, old media.Item, j
 		return m.db.SetMediaPoster(m.ctx, old.ID, key)
 	}
 	title, year := media.ParseFilename(relative)
+	if item.Type == "tv" {
+		title, year = episode.Title, episode.Year
+	}
 	indexed := media.Item{LibraryID: item.ID, RelativePath: relative, Title: title, Year: year, Size: info.Size(), ModifiedNS: info.ModTime().UnixNano()}
 	probe, err := media.Probe(m.ctx, m.config.FFprobePath, path)
 	if err != nil {
@@ -56,6 +70,9 @@ func (m *Manager) index(item library.Library, relative string, old media.Item, j
 		} else {
 			indexed.PosterKey = key
 		}
+	}
+	if item.Type == "tv" {
+		return m.db.SaveEpisode(m.ctx, indexed, episode, job.ID)
 	}
 	return m.db.SaveMedia(m.ctx, indexed, job.ID)
 }

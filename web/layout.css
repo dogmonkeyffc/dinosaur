@@ -27,7 +27,7 @@
   margin:0;
   overflow-y:auto;
 }
-.main-content>section:not(#player-section):not(#detail-section),
+.main-content>section:not(#player-section):not(#detail-section):not(#series-detail-section),
 .main-content>.workspace-footer {
   max-width:1400px;
   margin-inline:auto;

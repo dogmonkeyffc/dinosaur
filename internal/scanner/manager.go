@@ -13,7 +13,7 @@ import (
 )
 
 var ErrRunning = errors.New("library scan is already running")
-var ErrUnsupported = errors.New("only movie libraries are supported")
+var ErrUnsupported = errors.New("unsupported library type")
 var ErrClosed = errors.New("scanner is shutting down")
 
 type Manager struct {
@@ -44,7 +44,7 @@ func (m *Manager) Start() error {
 		return err
 	}
 	for _, item := range libraries {
-		if item.Type != "movie" {
+		if item.Type != "movie" && item.Type != "tv" {
 			continue
 		}
 		if _, err := m.Scan(m.ctx, item.ID); err != nil {
@@ -66,7 +66,7 @@ func (m *Manager) Scan(ctx context.Context, id int64) (library.ScanJob, error) {
 	if err != nil {
 		return library.ScanJob{}, err
 	}
-	if item.Type != "movie" {
+	if item.Type != "movie" && item.Type != "tv" {
 		return library.ScanJob{}, ErrUnsupported
 	}
 	job, err := m.db.NewScan(ctx, id)

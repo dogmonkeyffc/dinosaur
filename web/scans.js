@@ -17,22 +17,27 @@ function scanDescription(scan) {
 function scheduleScanPolling() {
   stopScanPolling();
   const active = state.libraries.filter(item => ['queued', 'scanning'].includes(item.scan?.status));
-  $('movie-scan-status').hidden = active.length === 0;
-  $('movie-scan-status').textContent = active.map(item => `${item.name}：${scanDescription(item.scan)}`).join('；');
+  for (const [type, id] of [['movie', 'movie-scan-status'], ['tv', 'series-scan-status']]) {
+    const jobs = active.filter(item => item.type === type);
+    $(id).hidden = !jobs.length;
+    $(id).textContent = jobs.map(item => `${item.name}：${scanDescription(item.scan)}`).join('；');
+  }
   if (!active.length || !state.user) return;
   scanPollTimer = setTimeout(async () => {
     await loadLibraries(true);
     if (state.user && !$('movies-section').hidden) await loadMovies();
+    if (state.user && state.section === 'series') await loadSeries();
+    if (state.user && state.section === 'series-detail') await openSeries(series.id, { replace: true });
   }, 2000);
 }
 async function scanLibraries(libraries) {
-  if (!libraries.length) { notify('请先在媒体库设置中添加电影目录。'); return; }
+  if (!libraries.length) { notify('请先在媒体库设置中添加对应目录。'); return; }
   try {
     for (const item of libraries) {
       try { await api(`/api/admin/libraries/${item.id}/scan`, { method: 'POST' }); }
       catch (error) { if (error.code !== 'scan_running') throw error; }
     }
-    notify('扫描已开始，电影列表会自动更新。');
+    notify('扫描已开始，列表会自动更新。');
     await loadLibraries(true);
   } catch (error) { handleError(error); }
 }

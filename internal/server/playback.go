@@ -40,9 +40,14 @@ func (s *Server) playbackInfo(w http.ResponseWriter, r *http.Request) {
 			audio = append(audio, track)
 		}
 	}
+	next, err := s.store.NextEpisode(r.Context(), source.Item)
+	if err != nil {
+		s.internal(w, r, err)
+		return
+	}
 	setPosterURL(&source.Item)
 	writeJSON(w, 200, map[string]any{
-		"item": source.Item, "plan": plan, "stream_url": streamURL(source.Item.ID, plan, r.URL.Query().Get("mode") == "compatible"),
+		"item": source.Item, "next_episode": next, "plan": plan, "stream_url": streamURL(source.Item.ID, plan, r.URL.Query().Get("mode") == "compatible"),
 		"progress": progress, "resume_position": progress.ResumePosition(), "audio_tracks": audio,
 		"subtitles": streaming.Subtitles(source.Root, source.Item.RelativePath),
 	})
@@ -86,7 +91,18 @@ func (s *Server) savePlaybackProgress(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, map[string]any{"progress": progress})
 }
 func (s *Server) continueWatching(w http.ResponseWriter, r *http.Request) {
-	items, err := s.store.ContinueWatching(r.Context(), current(r).user.ID)
+	kind := r.URL.Query().Get("type")
+	if kind != "" && kind != "movie" && kind != "tv" {
+		fail(w, 400, "invalid_filter", "invalid media type")
+		return
+	}
+	var items []media.Item
+	var err error
+	if kind == "tv" {
+		items, err = s.store.ContinueSeries(r.Context(), current(r).user.ID)
+	} else {
+		items, err = s.store.ContinueWatching(r.Context(), current(r).user.ID)
+	}
 	if err != nil {
 		s.internal(w, r, err)
 		return

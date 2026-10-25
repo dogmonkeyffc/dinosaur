@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 
 	"dinosaur/internal/media"
@@ -25,6 +26,14 @@ func (s *Store) MediaSnapshot(ctx context.Context, libraryID int64) (map[string]
 	return result, rows.Err()
 }
 func (s *Store) SaveMedia(ctx context.Context, item media.Item, jobID int64) error {
+	return saveMedia(ctx, s.DB, item, jobID)
+}
+
+type mediaWriter interface {
+	ExecContext(context.Context, string, ...any) (sql.Result, error)
+}
+
+func saveMedia(ctx context.Context, writer mediaWriter, item media.Item, jobID int64) error {
 	if item.Tracks == nil {
 		item.Tracks = make([]media.Track, 0)
 	}
@@ -32,7 +41,7 @@ func (s *Store) SaveMedia(ctx context.Context, item media.Item, jobID int64) err
 	if err != nil {
 		return err
 	}
-	_, err = s.DB.ExecContext(ctx, `INSERT INTO media_items
+	_, err = writer.ExecContext(ctx, `INSERT INTO media_items
  (library_id,relative_path,title,year,size,modified_ns,duration,format,video_codec,width,height,tracks_json,poster_key,probe_error,last_seen_scan)
  VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(library_id,relative_path) DO UPDATE SET
  title=excluded.title,year=excluded.year,size=excluded.size,modified_ns=excluded.modified_ns,duration=excluded.duration,

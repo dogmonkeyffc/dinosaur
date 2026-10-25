@@ -23,7 +23,7 @@ func (s *Server) mountWeb(mux *http.ServeMux) error {
 			s.logger.Error("render web page", "error", err)
 		}
 	}
-	for _, path := range []string{"GET /{$}", "GET /login", "GET /setup", "GET /settings", "GET /settings/metadata", "GET /settings/scraping", "GET /movies", "GET /movies/{id}", "GET /watch/{id}"} {
+	for _, path := range []string{"GET /{$}", "GET /login", "GET /setup", "GET /settings", "GET /settings/metadata", "GET /settings/scraping", "GET /movies", "GET /movies/{id}", "GET /series", "GET /series/{id}", "GET /watch/{id}"} {
 		mux.HandleFunc(path, render)
 	}
 	mux.HandleFunc("GET /assets/{name}", func(w http.ResponseWriter, r *http.Request) { serveAsset(w, r, "") })

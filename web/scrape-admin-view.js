@@ -8,6 +8,7 @@ const scrapeStateNames = {
 const scrapeTime = value => value ? new Date(value * 1000).toLocaleString('zh-CN', { hour12: false }) : '—';
 const scrapeStateBadge = status => `<span class="scrape-state scrape-state-${escapeHTML(status)}">${escapeHTML(scrapeStateNames[status] || status)}</span>`;
 function scrapeAdminActions(item) {
+  if (item.series_id) return `<button class="text-button" data-admin-series="${item.series_id}">剧集详情 / 匹配</button>`;
   if (!item.media_id) return '<span class="muted">影片已移除</span>';
   return `<div class="scrape-row-actions"><button class="text-button" data-admin-view="${item.media_id}">详情</button><button class="text-button" data-admin-match="${item.media_id}">匹配更正</button><button class="text-button" data-admin-retry="${item.media_id}" data-refresh="${item.tmdb_id > 0}" ${scraping.active ? 'disabled' : ''}>${item.tmdb_id > 0 ? '刷新资料' : '重试识别'}</button></div>`;
 }
@@ -30,7 +31,7 @@ function renderScrapeRecords(page) {
 }
 function renderScrapeHistory(page) {
   $('scrape-history-body').innerHTML = page.jobs.map(job => `<tr>
-    <td><strong>#${job.id}</strong><small>${job.media_id ? `影片 #${job.media_id}` : job.library_id ? `媒体库 #${job.library_id}` : '所有未识别影片'}</small></td>
+    <td><strong>#${job.id}</strong><small>${job.media_id ? `${job.media_type === 'tv' ? '剧集' : '影片'} #${job.media_id}` : job.library_id ? `媒体库 #${job.library_id}` : job.media_type === 'tv' ? '所有未识别剧集' : '所有未识别影片'}</small></td>
     <td>${scrapeStateBadge(job.status)}<small>${job.processed} / ${job.total}</small></td>
     <td>匹配 ${job.matched} · 待确认 ${job.review}<small>失败 ${job.errors} · 跳过 ${job.skipped}</small>${job.message ? `<p class="scrape-row-note">${escapeHTML(scrapeMessage(job.message))}</p>` : ''}</td>
     <td>${scrapeTime(job.created_at)}<small>结束：${scrapeTime(job.ended_at)}</small></td>
@@ -59,3 +60,8 @@ function updateScrapePagination(group, page) {
   document.querySelector(`[data-admin-prev="${group}"]`).disabled = page.page <= 1;
   document.querySelector(`[data-admin-next="${group}"]`).disabled = page.page >= pages;
 }
+
+document.addEventListener('click', event => {
+  const button = event.target.closest('[data-admin-series]');
+  if (button) openSeries(Number(button.dataset.adminSeries));
+});

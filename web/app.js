@@ -16,7 +16,7 @@ const errors = {
   media_unavailable: '视频文件不存在或当前无法读取。',
   invalid_progress: '观看进度无效，请重试。',
   scan_running: '媒体库正在扫描，请完成后再编辑或移除。',
-  unsupported_library: '目前支持电影扫描，电视剧扫描将在后续版本开放。',
+  unsupported_library: '暂不支持此媒体库类型，请检查配置。',
   scanner_unavailable: '扫描服务正在退出，请稍后重试。',
   invalid_filter: '筛选条件有误，请刷新后重试。',
   invalid_credentials: '用户名或密码不正确，请重新输入。', invalid_setup_token: '初始化令牌不正确，请检查服务器上的令牌文件。',
@@ -88,6 +88,9 @@ function showAuth(setup) {
   resetMetadataSettings();
   stopScrapePolling();
   resetScrapeAdmin();
+  stopSeriesScraping();
+  series.request++;
+  series.detailRequest++;
   movieDetailRequest++;
   if (state.section === 'player') closePlayer();
   state.section = null;
@@ -118,6 +121,8 @@ async function showApp(data) {
   $('scrape-admin-nav').hidden = !admin;
   $('scrape-movies').hidden = !admin;
   $('scan-movies').hidden = !admin;
+  $('scan-series').hidden = !admin;
+  $('scrape-series').hidden = !admin;
   $('add-library').hidden = !admin; $('empty-add').hidden = !admin;
   $('library-hint').textContent = admin ? '添加服务器上的媒体目录，配置会自动保存。媒体扫描会自动开始，也可以手动重新扫描。' : '查看管理员配置的媒体库。添加、编辑和移除目录需要管理员权限。';
   $('library-search').value = '';

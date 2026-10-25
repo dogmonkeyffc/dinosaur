@@ -40,7 +40,8 @@ function bindPlayerEvents() {
     if (duration > 0 && duration - position < 5) {
       player.position = duration;
       player.ready = false;
-      persistPlayback(true, true);
+      if (player.info.next_episode) playNextEpisode(true);
+      else persistPlayback(true, true);
       $('player-status').textContent = '播放结束';
     } else {
       persistPlayback(true);
@@ -59,6 +60,6 @@ function bindPlayerEvents() {
 $('player-retry').addEventListener('click', () => changePlayerSource({ mode: 'compatible' }));
 document.addEventListener('keydown', event => {
   if (state.section === 'player' && event.code === 'Escape' && !document.fullscreenElement) {
-    switchSection('movies', null, { replace: true });
+    returnFromPlayer();
   }
 });

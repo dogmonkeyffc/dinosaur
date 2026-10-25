@@ -9,7 +9,7 @@ import (
 func scanScrapeJob(row interface{ Scan(...any) error }) (metadata.Job, error) {
 	var job metadata.Job
 	err := row.Scan(&job.ID, &job.LibraryID, &job.MediaID, &job.Status, &job.Total, &job.Processed, &job.Matched,
-		&job.Review, &job.Errors, &job.Skipped, &job.Message, &job.CreatedAt, &job.EndedAt)
+		&job.Review, &job.Errors, &job.Skipped, &job.Message, &job.CreatedAt, &job.EndedAt, &job.MediaType)
 	return job, err
 }
 
@@ -17,6 +17,10 @@ func (s *Store) ScrapeJobPage(ctx context.Context, filter metadata.ReportFilter)
 	page := metadata.JobPage{Jobs: []metadata.Job{}, Page: filter.Page, PageSize: filter.PageSize}
 	where := ` WHERE 1=1`
 	args := []any{}
+	if filter.MediaType != "" {
+		where += ` AND media_type=?`
+		args = append(args, filter.MediaType)
+	}
 	if filter.Status != "" {
 		where += ` AND status=?`
 		args = append(args, filter.Status)
@@ -64,13 +68,13 @@ func (s *Store) ScrapeJobDetail(ctx context.Context, id int64, filter metadata.R
 	if err := tx.QueryRowContext(ctx, `SELECT count(*) FROM scrape_job_items WHERE job_id=?`, id).Scan(&result.Total); err != nil {
 		return result, err
 	}
-	rows, err := tx.QueryContext(ctx, `SELECT id,COALESCE(media_id,0),title,filename,library_name,status,message,tmdb_id,updated_at FROM scrape_job_items WHERE job_id=? ORDER BY id LIMIT ? OFFSET ?`, id, filter.PageSize, (filter.Page-1)*filter.PageSize)
+	rows, err := tx.QueryContext(ctx, `SELECT id,COALESCE(media_id,0),title,filename,library_name,status,message,tmdb_id,updated_at,COALESCE(series_id,0) FROM scrape_job_items WHERE job_id=? ORDER BY id LIMIT ? OFFSET ?`, id, filter.PageSize, (filter.Page-1)*filter.PageSize)
 	if err != nil {
 		return result, err
 	}
 	for rows.Next() {
 		var item metadata.JobItem
-		if err := rows.Scan(&item.ID, &item.MediaID, &item.Title, &item.Filename, &item.Library, &item.Status, &item.Message, &item.TMDBID, &item.UpdatedAt); err != nil {
+		if err := rows.Scan(&item.ID, &item.MediaID, &item.Title, &item.Filename, &item.Library, &item.Status, &item.Message, &item.TMDBID, &item.UpdatedAt, &item.SeriesID); err != nil {
 			rows.Close()
 			return result, err
 		}

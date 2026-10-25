@@ -1,0 +1,104 @@
+.series-detail-page {
+  width:100%;
+  min-height:100%;
+}
+#series-detail .detail-layout {
+  max-width:1400px;
+  margin-inline:auto;
+}
+.series-back .icon {
+  transform:rotate(180deg);
+}
+.series-seasons {
+  margin-top:30px;
+}
+.series-seasons>label {
+  max-width:250px;
+}
+.series-seasons select {
+  width:100%;
+  min-height:43px;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:var(--surface);
+  color:var(--ink);
+  font:inherit;
+}
+.series-episodes {
+  display:grid;
+  gap:14px;
+  margin-top:20px;
+}
+.series-episode {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:20px;
+  padding:20px;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:10px;
+}
+.series-episode>div:first-child {
+  min-width:0;
+  flex:1;
+}
+.series-episode h2 {
+  font-size:15px;
+  line-height:1.6;
+  overflow-wrap:anywhere;
+  margin-bottom:8px;
+}
+.series-episode p {
+  font-size:12px;
+}
+.series-episode summary {
+  font-size:11px;
+  color:var(--muted);
+  cursor:pointer;
+}
+.series-episode .field-help {
+  overflow-wrap:anywhere;
+}
+.series-episode progress {
+  width:100%;
+  height:4px;
+  margin-bottom:12px;
+  accent-color:var(--green);
+}
+.series-episode-actions {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:10px;
+  flex-shrink:0;
+}
+.series-matching {
+  margin-top:20px;
+}
+.series-matching form {
+  display:flex;
+  align-items:flex-end;
+  flex-wrap:wrap;
+  gap:12px;
+  margin:16px 0;
+}
+.series-matching label {
+  flex:1 1 140px;
+  min-width:0;
+}
+@media(max-width:720px) {
+  #series-detail .detail-layout {
+    padding:20px 16px 32px;
+  }
+  .series-episode {
+    flex-direction:column;
+    padding:14px;
+  }
+  .series-episode-actions {
+    flex-direction:row;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+}

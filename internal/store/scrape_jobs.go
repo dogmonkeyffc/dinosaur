@@ -7,12 +7,16 @@ import (
 	"dinosaur/internal/metadata"
 )
 
-const scrapeJobColumns = `id,library_id,media_id,status,total,processed,matched,review,errors,skipped,message,created_at,ended_at`
+const scrapeJobColumns = `id,library_id,media_id,status,total,processed,matched,review,errors,skipped,message,created_at,ended_at,media_type`
 
 func (s *Store) NewScrapeJob(ctx context.Context, request metadata.ScrapeRequest) (metadata.Job, error) {
-	job := metadata.Job{LibraryID: request.LibraryID, MediaID: request.MediaID, Status: "queued", CreatedAt: time.Now().Unix()}
-	result, err := s.DB.ExecContext(ctx, `INSERT INTO scrape_jobs(library_id,media_id,status,created_at) VALUES (?,?,?,?)`,
-		job.LibraryID, job.MediaID, job.Status, job.CreatedAt)
+	kind := request.MediaType
+	if kind == "" {
+		kind = "movie"
+	}
+	job := metadata.Job{MediaType: kind, LibraryID: request.LibraryID, MediaID: request.MediaID, Status: "queued", CreatedAt: time.Now().Unix()}
+	result, err := s.DB.ExecContext(ctx, `INSERT INTO scrape_jobs(library_id,media_id,status,created_at,media_type) VALUES (?,?,?,?,?)`,
+		job.LibraryID, job.MediaID, job.Status, job.CreatedAt, job.MediaType)
 	if err != nil {
 		return job, err
 	}
@@ -51,9 +55,8 @@ func (s *Store) ScrapeJobs(ctx context.Context) ([]metadata.Job, error) {
 	defer rows.Close()
 	jobs := make([]metadata.Job, 0)
 	for rows.Next() {
-		var job metadata.Job
-		if err := rows.Scan(&job.ID, &job.LibraryID, &job.MediaID, &job.Status, &job.Total, &job.Processed, &job.Matched,
-			&job.Review, &job.Errors, &job.Skipped, &job.Message, &job.CreatedAt, &job.EndedAt); err != nil {
+		job, err := scanScrapeJob(rows)
+		if err != nil {
 			return nil, err
 		}
 		jobs = append(jobs, job)

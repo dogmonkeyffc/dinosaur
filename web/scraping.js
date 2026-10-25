@@ -24,7 +24,7 @@ async function loadScrapeJobs() {
   const request = ++scraping.request;
   const userID = state.user.id;
   try {
-    const { jobs } = await api('/api/admin/metadata/jobs');
+    const { jobs } = await api('/api/admin/metadata/jobs?type=movie');
     if (request !== scraping.request || state.user?.id !== userID) return;
     const job = jobs[0];
     const active = jobs.some(item => ['queued', 'running'].includes(item.status));

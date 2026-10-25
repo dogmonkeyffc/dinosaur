@@ -37,21 +37,29 @@ type Provider interface {
 }
 
 type Manager struct {
-	repo     Repository
-	provider Provider
-	dataDir  string
-	ctx      context.Context
-	cancel   context.CancelFunc
-	mu       sync.Mutex
-	active   bool
-	pending  bool
-	closed   bool
-	workers  sync.WaitGroup
+	repo        Repository
+	provider    Provider
+	dataDir     string
+	libraryType string
+	ctx         context.Context
+	cancel      context.CancelFunc
+	mu          sync.Mutex
+	active      bool
+	pending     bool
+	closed      bool
+	workers     sync.WaitGroup
 }
 
 func New(repo Repository, provider Provider, dataDir string) *Manager {
 	ctx, cancel := context.WithCancel(context.Background())
-	return &Manager{repo: repo, provider: provider, dataDir: dataDir, ctx: ctx, cancel: cancel}
+	return &Manager{repo: repo, provider: provider, dataDir: dataDir, libraryType: "movie", ctx: ctx, cancel: cancel}
+}
+
+// NewTelevision shares job execution rules while validating TV libraries.
+func NewTelevision(repo Repository, provider Provider, dataDir string) *Manager {
+	m := New(repo, provider, dataDir)
+	m.libraryType = "tv"
+	return m
 }
 
 func (m *Manager) Start(ctx context.Context, request metadata.ScrapeRequest) (metadata.Job, error) {
@@ -134,7 +142,7 @@ func (m *Manager) validateScope(ctx context.Context, request metadata.ScrapeRequ
 		if err != nil {
 			return err
 		}
-		if item.Type != "movie" {
+		if item.Type != m.libraryType {
 			return ErrRequest
 		}
 	}

@@ -16,6 +16,7 @@ type Record struct {
 }
 
 type ReportFilter struct {
+	MediaType string
 	LibraryID int64
 	Query     string
 	Status    string
@@ -33,6 +34,7 @@ type RecordPage struct {
 
 // JobItem preserves the outcome at the time a job ran, even after rematching.
 type JobItem struct {
+	SeriesID  int64  `json:"series_id,omitempty"`
 	ID        int64  `json:"id"`
 	MediaID   int64  `json:"media_id"`
 	Title     string `json:"title"`

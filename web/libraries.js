@@ -14,9 +14,13 @@ async function loadLibraries(quiet = false) {
     state.libraries = result.libraries;
     renderLibraries();
     syncMovieLibraries();
+    syncSeriesLibraries();
     syncScrapeAdminLibraries();
     scheduleScanPolling();
-    if (state.user.role === 'admin') loadScrapeJobs();
+    if (state.user.role === 'admin') {
+      loadScrapeJobs();
+      loadSeriesScrapeJobs();
+    }
   } catch (error) {
     if (!quiet) $('library-list').replaceChildren();
     handleError(error, 'library-load-error');
@@ -40,7 +44,7 @@ function renderLibraries() {
       <h2>${escapeHTML(item.name)}</h2>
       <p class="card-path" title="${escapeHTML(item.root_path || '')}">${escapeHTML(item.root_path || '目录由管理员管理')}</p>
       <div class="card-bottom"><span class="card-status ${admin && !item.available ? 'unavailable' : ''}"><span class="status-dot"></span>${admin ? (item.available ? '目录可访问' : '目录暂不可用') : '已配置'}</span>${actions}</div>
-      ${item.type === 'movie' ? `<div class="library-browse-row"><button class="text-button" data-action="browse" data-id="${item.id}">查看电影 <span>${item.media_count || 0}</span></button>${admin ? `<button class="text-button" data-action="scan" data-id="${item.id}" ${scanning ? 'disabled' : ''}>${scanning ? '正在扫描…' : '重新扫描'}</button>` : ''}</div>` : ''}
+      <div class="library-browse-row"><button class="text-button" data-action="browse" data-id="${item.id}">${item.type === 'tv' ? '查看剧集' : '查看电影'} <span>${item.media_count || 0}</span></button>${admin ? `<button class="text-button" data-action="scan" data-id="${item.id}" ${scanning ? 'disabled' : ''}>${scanning ? '正在扫描…' : '重新扫描'}</button>` : ''}</div>
       ${admin && item.scan ? `<p class="scan-summary">${escapeHTML(scanDescription(item.scan))}</p>` : ''}
       </article>`;
   }).join('');
@@ -86,7 +90,7 @@ $('library-list').addEventListener('click', async event => {
   if (!item) return;
   switch (button.dataset.action) {
     case 'edit': openLibrary(item); break;
-    case 'browse': browseLibrary(item.id); break;
+    case 'browse': if (item.type === 'tv') browseSeriesLibrary(item.id); else browseLibrary(item.id); break;
     case 'scan': await scanLibraries([item]); break;
     case 'delete':
       state.deleting = item.id;
@@ -109,7 +113,7 @@ $('library-form').addEventListener('submit', async event => {
     try {
       await api(id ? `/api/admin/libraries/${id}` : '/api/admin/libraries', { method: id ? 'PUT' : 'POST', body });
       $('library-dialog').close();
-      notify(id ? '媒体库配置已更新。' : '媒体库已添加，电影扫描将自动开始。');
+      notify(id ? '媒体库配置已更新。' : '媒体库已添加，扫描将自动开始。');
       await loadLibraries();
     } catch (error) { handleError(error, 'library-form-error'); }
   });

@@ -36,6 +36,13 @@ func (s *Server) scrapeJobs(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	if kind := r.URL.Query().Get("type"); kind != "" {
+		if kind != "movie" && kind != "tv" {
+			fail(w, 400, "invalid_filter", "invalid media type")
+			return
+		}
+		filter.MediaType = kind
+	}
 	page, err := s.store.ScrapeJobPage(r.Context(), filter)
 	if s.scrapeError(w, r, err) {
 		return
@@ -44,6 +51,9 @@ func (s *Server) scrapeJobs(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) scrapeCandidates(w http.ResponseWriter, r *http.Request) {
+	s.scrapeCandidatesWith(w, r, s.scraper)
+}
+func (s *Server) scrapeCandidatesWith(w http.ResponseWriter, r *http.Request, manager *scraping.Manager) {
 	id, ok := libraryID(w, r)
 	if !ok {
 		return
@@ -53,7 +63,7 @@ func (s *Server) scrapeCandidates(w http.ResponseWriter, r *http.Request) {
 	}
 	query := strings.TrimSpace(r.URL.Query().Get("q"))
 	if len(query) > 256 || (r.URL.Query().Has("q") && query == "") {
-		fail(w, 400, "invalid_metadata_query", "invalid movie search query")
+		fail(w, 400, "invalid_metadata_query", "invalid metadata search query")
 		return
 	}
 	var year *int
@@ -65,7 +75,7 @@ func (s *Server) scrapeCandidates(w http.ResponseWriter, r *http.Request) {
 		}
 		year = &number
 	}
-	result, err := s.scraper.Candidates(r.Context(), id, query, year)
+	result, err := manager.Candidates(r.Context(), id, query, year)
 	if s.scrapeError(w, r, err) {
 		return
 	}
@@ -77,7 +87,7 @@ func (s *Server) scrapeError(w http.ResponseWriter, r *http.Request, err error) 
 	case err == nil:
 		return false
 	case errors.Is(err, sql.ErrNoRows), errors.Is(err, metadata.ErrProviderNotFound):
-		fail(w, 404, "not_found", "movie or library not found")
+		fail(w, 404, "not_found", "media or library not found")
 	case errors.Is(err, metadata.ErrMissingCredential):
 		fail(w, 400, "tmdb_not_configured", "TMDB credential is not configured")
 	case errors.Is(err, metadata.ErrProviderAuth):

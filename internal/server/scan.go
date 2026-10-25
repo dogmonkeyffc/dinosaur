@@ -45,7 +45,7 @@ func (s *Server) scanError(w http.ResponseWriter, r *http.Request, err error) bo
 	case errors.Is(err, scanner.ErrRunning):
 		fail(w, 409, "scan_running", "library scan is active; retry after it finishes")
 	case errors.Is(err, scanner.ErrUnsupported):
-		fail(w, 400, "unsupported_library", "only movie library scans are available")
+		fail(w, 400, "unsupported_library", "unsupported library type")
 	case errors.Is(err, scanner.ErrClosed):
 		fail(w, 503, "scanner_unavailable", "scanner is shutting down")
 	default:
@@ -63,5 +63,6 @@ func (s *Server) StartScanning() error {
 func (s *Server) Close() {
 	s.scanner.Close()
 	s.scraper.Close()
+	s.tvScraper.Close()
 	s.transcoder.Close()
 }

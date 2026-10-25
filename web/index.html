@@ -18,6 +18,11 @@
   <script src="/assets/movie-cards.js" defer></script>
   <script src="/assets/movies.js" defer></script>
   <script src="/assets/movie-detail.js" defer></script>
+  <script src="/assets/series.js" defer></script>
+  <script src="/assets/series-detail.js" defer></script>
+  <script src="/assets/series-metadata.js" defer></script>
+  <script src="/assets/series-scraping.js" defer></script>
+  <link rel="stylesheet" href="/assets/series.css">
   <script src="/assets/scraping.js" defer></script>
   <script src="/assets/scrape-admin-view.js" defer></script>
   <script src="/assets/scrape-admin.js" defer></script>
@@ -28,6 +33,7 @@
   <script src="/assets/artplayer-timeline.js" defer></script>
   <script src="/assets/player-settings.js" defer></script>
   <script src="/assets/artplayer-adapter.js" defer></script>
+  <script src="/assets/player-episodes.js" defer></script>
   <script src="/assets/player.js" defer></script>
   <script src="/assets/player-controls.js" defer></script>
   <script src="/assets/player-progress.js" defer></script>
@@ -87,6 +93,7 @@
     <div class="workspace-label">你的媒体服务器<span>PERSONAL MEDIA SERVER</span></div>
     <span class="nav-label">媒体空间</span><nav aria-label="媒体空间">
       <button class="nav-item" data-section="movies" aria-label="我的电影" title="我的电影"><svg class="icon"><use href="#i-film"/></svg>我的电影</button>
+      <button class="nav-item" data-section="series" aria-label="我的剧集" title="我的剧集"><svg class="icon"><use href="#i-tv"/></svg>我的剧集</button>
       <button class="nav-item active" data-section="libraries" aria-label="媒体库设置" title="媒体库设置"><svg class="icon"><use href="#i-folder"/></svg>媒体库设置<span id="nav-count" class="nav-count">0</span></button>
       <button id="scrape-admin-nav" class="nav-item" data-section="scraping" aria-label="刮削管理" title="刮削管理"><svg class="icon"><use href="#i-film"/></svg>刮削管理</button>
       <button id="metadata-nav" class="nav-item" data-section="metadata" aria-label="元数据设置" title="元数据设置"><svg class="icon"><use href="#i-info"/></svg>元数据设置</button>
@@ -112,6 +119,18 @@
         <div id="movie-empty" class="empty-state" hidden><div class="empty-illustration"><span class="empty-folder-back"></span><span class="empty-folder"><svg class="icon"><use href="#i-film"/></svg></span></div><h2 id="movie-empty-title">珍藏，即将登场</h2><p id="movie-empty-description">添加电影目录并完成扫描后，你的电影会展示在这里。</p><button id="movie-reload" class="button secondary">刷新电影列表</button></div>
         <div id="movie-pagination" class="movie-pagination" hidden><button id="movie-prev" class="button secondary">上一页</button><span id="movie-page"></span><button id="movie-next" class="button secondary">下一页</button></div>
       </section>
+      <section id="series-section" hidden>
+        <div class="page-heading"><div><span class="small-label">YOUR SERIES COLLECTION</span><h1>我的剧集<span class="collection-count" id="series-total">0</span></h1><p class="muted">按季整理，接着上一集的故事。</p></div><div class="metadata-actions"><button id="scan-series" class="button secondary">扫描媒体库</button><button id="scrape-series" class="button secondary">刮削未识别剧集</button></div></div>
+        <div id="series-scan-status" class="info-banner" role="status" hidden></div>
+        <p id="series-scrape-status" class="scrape-status" role="status" hidden></p>
+        <section id="series-continue" class="continue-section" hidden><h2>继续观看</h2><div id="series-continue-grid" class="movie-grid continue-grid"></div></section>
+        <div class="movie-toolbar"><label class="library-select"><span class="sr-only">选择剧集媒体库</span><select id="series-library-filter"><option value="">全部剧集媒体库</option></select></label><label class="search-field"><svg class="icon"><use href="#i-search"/></svg><input id="series-search" type="search" maxlength="128" placeholder="搜索剧集" aria-label="搜索剧集"></label></div>
+        <p id="series-error" class="form-error" role="alert" hidden></p>
+        <div id="series-grid" class="movie-grid" aria-live="polite"></div>
+        <div id="series-empty" class="empty-state" hidden><h2>还没有找到剧集</h2><p>添加电视剧媒体库，使用“剧名/Season 01/剧名.S01E01.mkv”命名后扫描；也可以调整搜索和筛选。</p></div>
+        <div id="series-pagination" class="movie-pagination" hidden><button id="series-prev" class="button secondary">上一页</button><span id="series-page"></span><button id="series-next" class="button secondary">下一页</button></div>
+      </section>
+      <section id="series-detail-section" class="series-detail-page" aria-label="剧集详情" hidden><div id="series-detail"></div></section>
       <section id="libraries-section">
         <div class="page-heading"><div><span class="small-label">YOUR MEDIA, ORGANIZED</span><h1>媒体库</h1><p class="muted">为你的电影和剧集，安排一个专属位置。</p></div><button id="add-library" class="button primary"><svg class="icon"><use href="#i-plus"/></svg>添加媒体库</button></div>
         <div class="info-banner"><span class="banner-icon"><svg class="icon"><use href="#i-info"/></svg></span><div><strong>从本地目录开始，建立你的珍藏</strong><p id="library-hint">添加服务器上的媒体目录，配置会自动保存。扫描会自动开始，也可以手动重新扫描。</p></div><span class="version-tag">本地媒体</span></div>
@@ -145,7 +164,7 @@
         </div>
       </section>
       <section id="metadata-section" hidden>
-        <div class="page-heading"><div><span class="small-label">METADATA</span><h1>元数据设置</h1><p class="muted">配置电影资料来源和首选语言。</p></div></div>
+        <div class="page-heading"><div><span class="small-label">METADATA</span><h1>元数据设置</h1><p class="muted">配置电影与剧集的资料来源和首选语言。</p></div></div>
         <div class="metadata-card">
           <h2>TMDB</h2><p id="tmdb-state" role="status">正在读取配置…</p>
           <p class="muted">在 <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener noreferrer">TMDB 账号的 API 设置</a>申请凭据。推荐使用 API Read Access Token。</p>

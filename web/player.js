@@ -28,8 +28,9 @@ async function openPlayer(id, fromBeginning = false, replace = false) {
     const info = await api(`/api/playback/${id}`);
     if (revision !== player.revision || state.section !== 'player') return;
     player.info = info;
-    $('player-title').textContent = info.item.title;
-    document.title = `${info.item.title} · Dinosaur`;
+    $('player-title').textContent = playbackTitle(info.item);
+    syncPlayerNavigation();
+    document.title = `${playbackTitle(info.item)} · Dinosaur`;
     player.audio = info.plan.audio;
     player.mode = 'auto';
     player.subtitle = '';
@@ -108,6 +109,7 @@ function closePlayer() {
   }
   Promise.resolve(saved).finally(() => {
     if (state.user && !$('movies-section').hidden) loadMovies();
+    if (state.user && state.section === 'series') loadSeries();
   });
   return saved;
 }

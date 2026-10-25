@@ -82,6 +82,9 @@ func (s *Store) updateLibrary(ctx context.Context, item Library) (Library, error
 		return item, err
 	}
 	if oldRoot != item.RootPath || oldType != item.Type {
+		if _, err := tx.ExecContext(ctx, `DELETE FROM tv_series WHERE library_id=?`, item.ID); err != nil {
+			return item, err
+		}
 		if _, err := tx.ExecContext(ctx, `DELETE FROM media_items WHERE library_id=?`, item.ID); err != nil {
 			return item, err
 		}

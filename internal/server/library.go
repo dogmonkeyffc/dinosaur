@@ -93,7 +93,7 @@ func (s *Server) saveLibrary(w http.ResponseWriter, r *http.Request) {
 		s.internal(w, r, err)
 		return
 	}
-	if item.Type == "movie" {
+	if item.Type == "movie" || item.Type == "tv" {
 		if _, err := s.scanner.Scan(r.Context(), item.ID); err != nil {
 			s.logger.Warn("schedule library scan", "library_id", item.ID, "error", err)
 		}

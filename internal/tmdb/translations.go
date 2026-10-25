@@ -11,6 +11,7 @@ type translation struct {
 	Country  string `json:"iso_3166_1"`
 	Data     struct {
 		Title    string `json:"title"`
+		Name     string `json:"name"`
 		Overview string `json:"overview"`
 	} `json:"data"`
 }

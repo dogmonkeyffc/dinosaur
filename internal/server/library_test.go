@@ -101,7 +101,7 @@ func TestLibraryConfiguration(t *testing.T) {
 }
 func TestEmbeddedWeb(t *testing.T) {
 	s, _ := fixture(t)
-	for _, path := range []string{"/", "/login", "/setup", "/settings", "/watch/1"} {
+	for _, path := range []string{"/", "/login", "/setup", "/settings", "/movies/1", "/watch/1"} {
 		w := request(t, s, "GET", path, nil, nil, nil)
 		if w.Code != 200 || !strings.HasPrefix(w.Header().Get("Content-Type"), "text/html") || !strings.Contains(w.Body.String(), "Dinosaur") {
 			t.Fatalf("bad web response %s: %d", path, w.Code)

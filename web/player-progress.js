@@ -30,10 +30,13 @@ function persistPlayback(keepalive = false, ended = false) {
 }
 window.addEventListener('pagehide', () => persistPlayback(true));
 async function markMovieWatched(id, watched) {
+  const userID = state.user?.id;
+  const revision = movieDetailRequest;
   try {
     await api(`/api/playback/${id}/progress`, { method: 'PUT', body: { watched } });
     notify(watched ? '已标记为已看。' : '已重置为未看。');
-    await openMovie(id);
+    if (state.user?.id !== userID) return;
+    if (state.section === 'detail' && movieDetailID === id && revision === movieDetailRequest) await openMovie(id, { replace: true });
     loadMovies();
   } catch (error) { handleError(error); }
 }

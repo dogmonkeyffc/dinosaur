@@ -34,7 +34,7 @@ $('movie-detail').addEventListener('submit', async event => {
   }
   const revision = movieDetailRequest;
   const userID = state.user?.id;
-  const active = () => movieDetailRequest === revision && state.user?.id === userID && $('movie-dialog').open;
+  const active = () => movieDetailRequest === revision && state.user?.id === userID && state.section === 'detail';
   const query = new URLSearchParams();
   if ($('movie-match-query').value.trim()) query.set('q', $('movie-match-query').value.trim());
   if ($('movie-match-year').value !== '') query.set('year', $('movie-match-year').value);

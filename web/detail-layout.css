@@ -1,0 +1,14 @@
+.content.is-detail {
+  grid-template-rows:minmax(0,1fr);
+}
+.content.is-detail>.topbar,
+.content.is-detail .workspace-footer {
+  display:none;
+}
+.content.is-detail>.main-content {
+  padding:0;
+}
+.content.is-detail .movie-detail-page {
+  max-width:none;
+  margin:0;
+}

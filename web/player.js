@@ -21,7 +21,6 @@ function playbackPosition() {
 async function openPlayer(id, fromBeginning = false, replace = false) {
   if (state.section === 'player') closePlayer();
   const revision = ++player.revision;
-  $('movie-dialog').close();
   $('player-title').textContent = '正在准备播放…';
   showError('player-error');
   switchSection('player', id, { replace });
@@ -110,6 +109,7 @@ function closePlayer() {
   Promise.resolve(saved).finally(() => {
     if (state.user && !$('movies-section').hidden) loadMovies();
   });
+  return saved;
 }
 
 document.addEventListener('click', event => {

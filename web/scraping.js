@@ -39,7 +39,7 @@ async function loadScrapeJobs() {
       const hadResult = Boolean(scraping.signature);
       scraping.signature = signature;
       if (state.section === 'movies') loadMovies();
-      if (hadResult && job && !active && $('movie-dialog').open && movieDetailID) openMovie(movieDetailID);
+      if (hadResult && job && !active && state.section === 'detail' && movieDetailID) openMovie(movieDetailID, { replace: true });
     }
     if (state.section === 'scraping') loadScrapeAdmin({ quiet: true });
     $('scrape-admin-start').disabled = active;

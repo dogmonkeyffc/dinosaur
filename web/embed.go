@@ -1,7 +1,7 @@
-// Package web contains the embedded browser interface.
+// Package web embeds the React production build created by build.sh.
 package web
 
 import "embed"
 
-//go:embed *.html *.css *.js vendor/*
+//go:embed all:dist
 var Files embed.FS

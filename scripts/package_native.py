@@ -53,7 +53,7 @@ def main():
         raise SystemExit('FFmpeg archive SHA-256 mismatch')
     root = Path(__file__).resolve().parent.parent
     revision = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'], cwd=root, text=True).strip()
-    dirty = subprocess.check_output(['git', 'diff', '--name-only', 'HEAD'], cwd=root, text=True).strip()
+    dirty = subprocess.check_output(['git', 'status', '--porcelain'], cwd=root, text=True).strip()
     stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     version = revision + ('-dirty' if dirty else '') + '-' + stamp
     output = root / 'bin' / 'native'
@@ -63,7 +63,7 @@ def main():
         stage = Path(temporary) / ('dinosaur-' + version)
         stage.mkdir()
         environment = dict(os.environ, CGO_ENABLED='0', GOOS='linux', GOARCH='amd64')
-        subprocess.run(['go', 'build', '-trimpath', '-o', str(stage / 'dinosaur'), './cmd/dinosaur'],
+        subprocess.run(['bash', str(root / 'build.sh'), '--output', str(stage / 'dinosaur')],
                        cwd=root, env=environment, check=True)
         copy_ffmpeg(args.ffmpeg_archive, stage)
         for name in ('dinosaur.service', 'dinosaur.env.example', 'install.py'):

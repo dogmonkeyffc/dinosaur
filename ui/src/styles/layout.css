@@ -1,0 +1,46 @@
+/* Desktop layout; the mobile app shell lives in mobile-layout.css. */
+.app-shell {
+  display: grid;
+  grid-template-columns: 225px minmax(0, 1fr);
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+.sidebar {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+}
+.content {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+.main-content {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+  overflow-y: auto;
+}
+.main-content > section:not(#player-section):not(#detail-section):not(#series-detail-section),
+.main-content > .workspace-footer {
+  max-width: 1400px;
+  margin-inline: auto;
+}
+.content.is-playing .workspace-footer {
+  display: none;
+}
+.content.is-playing > .main-content {
+  padding: 0;
+  overflow: hidden;
+}
+@media (max-width: 1000px) {
+  .app-shell {
+    grid-template-columns: 195px minmax(0, 1fr);
+  }
+}

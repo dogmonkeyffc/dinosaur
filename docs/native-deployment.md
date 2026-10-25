@@ -16,6 +16,8 @@
 
 ## 构建发布包
 
+开发机需要 Go、Node.js 和 npm；打包脚本自动调用 `build.sh`，先构建 React 再交叉编译 Go。NAS 运行时仍无需 Node.js。
+
 在开发机准备 Linux x86_64 的 FFmpeg GPL 非 shared 发行包，需同时包含 `bin/ffmpeg`、`bin/ffprobe`、libx264 和 AAC。使用发行方公布的 SHA-256 校验值，不能仅对未知来源下载文件自行计算并当作来源校验。
 
 ```bash

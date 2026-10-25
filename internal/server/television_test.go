@@ -101,7 +101,7 @@ func TestSeriesBrowsingPlaybackAndPermissions(t *testing.T) {
 		t.Fatal("TV files leaked into movie list")
 	}
 	for _, route := range []string{"/series", "/series/1"} {
-		if page := request(t, s, "GET", route, nil, nil, nil); page.Code != 200 || !strings.Contains(page.Body.String(), "series-section") {
+		if page := request(t, s, "GET", route, nil, nil, nil); page.Code != 200 || !strings.Contains(page.Body.String(), `id="root"`) {
 			t.Fatal("deep link did not render")
 		}
 	}

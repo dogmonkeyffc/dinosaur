@@ -1,0 +1,15 @@
+.auth-footnote .icon {
+  width: 13px;
+  height: 13px;
+}
+
+.panel-footer {
+  position: absolute;
+  bottom: 26px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #b0b6ab;
+}

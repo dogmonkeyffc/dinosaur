@@ -19,6 +19,8 @@
 /node_modules/
 /ui/node_modules/
 /ui/dist/
+/web/dist/*
+!/web/dist/.gitkeep
 __pycache__/
 *.pyc
 *.log

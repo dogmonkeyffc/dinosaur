@@ -4,10 +4,11 @@
 
 ## 启动
 
-需要 Go 1.27 或更新版本。SQLite 使用纯 Go 驱动，无需 CGO；电影元数据读取和封面提取需要系统安装 `ffprobe` 与 `ffmpeg`。缺少工具时视频仍会以文件名进入列表，扫描状态会记录问题。
+源码构建需要 Go 1.27 或更新版本、Node.js 20.19+（或 22.12+）及 npm。发布后的二进制不需要 Node.js。SQLite 使用纯 Go 驱动，无需 CGO；电影元数据读取和封面提取需要系统安装 `ffprobe` 与 `ffmpeg`。缺少工具时视频仍会以文件名进入列表，扫描状态会记录问题。
 
 ```sh
-go run ./cmd/dinosaur
+./build.sh
+./bin/dinosaur
 ```
 
 默认监听 `127.0.0.1:8096`，自动创建 `~/.cache/dinosaur/dinosaur.db` 并执行迁移。首次启动生成 `~/.cache/dinosaur/setup-token`，文件权限为 `0600`，日志只记录该文件路径。数据库与生成的数据目录也使用受限权限。账号、会话、媒体库、电影索引、扫描记录、封面和初始化令牌统一保存在该目录。相同用户从不同工作目录启动时使用同一份数据。
@@ -28,7 +29,7 @@ curl http://127.0.0.1:8096/health/ready
 - **账户安全**：修改自己的密码，修改后所有会话失效并返回登录页；sidebar 底部可退出登录。
 - **权限**：管理员管理媒体库；普通用户仅能查看名称和类型，不能看到服务器目录或操作配置。
 
-界面为原生 HTML/JavaScript，播放器使用固定版本的 Artplayer；资源通过 `go:embed` 随 Go 二进制打包，无需 Node.js、前端构建或外部 CDN。适配桌面和手机屏幕。电影与电视剧扫描、展示和在线播放已经可用。电视剧按剧集和季度归集，支持单集进度、继续观看和自动播放下一集，详见 [电视剧说明](docs/television.md)。
+界面使用 React + TypeScript + Vite，播放器使用固定版本的 Artplayer。`build.sh` 先执行锁定依赖安装、类型检查和前端构建，再由 Go 将 `web/dist/` 嵌入二进制；运行时无需 Node.js 或外部 CDN。适配桌面和手机屏幕。电影与电视剧扫描、展示和在线播放已经可用。电视剧按剧集和季度归集，支持单集进度、继续观看和自动播放下一集，详见 [电视剧说明](docs/television.md)。
 
 ## 创建管理员并登录
 
@@ -136,18 +137,26 @@ HTTPS 部署时同时设置 `DINOSAUR_PUBLIC_URL=https://media.example.com` 和 
 ## 开发与检查
 
 ```sh
-make run    # 启动
-make build  # 输出 bin/dinosaur
+make run    # 构建前端后启动 Go
+make build  # React 构建 + Go 编译，输出 bin/dinosaur
 make fmt
-make check  # 250 行检查 + go vet + go test
+make check  # 前端类型检查/构建 + 250 行检查 + go vet + go test
 make race   # 竞态检测，需要本机支持 CGO
 ```
 
 测试覆盖并发初始化、SQLite 持久化及约束、认证与角色隔离、CSRF、请求来源、会话过期/撤销、密码修改、禁用用户、限流、请求超时和异常恢复。
 
-目录：`cmd/dinosaur` 为启动入口，`internal/config` 为配置，`internal/store` 为迁移和持久化，`internal/auth` 为密码与令牌工具，`internal/server` 为 HTTP API。`internal/library` 定义媒体库和扫描任务模型，`internal/scanner` 调度后台扫描，`internal/media` 定义电影模型、读取媒体信息并生成封面，`web` 按功能拆分界面资源。`internal/playback` 定义播放方案和观看记录规则，`internal/streaming` 适配 FFmpeg 与外挂字幕。
+目录：`cmd/dinosaur` 为启动入口，`internal/config` 为配置，`internal/store` 为迁移和持久化，`internal/auth` 为密码与令牌工具，`internal/server` 为 HTTP API。`internal/library` 定义媒体库和扫描任务模型，`internal/scanner` 调度后台扫描，`internal/media` 定义电影模型、读取媒体信息并生成封面，`ui/src` 按页面和功能组织 React 组件，`web` 嵌入前端构建产物。`internal/playback` 定义播放方案和观看记录规则，`internal/streaming` 适配 FFmpeg 与外挂字幕。
 
 本次 Web 界面已通过真实 Chromium 验证：初始化、错误密码、登录、目录校验、重复目录、媒体库增改删、筛选搜索、刷新保留、手机布局、修改密码与退出。后端 `go vet` 与竞态测试通过。
+
+## 系统设置与磁盘空间
+
+管理员可在“系统设置”（`/settings/system`）查看每个已挂载本地分区的已用、可用空间和占用条，并手动刷新。接口为 `GET /api/admin/system/disks`；普通用户无法访问。
+
+Linux 原生部署从挂载表及文件系统容量接口读取，不遍历媒体目录。同一分区的重复挂载、bind mount 只显示一次；Btrfs 子卷和多设备文件系统按共享文件系统去重。独立分区分别显示，内存盘、Loop/Snap 镜像、光盘、网络共享等非块设备挂载不计入。当前不展示 ZFS 存储池；非 Linux 系统会提示暂不支持。
+
+“已用”按文件系统实际已分配空间计算，“可用”采用普通用户可写空间；保留块不会计入可用空间。占用条按已用与可用之和计算。部分磁盘读取失败时保留其他磁盘，并显示提示。
 
 ## 电影扫描与封面
 
@@ -195,9 +204,9 @@ make race   # 竞态检测，需要本机支持 CGO
 
 Artplayer 的视频代理将原文件或分片流的相对媒体时钟转换为整部影片时间轴。兼容流跳转仍由 Go/FFmpeg 重新取流，拖动时做短暂合并，避免每个鼠标移动都启动一个转码任务。离开页面时销毁 Artplayer 实例、字幕和事件绑定，回收媒体连接。
 
-依赖资源放在 `web/vendor`，保留上游发行包及 MIT 许可证，并记录版本、来源和 SHA-256。CSS 从上游分发内容中原样提取为外部样式，继续使用现有 CSP；不需要 CDN。更新方法见 [vendor 说明](web/vendor/README.md)。
+依赖资源放在 `ui/public/assets/vendor`，保留上游发行包及 MIT 许可证，并记录版本、来源和 SHA-256。CSS 从上游分发内容中原样提取为外部样式，继续使用现有 CSP；不需要 CDN。更新方法见 [vendor 说明](ui/public/assets/vendor/README.md)。
 
-前端目前尚未迁移 React。建议采用 React + TypeScript + Vite 逐步迁移，以管理页面状态与播放器生命周期；Go API 和单二进制部署方案保留。技术选择、代价和迁移步骤见 [React 迁移评估](docs/frontend-react-assessment.md)。
+前端已迁移 React + TypeScript + Vite，保留 Go API 和单二进制部署。目录、生命周期与统一构建方式见 [React 前端说明](docs/frontend-react-assessment.md)。
 
 ## TMDB 配置
 

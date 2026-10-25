@@ -1,8 +1,10 @@
-.PHONY: run build fmt vet test race check lines
-run:
+.PHONY: run build frontend fmt vet test race check lines
+frontend:
+	./build.sh --frontend-only
+run: frontend
 	go run ./cmd/dinosaur
 build:
-	go build -o bin/dinosaur ./cmd/dinosaur
+	./build.sh
 fmt:
 	go fmt ./...
 vet:
@@ -13,4 +15,7 @@ race:
 	go test -race ./...
 lines:
 	python3 scripts/check_file_lines.py
-check: lines vet test
+check: frontend
+	python3 scripts/check_file_lines.py
+	go vet ./...
+	go test ./...

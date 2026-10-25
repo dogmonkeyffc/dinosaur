@@ -1,4 +1,4 @@
-"""Vendor an explicit official Artplayer release; Node is needed only for updates."""
+"""Vendor an explicit official Artplayer release into the React public assets."""
 import base64
 import hashlib
 import io
@@ -13,7 +13,7 @@ version = sys.argv[1] if len(sys.argv) == 2 else ''
 if not version or any(c not in '0123456789.' for c in version):
     raise SystemExit('Usage: python3 scripts/update_artplayer.py <exact-version>')
 root = Path(__file__).resolve().parent.parent
-folder = root / 'web' / 'vendor'
+folder = root / 'ui' / 'public' / 'assets' / 'vendor'
 folder.mkdir(parents=True, exist_ok=True)
 with urllib.request.urlopen(f'https://registry.npmjs.org/artplayer/{version}', timeout=30) as response:
     metadata = json.load(response)

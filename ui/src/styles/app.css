@@ -1,0 +1,14 @@
+/* Styles are split by page and component to keep each source file small. */
+@import url('./base.css');
+@import url('./buttons.css');
+@import url('./form-feedback.css');
+@import url('./auth.css');
+@import url('./auth-footer.css');
+@import url('./shell.css');
+@import url('./settings.css');
+@import url('./library-cards.css');
+@import url('./workspace-footer.css');
+@import url('./dialogs.css');
+@import url('./responsive-desktop.css');
+@import url('./responsive-mobile.css');
+@import url('./accessibility.css');

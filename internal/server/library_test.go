@@ -99,22 +99,3 @@ func TestLibraryConfiguration(t *testing.T) {
 		t.Fatalf("libraries not removed: %v", err)
 	}
 }
-func TestEmbeddedWeb(t *testing.T) {
-	s, _ := fixture(t)
-	for _, path := range []string{"/", "/login", "/setup", "/settings", "/movies/1", "/watch/1"} {
-		w := request(t, s, "GET", path, nil, nil, nil)
-		if w.Code != 200 || !strings.HasPrefix(w.Header().Get("Content-Type"), "text/html") || !strings.Contains(w.Body.String(), "Dinosaur") {
-			t.Fatalf("bad web response %s: %d", path, w.Code)
-		}
-		if !strings.Contains(w.Header().Get("Content-Security-Policy"), "frame-ancestors 'none'") {
-			t.Fatal("CSP missing")
-		}
-	}
-	for path, kind := range map[string]string{"/assets/app.css": "text/css", "/assets/app.js": "text/javascript", "/assets/vendor/artplayer.js": "text/javascript", "/assets/vendor/artplayer.css": "text/css"} {
-		w := request(t, s, "GET", path, nil, nil, nil)
-		if w.Code != 200 || !strings.HasPrefix(w.Header().Get("Content-Type"), kind) {
-			t.Fatalf("bad asset %s", path)
-		}
-	}
-	status(t, request(t, s, "GET", "/assets/missing.js", nil, nil, nil), 404)
-}

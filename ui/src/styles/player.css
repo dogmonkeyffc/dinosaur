@@ -1,0 +1,29 @@
+.player-stage {
+  overflow: hidden;
+  background: #000;
+  color: #dce7d2;
+}
+.artplayer-host {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+#player-art .art-video {
+  object-fit: contain;
+}
+#player-art .art-control-back-ten,
+#player-art .art-control-forward-ten {
+  font-size: 12px;
+}
+#player-video::cue {
+  color: white;
+  background: #000b;
+  font-size: 1.2em;
+}
+@media (max-width: 720px) {
+  #player-art .art-control-back-ten,
+  #player-art .art-control-forward-ten {
+    display: none;
+  }
+}

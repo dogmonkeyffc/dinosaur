@@ -1,0 +1,11 @@
+.content.is-detail .workspace-footer {
+  display: none;
+}
+.content.is-detail > .main-content {
+  padding: 0;
+}
+.content.is-detail .movie-detail-page,
+.content.is-detail .series-detail-page {
+  max-width: none;
+  margin: 0;
+}

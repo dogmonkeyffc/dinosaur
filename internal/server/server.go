@@ -15,6 +15,8 @@ import (
 
 	"dinosaur/internal/auth"
 	"dinosaur/internal/config"
+	"dinosaur/internal/disk"
+	"dinosaur/internal/disk/local"
 	"dinosaur/internal/scanner"
 	"dinosaur/internal/scraping"
 	"dinosaur/internal/store"
@@ -42,6 +44,7 @@ type Server struct {
 	tmdb       *tmdb.Client
 	scraper    *scraping.Manager
 	tvScraper  *scraping.Manager
+	disks      disk.Reader
 }
 
 func New(c config.Config, db *store.Store, logger *slog.Logger) (*Server, error) {
@@ -55,6 +58,7 @@ func New(c config.Config, db *store.Store, logger *slog.Logger) (*Server, error)
 		return nil, err
 	}
 	s := &Server{config: c, store: db, logger: logger, hasher: h, limiter: auth.NewLimiter(), dummyHash: dummy}
+	s.disks = local.Reader{}
 	s.scanner = scanner.New(db, c, logger)
 	s.transcoder = streaming.New(c.FFmpegPath)
 	s.tmdb = tmdb.New()
@@ -86,6 +90,7 @@ func New(c config.Config, db *store.Store, logger *slog.Logger) (*Server, error)
 	s.mountTelevision(mux)
 	s.mountTelevisionScraping(mux)
 	s.mountMetadataSettings(mux)
+	s.mountSystem(mux)
 	s.mountScraping(mux)
 	if err := s.mountWeb(mux); err != nil {
 		return nil, err

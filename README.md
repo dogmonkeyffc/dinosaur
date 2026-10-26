@@ -2,6 +2,8 @@
 
 使用 Go 开发的自托管媒体服务器，功能目标参考 Jellyfin。目前已完成用户认证、Web 系统设置、媒体库后台扫描、电影与电视剧展示和浏览器播放。电视剧功能见 [使用说明](docs/television.md)，其他规划见 [task.md](task.md)。API 为项目自有协议。
 
+电视端与手机端的目录、共享代码边界及实施顺序见 [App 架构规划](docs/client-app-architecture.md)。
+
 ## 启动
 
 源码构建需要 Go 1.27 或更新版本、Node.js 20.19+（或 22.12+）及 npm。发布后的二进制不需要 Node.js。SQLite 使用纯 Go 驱动，无需 CGO；电影元数据读取和封面提取需要系统安装 `ffprobe` 与 `ffmpeg`。缺少工具时视频仍会以文件名进入列表，扫描状态会记录问题。

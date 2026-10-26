@@ -120,7 +120,6 @@ function JobDetail({ id }: { id: number }) {
         任务 #{id} · {resource.data ? stateNames[resource.data.job.status] : ''}
       </h2>
       <p className="scrape-status">{resource.data && jobDescription(resource.data.job)}</p>
-      <p className="field-help">以下是任务执行时保存的结果；操作会以当前资料为准。</p>
       <ErrorMessage error={resource.error} />
       <div className="scrape-table-wrap" role="region" aria-label="任务逐片结果" tabIndex={0}>
         <table className="scrape-table">
@@ -156,9 +155,7 @@ function JobDetail({ id }: { id: number }) {
           </tbody>
         </table>
       </div>
-      {resource.data && !resource.data.total && (
-        <p className="scrape-admin-empty">此任务暂无逐片记录；升级前的任务可能仅保留汇总。</p>
-      )}
+      {resource.data && !resource.data.total && <p className="scrape-admin-empty">此任务暂无逐片记录。</p>}
       <Pagination
         page={page}
         total={resource.data?.total || 0}

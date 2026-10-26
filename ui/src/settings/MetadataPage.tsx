@@ -46,7 +46,7 @@ export function MetadataPage() {
   }
   return (
     <section id="metadata-section">
-      <Heading title="元数据设置" label="METADATA" description="配置电影与剧集的资料来源和首选语言。" />
+      <Heading title="元数据设置" />
       <div className="metadata-card">
         <h2>TMDB</h2>
         {resource.loading && !resource.data ? (
@@ -54,13 +54,6 @@ export function MetadataPage() {
         ) : (
           <p role="status">{resource.data?.configured ? '已配置凭据' : '尚未配置凭据'}</p>
         )}
-        <p className="muted">
-          在{' '}
-          <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener noreferrer">
-            TMDB 账号的 API 设置
-          </a>
-          申请凭据。推荐使用 API Read Access Token。
-        </p>
         <form onSubmit={(event) => submit('save', event)}>
           <fieldset disabled={!resource.data || resource.loading || action.busy}>
             <label>
@@ -75,7 +68,6 @@ export function MetadataPage() {
               <input
                 type="password"
                 aria-label="凭据"
-                aria-describedby="credential-help"
                 value={credential}
                 onChange={(event) => setCredential(event.target.value)}
                 maxLength={4096}
@@ -85,9 +77,6 @@ export function MetadataPage() {
                   resource.data?.configured ? '已配置；留空保留，输入新凭据可替换' : '粘贴 TMDB 凭据'
                 }
               />
-              <span id="credential-help" className="field-help">
-                留空保留已保存的凭据；切换凭据类型时请重新填写。
-              </span>
             </label>
             <label>
               首选资料语言
@@ -121,9 +110,6 @@ export function MetadataPage() {
             重新读取配置
           </button>
         )}
-        <p className="field-help">
-          扫描完成后会自动识别未匹配影片。已匹配资料会保留；更改语言后，可在详情主动刷新资料。
-        </p>
         <button
           className="button secondary"
           disabled={jobs.busy || jobs.running}

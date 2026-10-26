@@ -55,8 +55,6 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
             <span className="collection-count">{result.data?.total || 0}</span>
           </>
         }
-        label={tv ? 'YOUR SERIES COLLECTION' : 'YOUR PERSONAL COLLECTION'}
-        description={tv ? '按季整理，接着上一集的故事。' : '收藏的每一个故事，都值得再次相遇。'}
       >
         {user?.role === 'admin' && (
           <div className="metadata-actions">
@@ -133,11 +131,6 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
       {!result.loading && !result.error && !result.data?.items.length && (
         <div className="empty-state">
           <h2>{query || library ? '没有找到匹配的内容' : '珍藏，即将登场'}</h2>
-          <p>
-            {query || library
-              ? '试试其他关键词或媒体库。'
-              : '添加媒体目录并完成扫描后，你的收藏会展示在这里。'}
-          </p>
           <button
             className="button secondary"
             onClick={() => {

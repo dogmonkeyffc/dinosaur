@@ -42,11 +42,6 @@ export function AuthPage() {
             <br />
             有自己的家<span>。</span>
           </h1>
-          <p>
-            珍藏的电影，追过的剧集。
-            <br />
-            在属于你的媒体空间里，随时重逢。
-          </p>
           <div className="collection-art" aria-hidden="true">
             <div className="art-grid" />
             <div className="art-card art-back">
@@ -64,15 +59,11 @@ export function AuthPage() {
             <span className="art-spark">✳</span>
           </div>
         </div>
-        <span className="story-footer">自托管 · 私人珍藏 · 自由掌控</span>
       </section>
       <section className="auth-panel">
         <div className="auth-form-wrap">
           <span className="small-label">{setup ? 'MAKE YOURSELF AT HOME' : 'WELCOME BACK'}</span>
           <h2>{setup ? '开启你的私人空间' : '欢迎回来'}</h2>
-          <p className="muted">
-            {setup ? '创建首位管理员，开始整理你的媒体珍藏。' : '登录 Dinosaur，管理你的私人媒体空间。'}
-          </p>
           {notice && <p role="status">{notice}</p>}
           <form id="auth-form" onSubmit={submit}>
             {setup && (
@@ -143,10 +134,6 @@ export function AuthPage() {
               <Icon name="arrow" />
             </button>
           </form>
-          <p className="auth-footnote">
-            <Icon name="lock" />
-            {setup ? '初始化只需一次，密码至少 12 字节' : '私人服务器，仅限已授权用户访问'}
-          </p>
         </div>
         <span className="panel-footer">Dinosaur Media Server</span>
       </section>

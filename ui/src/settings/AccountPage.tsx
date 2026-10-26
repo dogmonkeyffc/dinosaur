@@ -25,10 +25,9 @@ export function AccountPage() {
   }
   return (
     <section id="account-section">
-      <Heading title="账户安全" label="ACCOUNT & SECURITY" description="管理登录密码，保护你的私人空间。" />
+      <Heading title="账户安全" />
       <div className="account-card">
         <h2>修改密码</h2>
-        <p className="muted">密码更新后，所有设备都需要重新登录。</p>
         <form id="password-form" onSubmit={submit}>
           <label>
             当前密码

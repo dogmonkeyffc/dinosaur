@@ -14,7 +14,7 @@ export function SystemPage() {
   );
   return (
     <section id="system-section">
-      <Heading title="系统设置" label="SYSTEM SETTINGS" description="查看服务器磁盘的已用和可用空间。" />
+      <Heading title="系统设置" />
       <div className="disk-section-heading">
         <h2>磁盘空间</h2>
         <button id="disk-refresh" className="button secondary" disabled={loading} onClick={reload}>

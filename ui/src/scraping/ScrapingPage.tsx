@@ -33,11 +33,7 @@ export function ScrapingPage() {
   }
   return (
     <section id="scraping-section">
-      <Heading
-        title="刮削管理"
-        label="METADATA ACTIVITY"
-        description="查看识别结果、处理异常并追踪每次任务。"
-      >
+      <Heading title="刮削管理">
         <div className="metadata-actions">
           <Link className="text-button" to="/settings/metadata">
             TMDB 设置
@@ -129,9 +125,6 @@ export function ScrapingPage() {
               />
             </label>
           </form>
-          <p className="field-help">
-            统计遵循媒体库和搜索条件。“有提示”包含在已识别数量内；批量刮削只处理所选媒体库中的未识别影片。
-          </p>
           {resource.loading && !resource.data && <Loading />}
           <div className="scrape-table-wrap" role="region" aria-label="影片识别结果" tabIndex={0}>
             <table className="scrape-table">

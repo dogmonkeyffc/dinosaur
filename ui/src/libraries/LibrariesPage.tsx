@@ -24,11 +24,7 @@ export function LibrariesPage() {
   );
   return (
     <section id="libraries-section">
-      <Heading
-        title="媒体库"
-        label="YOUR MEDIA, ORGANIZED"
-        description="为你的电影和剧集，安排一个专属位置。"
-      >
+      <Heading title="媒体库">
         {admin && (
           <button className="button primary" onClick={() => setEditing(null)}>
             <Icon name="plus" />
@@ -36,20 +32,6 @@ export function LibrariesPage() {
           </button>
         )}
       </Heading>
-      <div className="info-banner">
-        <span className="banner-icon">
-          <Icon name="info" />
-        </span>
-        <div>
-          <strong>从本地目录开始，建立你的珍藏</strong>
-          <p>
-            {admin
-              ? '添加服务器上的媒体目录，配置会自动保存。扫描会自动开始，也可以手动重新扫描。'
-              : '查看管理员配置的媒体库。添加、编辑和移除目录需要管理员权限。'}
-          </p>
-        </div>
-        <span className="version-tag">本地媒体</span>
-      </div>
       <div className="list-toolbar">
         <div className="filter-tabs" role="group" aria-label="媒体类型">
           {[
@@ -152,13 +134,6 @@ export function LibrariesPage() {
       {!loading && !items.length && (
         <div className="empty-state">
           <h2>{libraries.length ? '没有找到匹配的媒体库' : '你的媒体故事，从这里开始'}</h2>
-          <p>
-            {libraries.length
-              ? '换一个关键词，或选择其他媒体类型试试。'
-              : admin
-                ? '添加第一个媒体库，把收藏的电影和剧集整理在一起。'
-                : '管理员尚未添加媒体库，请稍后再来看看。'}
-          </p>
           {admin && !libraries.length && (
             <button className="button secondary" onClick={() => setEditing(null)}>
               添加第一个媒体库
@@ -166,10 +141,6 @@ export function LibrariesPage() {
           )}
         </div>
       )}
-      <div className="section-footnote">
-        <Icon name="lock" />
-        媒体文件保留在原目录，移除媒体库不会删除你的文件。
-      </div>
       {editing !== undefined && (
         <LibraryDialog item={editing || undefined} close={() => setEditing(undefined)} />
       )}

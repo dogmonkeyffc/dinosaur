@@ -120,7 +120,6 @@ export function Shell() {
               <span>Dinosaur Server</span>
             </div>
           </div>
-          <p>好故事，值得好好收藏。</p>
         </div>
         <div id="sidebar-account" className="sidebar-account user-area" role="group" aria-label="当前用户">
           <span className="avatar">{user?.username.slice(0, 1).toUpperCase()}</span>
@@ -152,7 +151,6 @@ export function Shell() {
               <span>
                 Dinosaur<span className="brand-period">.</span>
               </span>
-              <span>你的收藏，由你掌控。</span>
             </footer>
           )}
         </main>

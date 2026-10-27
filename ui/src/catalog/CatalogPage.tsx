@@ -1,18 +1,16 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useAuth } from '../auth/AuthProvider';
-import { ErrorMessage, Heading, Icon, Loading, Pagination } from '../components/common';
+import { ErrorMessage, Icon, Loading, Pagination } from '../components/common';
 import { useLibraries } from '../libraries/LibraryProvider';
-import { useAction, useDebounced, useResource } from '../lib/hooks';
-import { activeJob, jobDescription, scanDescription } from '../lib/format';
+import { useDebounced, useResource } from '../lib/hooks';
+import { activeJob } from '../lib/format';
 import type { MediaKind, Movie, Page, Series } from '../lib/types';
 import { useJobs } from '../metadata/useJobs';
 import { MediaCard } from './MediaCard';
 
 export function CatalogPage({ kind }: { kind: MediaKind }) {
   const tv = kind === 'tv';
-  const { user } = useAuth();
-  const { libraries, scan } = useLibraries();
+  const { libraries } = useLibraries();
   const [params, setParams] = useSearchParams();
   const page = Math.max(1, Number(params.get('page')) || 1);
   const library = params.get('library_id') || '';
@@ -31,8 +29,7 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
     scans.length ? 3000 : 0,
   );
   const recent = useResource<{ items: Movie[] }>(`/api/playback/continue?type=${kind}`);
-  const jobs = useJobs(kind, result.reload);
-  const action = useAction();
+  useJobs(kind, result.reload);
   useEffect(() => {
     result.reload();
   }, [scanSignature, result.reload]);
@@ -47,46 +44,7 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
     setParams(next, { replace: name === 'q' });
   }
   return (
-    <section id={tv ? 'series-section' : 'movies-section'}>
-      <Heading
-        title={
-          <>
-            我的{tv ? '剧集' : '电影'}
-            <span className="collection-count">{result.data?.total || 0}</span>
-          </>
-        }
-      >
-        {user?.role === 'admin' && (
-          <div className="metadata-actions">
-            <button
-              className="button secondary"
-              disabled={!choices.length || action.busy}
-              onClick={() =>
-                action.run(() => scan(choices.filter((item) => !library || String(item.id) === library)))
-              }
-            >
-              扫描媒体库
-            </button>
-            <button
-              className="button secondary"
-              disabled={jobs.busy || jobs.running}
-              onClick={() => jobs.start({ library_id: Number(library) })}
-            >
-              刮削未识别{tv ? '剧集' : '影片'}
-            </button>
-          </div>
-        )}
-      </Heading>
-      {scans.length > 0 && (
-        <div className="info-banner" role="status">
-          {scans.map((item) => `${item.name}：${scanDescription(item.scan!)}`).join('；')}
-        </div>
-      )}
-      {jobs.latest && (
-        <p className="scrape-status" role="status">
-          {jobDescription(jobs.latest)}
-        </p>
-      )}
+    <section id={tv ? 'series-section' : 'movies-section'} aria-label={tv ? '我的剧集' : '我的电影'}>
       {(recent.data?.items.length || 0) > 0 && (
         <section className="continue-section">
           <h2>继续观看</h2>
@@ -121,7 +79,7 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
           />
         </label>
       </div>
-      <ErrorMessage error={result.error || jobs.error || action.error || recent.error} />
+      <ErrorMessage error={result.error || recent.error} />
       {result.loading && !result.data && <Loading />}
       <div className="movie-grid" aria-live="polite" aria-busy={result.loading}>
         {result.data?.items.map((item) => (

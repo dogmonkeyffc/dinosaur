@@ -43,16 +43,6 @@
 .series-seasons > label {
   max-width: 250px;
 }
-.series-seasons select {
-  width: 100%;
-  min-height: 43px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--ink);
-  font: inherit;
-}
 .series-episodes {
   display: grid;
   gap: 14px;

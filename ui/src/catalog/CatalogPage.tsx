@@ -1,3 +1,4 @@
+import { Select } from '../components/Select';
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ErrorMessage, Icon, Loading, Pagination } from '../components/common';
@@ -58,14 +59,14 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
       <div className="movie-toolbar">
         <label className="library-select">
           <span className="sr-only">选择媒体库</span>
-          <select value={library} onChange={(event) => change('library_id', event.target.value)}>
+          <Select value={library} onChange={(event) => change('library_id', event.target.value)}>
             <option value="">全部{tv ? '剧集' : ''}媒体库</option>
             {choices.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.name}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         <label className="search-field">
           <Icon name="search" />

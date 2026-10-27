@@ -1,3 +1,4 @@
+import { Select } from '../components/Select';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ErrorMessage, Heading, Loading } from '../components/common';
@@ -58,10 +59,10 @@ export function MetadataPage() {
           <fieldset disabled={!resource.data || resource.loading || action.busy}>
             <label>
               凭据类型
-              <select value={type} onChange={(event) => setType(event.target.value)}>
+              <Select value={type} onChange={(event) => setType(event.target.value)}>
                 <option value="bearer">API Read Access Token（推荐）</option>
                 <option value="api_key">API Key</option>
-              </select>
+              </Select>
             </label>
             <label>
               凭据
@@ -80,12 +81,12 @@ export function MetadataPage() {
             </label>
             <label>
               首选资料语言
-              <select value={language} onChange={(event) => setLanguage(event.target.value)}>
+              <Select value={language} onChange={(event) => setLanguage(event.target.value)}>
                 <option value="zh-CN">简体中文</option>
                 <option value="zh-TW">繁体中文（台湾）</option>
                 <option value="zh-HK">繁体中文（香港）</option>
                 <option value="en-US">英语</option>
-              </select>
+              </Select>
             </label>
             <div className="metadata-actions">
               <button className="button primary">保存配置</button>

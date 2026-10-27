@@ -1,3 +1,4 @@
+import { Select } from '../components/Select';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ErrorMessage, Heading, Loading, Pagination } from '../components/common';
@@ -93,7 +94,7 @@ export function ScrapingPage() {
           <form className="scrape-admin-filters" onSubmit={(event) => event.preventDefault()}>
             <label>
               媒体库
-              <select value={library} onChange={(event) => filter(setLibrary, event.target.value)}>
+              <Select value={library} onChange={(event) => filter(setLibrary, event.target.value)}>
                 <option value="">全部媒体库</option>
                 {libraries
                   .filter((item) => item.type === 'movie')
@@ -102,17 +103,17 @@ export function ScrapingPage() {
                       {item.name}
                     </option>
                   ))}
-              </select>
+              </Select>
             </label>
             <label>
               识别状态
-              <select value={status} onChange={(event) => filter(setStatus, event.target.value)}>
+              <Select value={status} onChange={(event) => filter(setStatus, event.target.value)}>
                 {states.map((value) => (
                   <option key={value} value={value}>
                     {value ? stateNames[value] : '全部状态'}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
             <label>
               搜索影片

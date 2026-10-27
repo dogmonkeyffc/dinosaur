@@ -24,8 +24,7 @@
   margin: 18px 0;
   font-size: 13px;
 }
-.metadata-card input,
-.metadata-card select {
+.metadata-card input {
   display: block;
   box-sizing: border-box;
   width: 100%;
@@ -60,4 +59,8 @@
   .metadata-card {
     padding: 18px;
   }
+}
+
+.metadata-card .select-control {
+  margin-top: 8px;
 }

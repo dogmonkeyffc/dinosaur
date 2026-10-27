@@ -1,3 +1,4 @@
+import { Select } from '../components/Select';
 import { useState } from 'react';
 import { ErrorMessage, Loading, Pagination } from '../components/common';
 import { useResource } from '../lib/hooks';
@@ -33,7 +34,7 @@ export function JobsView() {
       <form className="scrape-admin-filters" onSubmit={(event) => event.preventDefault()}>
         <label>
           任务状态
-          <select
+          <Select
             value={status}
             onChange={(event) => {
               setStatus(event.target.value);
@@ -46,7 +47,7 @@ export function JobsView() {
                 {stateNames[item]}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
       </form>
       <ErrorMessage error={resource.error} />

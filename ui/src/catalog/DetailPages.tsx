@@ -1,3 +1,4 @@
+import { Select } from '../components/Select';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ErrorMessage, Loading } from '../components/common';
@@ -119,13 +120,13 @@ export function SeriesDetailPage() {
             <div className="series-seasons">
               <label>
                 选择季度
-                <select value={season ?? ''} onChange={(event) => setSeason(Number(event.target.value))}>
+                <Select value={season ?? ''} onChange={(event) => setSeason(Number(event.target.value))}>
                   {data.seasons.map((item) => (
                     <option key={item.number} value={item.number}>
                       {item.number === 0 ? '特别篇' : `第 ${item.number} 季`} · {item.episodes.length} 个文件
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
               <div className="series-episodes">
                 {data.seasons

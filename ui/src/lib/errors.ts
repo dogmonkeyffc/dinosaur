@@ -1,4 +1,7 @@
 export const errorMessages: Record<string, string> = {
+  pairing_expired: '二维码或配对码已过期、已使用，请重新生成。',
+  invalid_pairing: '配对信息无效。',
+  pairing_conflict: '设备已完成授权，请重新生成配对码。',
   disk_usage_unsupported: '当前服务器系统暂不支持读取磁盘空间。',
   scrape_running: '已有刮削任务运行中，请完成后重试。',
   invalid_scrape: '刮削参数有误，请重新选择影片。',

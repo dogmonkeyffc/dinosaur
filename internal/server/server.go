@@ -15,6 +15,7 @@ import (
 
 	"dinosaur/internal/auth"
 	"dinosaur/internal/config"
+	"dinosaur/internal/deviceauth"
 	"dinosaur/internal/disk"
 	"dinosaur/internal/disk/local"
 	"dinosaur/internal/scanner"
@@ -28,8 +29,9 @@ const cookieName = "dinosaur_session"
 
 type identityKey struct{}
 type identity struct {
-	user  store.User
-	token string
+	user   store.User
+	token  string
+	device bool
 }
 type Server struct {
 	config     config.Config
@@ -45,6 +47,8 @@ type Server struct {
 	scraper    *scraping.Manager
 	tvScraper  *scraping.Manager
 	disks      disk.Reader
+	devices    deviceauth.Service
+	serverID   string
 }
 
 func New(c config.Config, db *store.Store, logger *slog.Logger) (*Server, error) {
@@ -59,6 +63,11 @@ func New(c config.Config, db *store.Store, logger *slog.Logger) (*Server, error)
 	}
 	s := &Server{config: c, store: db, logger: logger, hasher: h, limiter: auth.NewLimiter(), dummyHash: dummy}
 	s.disks = local.Reader{}
+	s.devices = deviceauth.Service{Repository: db, TTL: c.SessionTTL}
+	s.serverID, err = db.ServerID(context.Background())
+	if err != nil {
+		return nil, err
+	}
 	s.scanner = scanner.New(db, c, logger)
 	s.transcoder = streaming.New(c.FFmpegPath)
 	s.tmdb = tmdb.New()
@@ -91,6 +100,7 @@ func New(c config.Config, db *store.Store, logger *slog.Logger) (*Server, error)
 	s.mountTelevisionScraping(mux)
 	s.mountMetadataSettings(mux)
 	s.mountSystem(mux)
+	s.mountDevices(mux)
 	s.mountScraping(mux)
 	if err := s.mountWeb(mux); err != nil {
 		return nil, err

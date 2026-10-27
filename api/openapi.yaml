@@ -1,0 +1,223 @@
+openapi: 3.1.0
+info:
+  title: Dinosaur device authentication API
+  version: 1.0.0
+  description: App 登录与设备配对协议；现有媒体 API 见 README。
+servers:
+  - url: /
+paths:
+  /api/server:
+    get:
+      responses:
+        '200':
+          description: Stable server identity and supported capabilities
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/devices.yaml#/ServerInfo'
+  /api/devices/qr:
+    post:
+      security:
+        - browserCookie: []
+          csrf: []
+        - deviceBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+      responses:
+        '201':
+          description: One-time two-minute mobile login QR; replaces the previous QR of this session
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/devices.yaml#/MobileQR'
+        default:
+          $ref: '#/components/responses/Error'
+  /api/devices/qr/exchange:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ticket, name]
+              additionalProperties: false
+              properties:
+                ticket: { type: string, minLength: 43, maxLength: 43 }
+                name: { type: string, minLength: 1, maxLength: 128 }
+      responses:
+        '200':
+          $ref: '#/components/responses/Session'
+        default:
+          $ref: '#/components/responses/Error'
+  /api/devices/pairings:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              additionalProperties: false
+              properties:
+                name: { type: string, minLength: 1, maxLength: 128 }
+      responses:
+        '201':
+          description: Five-minute TV challenge; device_code is private to the TV
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/devices.yaml#/TVChallenge'
+        default:
+          $ref: '#/components/responses/Error'
+  /api/devices/pairings/poll:
+    post:
+      requestBody:
+        $ref: '#/components/requestBodies/DeviceCode'
+      responses:
+        '200':
+          $ref: '#/components/responses/Session'
+        '202':
+          description: Approval pending; poll at the requested interval without overlap
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, interval]
+                properties:
+                  status: { const: pending }
+                  interval: { type: integer, minimum: 3 }
+        default:
+          $ref: '#/components/responses/Error'
+  /api/devices/pairings/cancel:
+    post:
+      requestBody:
+        $ref: '#/components/requestBodies/DeviceCode'
+      responses:
+        '200':
+          description: Idempotent cancellation using the private TV secret; the displayed code cannot cancel a pairing
+        default:
+          $ref: '#/components/responses/Error'
+  /api/devices/pairings/lookup:
+    post:
+      security:
+        - browserCookie: []
+          csrf: []
+        - deviceBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              additionalProperties: false
+              properties:
+                code: { type: string, pattern: '^[0-9]{6}$' }
+      responses:
+        '200':
+          description: TV information for account and device confirmation
+          content:
+            application/json:
+              schema:
+                $ref: './schemas/devices.yaml#/Pairing'
+        default:
+          $ref: '#/components/responses/Error'
+  /api/devices/pairings/approve:
+    post:
+      security:
+        - browserCookie: []
+          csrf: []
+        - deviceBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pairing_id]
+              additionalProperties: false
+              properties:
+                pairing_id: { type: string, minLength: 43, maxLength: 43 }
+      responses:
+        '200':
+          description: Approved using the authenticated account; user_id and role cannot be specified
+        default:
+          $ref: '#/components/responses/Error'
+  /api/devices:
+    get:
+      security:
+        - browserCookie: []
+        - deviceBearer: []
+      responses:
+        '200':
+          description: Only the authenticated user's device sessions; no tokens or hashes
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [devices]
+                properties:
+                  devices:
+                    type: array
+                    items:
+                      $ref: './schemas/devices.yaml#/Device'
+        default:
+          $ref: '#/components/responses/Error'
+  /api/devices/{id}:
+    delete:
+      security:
+        - browserCookie: []
+          csrf: []
+        - deviceBearer: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, minLength: 43, maxLength: 43 }
+      responses:
+        '200':
+          description: Idempotent revocation scoped to the authenticated user
+        default:
+          $ref: '#/components/responses/Error'
+components:
+  requestBodies:
+    DeviceCode:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [device_code]
+            additionalProperties: false
+            properties:
+              device_code: { type: string, minLength: 43, maxLength: 43 }
+  securitySchemes:
+    browserCookie: { type: apiKey, in: cookie, name: dinosaur_session }
+    csrf: { type: apiKey, in: header, name: X-CSRF-Token }
+    deviceBearer: { type: http, scheme: bearer, bearerFormat: Opaque device token }
+  responses:
+    Session:
+      description: Independent revocable device session; no browser Cookie is issued
+      content:
+        application/json:
+          schema:
+            $ref: './schemas/devices.yaml#/Session'
+    Error:
+      description: JSON error; 400 invalid input, 401 unauthenticated, 403 forbidden, 410 expired/used, 429 rate limited
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code: { type: string }
+                  message: { type: string }

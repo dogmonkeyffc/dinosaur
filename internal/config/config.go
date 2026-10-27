@@ -9,12 +9,15 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 )
 
 type Config struct {
 	Addr, DataDir, DatabasePath, FFmpegPath, FFprobePath string
 	SetupToken, PublicURL                                string
+	ServerName                                           string
 	CookieSecure                                         bool
+	DiscoveryEnabled                                     bool
 	SessionTTL, RequestTimeout, ShutdownTimeout          time.Duration
 }
 
@@ -34,12 +37,25 @@ func Load() (Config, error) {
 		FFprobePath: env("DINOSAUR_FFPROBE_PATH", "ffprobe"),
 		SetupToken:  os.Getenv("DINOSAUR_SETUP_TOKEN"),
 		PublicURL:   strings.TrimRight(os.Getenv("DINOSAUR_PUBLIC_URL"), "/"),
+		ServerName:  env("DINOSAUR_SERVER_NAME", "Dinosaur"),
 	}
 	c.DatabasePath = env("DINOSAUR_DATABASE_PATH", filepath.Join(c.DataDir, "dinosaur.db"))
 	var err error
 	c.CookieSecure, err = strconv.ParseBool(env("DINOSAUR_COOKIE_SECURE", "false"))
 	if err != nil {
 		return c, fmt.Errorf("DINOSAUR_COOKIE_SECURE must be a boolean")
+	}
+	c.DiscoveryEnabled, err = strconv.ParseBool(env("DINOSAUR_DISCOVERY_ENABLED", "true"))
+	if err != nil {
+		return c, fmt.Errorf("DINOSAUR_DISCOVERY_ENABLED must be a boolean")
+	}
+	if strings.TrimSpace(c.ServerName) == "" || len(c.ServerName) > 128 || strings.ContainsAny(c.ServerName, "\r\n\x00") {
+		return c, fmt.Errorf("DINOSAUR_SERVER_NAME must contain 1-128 bytes without control characters")
+	}
+	for _, character := range c.ServerName {
+		if unicode.IsControl(character) {
+			return c, fmt.Errorf("DINOSAUR_SERVER_NAME must not contain control characters")
+		}
 	}
 	for _, field := range []struct {
 		name, fallback string

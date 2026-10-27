@@ -1,0 +1,33 @@
+{
+  "name": "dinosaur-apps",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "overrides": {
+    "react-native-zeroconf": {
+      "react-native": "npm:react-native-tvos@0.85.3-3"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test:client": "tsx --test packages/client/test/*.test.ts packages/playback-core/test/*.test.ts",
+    "mobile": "npm run start --workspace @dinosaur/mobile",
+    "tv": "npm run start --workspace @dinosaur/tv"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "@types/react": "19.3.0",
+    "expo": "56.0.24",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "npm:react-native-tvos@0.85.3-3",
+    "tsx": "4.21.0",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": "^22.13.0 || >=24.3.0"
+  }
+}

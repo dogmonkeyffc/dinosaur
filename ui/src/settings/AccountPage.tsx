@@ -4,6 +4,8 @@ import { ErrorMessage, Heading } from '../components/common';
 import { useToast } from '../components/Toast';
 import { api } from '../lib/api';
 import { useAction } from '../lib/hooks';
+import { MobileLogin } from '../devices/MobileLogin';
+import { Devices } from '../devices/Devices';
 
 export function AccountPage() {
   const auth = useAuth();
@@ -26,6 +28,8 @@ export function AccountPage() {
   return (
     <section id="account-section">
       <Heading title="账户安全" />
+      <MobileLogin />
+      <Devices />
       <div className="account-card">
         <h2>修改密码</h2>
         <form id="password-form" onSubmit={submit}>

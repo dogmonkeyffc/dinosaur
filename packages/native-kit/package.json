@@ -1,0 +1,18 @@
+{
+  "name": "@dinosaur/native-kit",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "@dinosaur/client": "0.1.0",
+    "@dinosaur/contracts": "0.1.0",
+    "@dinosaur/playback-core": "0.1.0",
+    "expo-secure-store": "56.0.4",
+    "expo-video": "56.1.4"
+  },
+  "peerDependencies": {
+    "react": "19.2.3",
+    "react-native": "*"
+  }
+}

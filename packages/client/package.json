@@ -1,0 +1,10 @@
+{
+  "name": "@dinosaur/client",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "@dinosaur/contracts": "0.1.0"
+  }
+}

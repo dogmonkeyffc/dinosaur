@@ -16,6 +16,7 @@ import (
 
 	"dinosaur/internal/auth"
 	"dinosaur/internal/config"
+	"dinosaur/internal/discovery"
 	"dinosaur/internal/server"
 	"dinosaur/internal/store"
 )
@@ -59,6 +60,12 @@ func run(logger *slog.Logger) error {
 		return err
 	}
 	defer handler.Close()
+	id, err := db.ServerID(startup)
+	if err != nil {
+		return err
+	}
+	advertiser := discovery.Start(c, id, logger)
+	defer advertiser.Close()
 	if err := handler.StartScanning(); err != nil {
 		return fmt.Errorf("start media scanner: %w", err)
 	}

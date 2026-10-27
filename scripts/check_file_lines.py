@@ -2,8 +2,8 @@
 from pathlib import Path
 import sys
 
-extensions = {'.go', '.js', '.cjs', '.mjs', '.jsx', '.ts', '.tsx', '.css', '.html', '.py', '.sql', '.sh'}
-roots = ['cmd', 'internal', 'web', 'ui/src', 'ui/public', 'scripts', 'deploy']
+extensions = {'.go', '.js', '.cjs', '.mjs', '.jsx', '.ts', '.tsx', '.css', '.html', '.py', '.sql', '.sh', '.kt', '.swift'}
+roots = ['cmd', 'internal', 'web', 'ui/src', 'ui/public', 'scripts', 'deploy', 'apps', 'packages']
 generated = [Path('web/dist'), Path('ui/public/assets/vendor')]
 violations = []
 paths = [Path('build.sh'), Path('ui/vite.config.ts'), Path('ui/index.html')]
@@ -11,6 +11,10 @@ for root in roots:
     paths.extend(Path(root).rglob('*'))
 for path in paths:
     if any(path.is_relative_to(folder) for folder in generated):
+        continue
+    if any(part in {'node_modules', '.expo', 'dist', 'build'} for part in path.parts):
+        continue
+    if len(path.parts) > 2 and path.parts[0] == 'apps' and path.parts[2] in {'android', 'ios'}:
         continue
     if path.is_file() and path.suffix in extensions:
         count = len(path.read_text().splitlines())

@@ -42,7 +42,7 @@ func TestPersistenceAndSQLiteConstraints(t *testing.T) {
 	if err := db.CreateSession(ctx, "stale", u.ID, "old-hash", time.Now().Add(time.Hour)); err == nil {
 		t.Fatal("login with stale password hash succeeded")
 	}
-	if _, err := db.DB.Exec(`INSERT INTO sessions VALUES ('invalid',99999,9999999999,0)`); err == nil {
+	if _, err := db.DB.Exec(`INSERT INTO sessions(token_hash,user_id,expires_at,created_at) VALUES ('invalid',99999,9999999999,0)`); err == nil {
 		t.Fatal("foreign key not enforced")
 	}
 	if err := db.Close(); err != nil {
@@ -64,7 +64,7 @@ func TestPersistenceAndSQLiteConstraints(t *testing.T) {
 	if err := db.DB.QueryRow(`SELECT count(*) FROM schema_migrations`).Scan(&count); err != nil {
 		t.Fatal(err)
 	}
-	if count != 9 {
+	if count != 10 {
 		t.Fatalf("migrations=%d", count)
 	}
 	if err := db.ChangePassword(ctx, u.ID, "new-hash"); err != nil {

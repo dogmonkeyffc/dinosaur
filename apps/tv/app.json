@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Dinosaur TV",
+    "slug": "dinosaur-tv",
+    "version": "0.1.0",
+    "orientation": "landscape",
+    "userInterfaceStyle": "dark",
+    "android": {
+      "package": "com.monkeydog.dinosaur.tv",
+      "permissions": [
+        "android.permission.CHANGE_WIFI_MULTICAST_STATE",
+        "android.permission.ACCESS_NETWORK_STATE"
+      ]
+    },
+    "plugins": [
+      ["@react-native-tvos/config-tv", { "isTV": true }],
+      "expo-secure-store",
+      "expo-video",
+      "./plugins/with-lan.cjs",
+      "../../scripts/expo-shared-inputs.cjs"
+    ]
+  }
+}

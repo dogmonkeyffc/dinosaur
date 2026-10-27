@@ -1,8 +1,10 @@
 # 电视与手机 App 架构规划
 
-状态：方案，尚未创建 App 工程或改变现有 API。
+状态：架构方案；Android 手机与 Android TV 初版已开始落地，实际功能、构建与登录流程见 [App 文档](../apps/README.md)。
 
-平台暂按 Android TV / Google TV，以及 Android / iOS 手机规划。Apple TV 可在电视端后续评估；三星 Tizen、LG webOS 需要独立方案，不能直接安装 Android TV 包。平台范围确认后更新本方案。
+初版新增 packages/native-kit 承载原生适配和基础组件；contracts 目前手工维护类型，新增设备协议记录在 api/openapi.yaml，尚未启用类型生成。后续目录仍以实际需要逐步展开。
+
+平台已确认为 Android 手机和 Android TV / Google TV。三星 Tizen、LG webOS 需要独立方案，不能直接安装 Android TV 包。
 
 ## 技术方向
 
@@ -16,7 +18,7 @@
 
 手机和电视共用 TypeScript 业务代码，分别维护导航、布局和播放控件。现有 React DOM、CSS、React Router、Artplayer 不能直接用于原生界面。
 
-React Native 的电视支持来自社区维护的 react-native-tvos。Expo 提供 TV 构建路径，但部分库不能用于电视。落地前先完成播放器和遥控器验证，再锁定兼容的 React Native、TV fork、Expo 与原生模块版本。手机和电视保留独立依赖解析，避免 TV fork 替换手机或 Web 使用的运行时。
+React Native 的电视支持来自社区维护的 react-native-tvos。Expo 提供 TV 构建路径，但部分库不能用于电视。落地前先完成播放器和遥控器验证，再锁定兼容的 React Native、TV fork、Expo 与原生模块版本。手机和电视保留独立入口与配置。实际工作区按 Expo TV 的要求共用同一 TV fork 和对应的 React 版本，手机不开启 TV 构建；Web 依赖独立管理。
 
 ## 建议目录
 
@@ -112,9 +114,9 @@ HTTP 认证适配器明确区分 Cookie 与设备 Token；Cookie 写操作继续
 
 客户端上报受限且经过校验的容器、编码、音轨、字幕和流协议能力；服务端结合源文件决定 direct、remux 或 transcode。客户端解码失败时可以请求兼容方案，限制自动重试次数。播放方案显式返回源时间偏移和流协议，避免各端猜测兼容流的时间轴。
 
-原生播放器优先评估 react-native-video 的适配层：Android 使用 ExoPlayer，Apple 平台使用 AVPlayer。具体库版本需验证 TV 支持，不能仅根据手机示例推断。媒体容器可解析也不代表设备能硬件解码对应视频、HDR 或音频格式。
+首版播放器采用 Expo Video，Android 使用 ExoPlayer，手机和电视分别验证播放与控制。媒体容器可解析也不代表设备能硬件解码对应视频、HDR 或音频格式。
 
-第一阶段验证现有 Range 原片流和兼容流在真机上的行为；如 AVPlayer 对现有兼容流存在限制，再在 internal/streaming/ 增加按需 HLS 适配。播放方案领域不直接依赖 FFmpeg 命令行。
+第一阶段验证现有 Range 原片流和兼容流在真机上的行为；后续如需 HLS，在 internal/streaming/ 增加按需适配。播放方案领域不直接依赖 FFmpeg 命令行。
 
 现有进度接口可作为起点。同一设备按播放会话串行提交；暂停、跳转、退出和切后台触发提交。缓存按服务器和用户隔离。多设备同时播放的覆盖规则需明确为服务端接收顺序；如需拒绝迟到更新，再扩展播放会话 ID 与序号，不能用取最大进度代替，因为用户可能主动后退。
 
@@ -134,11 +136,11 @@ TV 焦点状态以页面、媒体 ID、海报行和滚动位置定位；从详�
 
 ## 实施顺序与交付条件
 
-1. **播放与交互验证**：建立最小 Android TV 播放样例和手机样例；验证受保护的封面/视频/字幕、MP4、MKV/HEVC、兼容流、续播与跳转。TV 同时验证焦点、返回键和目标遥控器。确认平台、依赖组合及 iOS 是否需要 HLS。
+1. **播放与交互验证**：建立最小 Android TV 播放样例和手机样例；验证受保护的封面/视频/字幕、MP4、MKV/HEVC、兼容流、续播与跳转。TV 同时验证焦点、返回键和目标遥控器。确认依赖组合与 Android 设备播放能力。
 2. **协议与公共包**：设备会话、服务器能力协议、播放能力协商；抽取 contracts、client 和确实共用的播放规则。同步迁移 Web 调用，保持旧客户端兼容。
 3. **手机首版**：连服务器到续播的完整流程、电影与剧集、账户隔离、音轨字幕和生命周期。
 4. **电视首版**：设备配对、大屏浏览、焦点恢复与遥控播放；以真实电视/盒子验收。
-5. **发布**：签名 Android 手机 APK 与 Android TV APK，分别标记产物；需要 iOS 时使用 macOS/Xcode 构建与签名。记录客户端与最低服务端协议兼容范围。
+5. **发布**：签名 Android 手机 APK 与 Android TV APK，分别标记产物。记录客户端与最低服务端协议兼容范围。
 
 Go 的 build.sh 继续负责 Web + Go 二进制。App 使用各自构建入口和独立流水线，按目录变化触发；不让 NAS 服务打包依赖 Android SDK、Xcode 或 App 签名。源码、锁文件和必要原生工程配置入 Git，依赖缓存、签名私钥、APK/AAB/IPA 与生成产物放构建产物或 Release。
 

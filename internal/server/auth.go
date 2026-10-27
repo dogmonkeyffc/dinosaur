@@ -118,6 +118,10 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 }
 func (s *Server) me(w http.ResponseWriter, r *http.Request) {
 	who := current(r)
+	if who.device {
+		writeJSON(w, 200, map[string]any{"user": who.user})
+		return
+	}
 	writeJSON(w, 200, map[string]any{"user": who.user, "csrf_token": auth.CSRFToken(who.token)})
 }
 func (s *Server) logout(w http.ResponseWriter, r *http.Request) {
@@ -125,6 +129,8 @@ func (s *Server) logout(w http.ResponseWriter, r *http.Request) {
 		s.internal(w, r, err)
 		return
 	}
-	s.clearCookie(w)
+	if !current(r).device {
+		s.clearCookie(w)
+	}
 	writeJSON(w, 200, map[string]bool{"ok": true})
 }

@@ -1,0 +1,30 @@
+{
+  "name": "@dinosaur/tv",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start --dev-client",
+    "android": "expo run:android",
+    "export": "expo export --platform android"
+  },
+  "dependencies": {
+    "@dinosaur/client": "0.1.0",
+    "@dinosaur/contracts": "0.1.0",
+    "@dinosaur/native-kit": "0.1.0",
+    "@react-native-tvos/config-tv": "0.1.7",
+    "expo": "56.0.24",
+    "expo-secure-store": "56.0.4",
+    "expo-video": "56.1.4",
+    "react": "19.2.3",
+    "react-native": "npm:react-native-tvos@0.85.3-3",
+    "react-native-zeroconf": "0.17.6"
+  },
+  "expo": {
+    "install": {
+      "exclude": [
+        "react-native"
+      ]
+    }
+  }
+}

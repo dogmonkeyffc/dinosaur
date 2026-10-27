@@ -6,6 +6,7 @@ import { App } from './App';
 import './styles/app.css';
 import './styles/metadata-settings.css';
 import './styles/system-settings.css';
+import './styles/devices.css';
 import './styles/series.css';
 import './styles/scrape-admin.css';
 import './styles/movie-metadata.css';

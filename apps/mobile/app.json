@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Dinosaur",
+    "slug": "dinosaur-mobile",
+    "version": "0.1.0",
+    "scheme": "dinosaur",
+    "orientation": "default",
+    "userInterfaceStyle": "dark",
+    "android": {
+      "package": "com.monkeydog.dinosaur.mobile"
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "扫描 Dinosaur Web 登录二维码",
+          "recordAudioAndroid": false
+        }
+      ],
+      "expo-secure-store",
+      "expo-video",
+      "./plugins/with-lan.cjs",
+      "../../scripts/expo-shared-inputs.cjs"
+    ]
+  }
+}

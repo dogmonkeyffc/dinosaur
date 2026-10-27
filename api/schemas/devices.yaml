@@ -1,0 +1,57 @@
+User:
+  type: object
+  required: [id, username, role]
+  properties:
+    id: { type: integer, minimum: 1 }
+    username: { type: string }
+    role: { type: string, enum: [admin, user] }
+ServerInfo:
+  type: object
+  required: [id, name, api_version, capabilities]
+  properties:
+    id: { type: string, pattern: '^[a-f0-9]{32}$' }
+    name: { type: string }
+    api_version: { const: 1 }
+    capabilities:
+      type: array
+      items: { type: string }
+MobileQR:
+  type: object
+  required: [qr_payload, expires_at, user]
+  properties:
+    qr_payload: { type: string, description: 'dinosaur://login?server=<encoded-origin>&ticket=<opaque-secret>' }
+    expires_at: { type: integer, description: Unix seconds }
+    user: { $ref: '#/User' }
+Pairing:
+  type: object
+  required: [pairing_id, name, expires_at]
+  properties:
+    pairing_id: { type: string, minLength: 43, maxLength: 43 }
+    name: { type: string }
+    expires_at: { type: integer }
+TVChallenge:
+  type: object
+  required: [pairing_id, name, code, device_code, expires_at, interval]
+  properties:
+    pairing_id: { type: string, minLength: 43, maxLength: 43 }
+    name: { type: string }
+    code: { type: string, pattern: '^[0-9]{6}$' }
+    device_code: { type: string, minLength: 43, maxLength: 43 }
+    expires_at: { type: integer }
+    interval: { type: integer, minimum: 3 }
+Session:
+  type: object
+  required: [token, user, expires_at]
+  properties:
+    token: { type: string, pattern: '^[A-Za-z0-9_-]{43}$' }
+    user: { $ref: '#/User' }
+    expires_at: { type: integer }
+Device:
+  type: object
+  required: [id, name, created_at, expires_at, current]
+  properties:
+    id: { type: string, minLength: 43, maxLength: 43 }
+    name: { type: string }
+    created_at: { type: integer }
+    expires_at: { type: integer }
+    current: { type: boolean }

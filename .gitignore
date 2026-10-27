@@ -18,6 +18,13 @@
 /posters/
 /node_modules/
 /ui/node_modules/
+/apps/*/node_modules/
+/packages/*/node_modules/
+/apps/*/.expo/
+/apps/*/android/
+/apps/*/ios/
+/apps/*/dist/
+/apps/*/local.properties
 /ui/dist/
 /web/dist/*
 !/web/dist/.gitkeep

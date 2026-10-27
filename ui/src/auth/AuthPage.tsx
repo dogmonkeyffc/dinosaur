@@ -89,7 +89,7 @@ export function AuthPage() {
                 autoComplete="username"
                 required
                 maxLength={32}
-                pattern="[A-Za-z0-9][A-Za-z0-9_.-]{2,31}"
+                pattern={'[A-Za-z0-9][A-Za-z0-9_.\\-]{2,31}'}
                 placeholder="输入你的用户名"
               />
             </label>

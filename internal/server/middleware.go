@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"dinosaur/internal/auth"
@@ -83,14 +84,27 @@ func (s *Server) checkOrigin(next http.Handler) http.Handler {
 }
 func (s *Server) require(admin bool, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie(cookieName)
-		if err != nil || len(cookie.Value) != 43 {
+		cookie, cookieErr := r.Cookie(cookieName)
+		token, kind := "", "browser"
+		authorization := r.Header.Get("Authorization")
+		if authorization != "" {
+			if cookieErr == nil || len(r.Header.Values("Authorization")) != 1 || !strings.HasPrefix(authorization, "Bearer ") {
+				fail(w, 401, "unauthorized", "ambiguous or invalid authentication")
+				return
+			}
+			token, kind = strings.TrimPrefix(authorization, "Bearer "), "device"
+		} else if cookieErr == nil {
+			token = cookie.Value
+		}
+		if len(token) != 43 {
 			fail(w, 401, "unauthorized", "authentication required")
 			return
 		}
-		u, err := s.store.SessionUser(r.Context(), auth.TokenHash(cookie.Value))
+		u, err := s.store.SessionUserKind(r.Context(), auth.TokenHash(token), kind)
 		if errors.Is(err, sql.ErrNoRows) {
-			s.clearCookie(w)
+			if kind == "browser" {
+				s.clearCookie(w)
+			}
 			fail(w, 401, "unauthorized", "session expired or revoked")
 			return
 		}
@@ -102,11 +116,11 @@ func (s *Server) require(admin bool, next http.Handler) http.Handler {
 			fail(w, 403, "forbidden", "administrator permission required")
 			return
 		}
-		if !safeMethod(r.Method) && !auth.Equal(r.Header.Get("X-CSRF-Token"), auth.CSRFToken(cookie.Value)) {
+		if kind == "browser" && !safeMethod(r.Method) && !auth.Equal(r.Header.Get("X-CSRF-Token"), auth.CSRFToken(token)) {
 			fail(w, 403, "invalid_csrf", "valid X-CSRF-Token header required")
 			return
 		}
-		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), identityKey{}, identity{user: u, token: cookie.Value})))
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), identityKey{}, identity{user: u, token: token, device: kind == "device"})))
 	})
 }
 func current(r *http.Request) identity { return r.Context().Value(identityKey{}).(identity) }

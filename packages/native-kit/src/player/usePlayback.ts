@@ -42,6 +42,7 @@ export function usePlayback(
       player.addListener('sourceLoad', () => {
         if (started.current) return;
         player.currentTime = info.plan.mode === 'direct' ? start : 0;
+        player.subtitleTrack = null;
         started.current = true;
         player.play();
       }),

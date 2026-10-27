@@ -65,9 +65,10 @@ export class Client extends Transport {
   recent() {
     return this.request<{ items: Movie[] }>('/api/playback/continue');
   }
-  playback(id: number, mode = 'original', start = 0, audio?: number) {
+  playback(id: number, mode = 'original', start = 0, audio?: number, subtitle?: number) {
     const query = new URLSearchParams({ mode, start: String(Math.max(0, start)) });
     if (audio !== undefined) query.set('audio', String(audio));
+    if (subtitle !== undefined) query.set('subtitle', String(subtitle));
     return this.request<PlaybackInfo>(`/api/playback/${id}?${query}`);
   }
   progress(id: number, position: number, watched?: boolean) {

@@ -1,11 +1,12 @@
 import type { PlaybackEngine } from './engine';
-import { clearSubtitles } from './subtitles';
+import { clearSubtitles, refreshSubtitle } from './subtitles';
 
 export function bindEvents(engine: PlaybackEngine) {
   const { video, art, callbacks } = engine;
   const bind = (event: string, handler: () => void) => art.events.proxy(video, event, handler);
   bind('timeupdate', () => {
     if (engine.ready && !engine.loading) engine.savedPosition = engine.position();
+    refreshSubtitle(engine);
   });
   bind('playing', () => {
     clearTimeout(engine.pauseTimer);

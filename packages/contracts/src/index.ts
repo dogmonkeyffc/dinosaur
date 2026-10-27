@@ -83,9 +83,16 @@ export interface SeriesDetail {
 export interface PlaybackInfo {
   item: Movie;
   next_episode?: Movie;
-  plan: { mode: 'direct' | 'remux' | 'transcode'; audio: number; start: number };
+  plan: { mode: 'direct' | 'remux' | 'transcode'; audio: number; start: number; subtitle?: number };
   stream_url: string;
   resume_position: number;
   audio_tracks: Track[];
-  subtitles: { id: number; label: string }[];
+  subtitles: {
+    id: number;
+    label: string;
+    kind?: 'embedded' | 'external';
+    delivery?: 'text' | 'burn';
+    language?: string;
+    codec?: string;
+  }[];
 }

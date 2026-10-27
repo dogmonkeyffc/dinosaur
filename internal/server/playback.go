@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
-	"strconv"
 	"time"
 
 	"dinosaur/internal/media"
@@ -49,7 +48,7 @@ func (s *Server) playbackInfo(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, map[string]any{
 		"item": source.Item, "next_episode": next, "plan": plan, "stream_url": streamURL(source.Item.ID, plan, r.URL.Query().Get("mode") == "compatible"),
 		"progress": progress, "resume_position": progress.ResumePosition(), "audio_tracks": audio,
-		"subtitles": streaming.Subtitles(source.Root, source.Item.RelativePath),
+		"subtitles": streaming.Subtitles(source.Root, source.Item.RelativePath, source.Item.Tracks...),
 	})
 }
 func (s *Server) savePlaybackProgress(w http.ResponseWriter, r *http.Request) {
@@ -111,25 +110,6 @@ func (s *Server) continueWatching(w http.ResponseWriter, r *http.Request) {
 		setPosterURL(&items[i])
 	}
 	writeJSON(w, 200, map[string]any{"items": items})
-}
-func (s *Server) playbackSubtitle(w http.ResponseWriter, r *http.Request) {
-	source, ok := s.playbackSource(w, r)
-	if !ok {
-		return
-	}
-	id, err := strconv.Atoi(r.PathValue("subtitle"))
-	subtitles := streaming.Subtitles(source.Root, source.Item.RelativePath)
-	if err != nil || id < 0 || id >= len(subtitles) {
-		fail(w, 404, "not_found", "subtitle not found")
-		return
-	}
-	data, err := streaming.ReadSubtitle(source.Root, subtitles[id].RelativePath)
-	if err != nil {
-		fail(w, 422, "subtitle_unavailable", "subtitle must be UTF-8 WebVTT or SRT under 2 MiB")
-		return
-	}
-	w.Header().Set("Content-Type", "text/vtt; charset=utf-8")
-	_, _ = w.Write(data)
 }
 func (s *Server) playbackError(w http.ResponseWriter, err error) {
 	if errors.Is(err, sql.ErrNoRows) {

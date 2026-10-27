@@ -43,6 +43,7 @@ type Server struct {
 	handler    http.Handler
 	scanner    *scanner.Manager
 	transcoder *streaming.Transcoder
+	subtitles  *streaming.SubtitleExtractor
 	tmdb       *tmdb.Client
 	scraper    *scraping.Manager
 	tvScraper  *scraping.Manager
@@ -70,6 +71,7 @@ func New(c config.Config, db *store.Store, logger *slog.Logger) (*Server, error)
 	}
 	s.scanner = scanner.New(db, c, logger)
 	s.transcoder = streaming.New(c.FFmpegPath)
+	s.subtitles = streaming.NewSubtitleExtractor(c.FFmpegPath)
 	s.tmdb = tmdb.New()
 	s.scraper = scraping.New(db, s.tmdb, c.DataDir)
 	s.tvScraper = scraping.NewTelevision(store.TelevisionRepository{Store: db}, tmdb.Television{Client: s.tmdb}, c.DataDir)

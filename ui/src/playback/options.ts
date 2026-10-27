@@ -43,7 +43,7 @@ export function settingsControls(engine: PlaybackEngine) {
       })),
     ),
     control(engine, 'subtitle', '字幕', 20, [
-      { value: '', html: info.subtitles.length ? '关闭字幕' : '无外挂字幕' },
+      { value: '', html: info.subtitles.length ? '关闭字幕' : '无字幕' },
       ...info.subtitles.map((track) => ({ value: String(track.id), html: escapeHTML(track.label) })),
     ]),
     control(engine, 'mode', '播放方式', 30, [
@@ -80,7 +80,7 @@ function control(engine: PlaybackEngine, key: Key, label: string, index: number,
       if (key === 'rate') {
         engine.rate = Number(item.value);
         engine.art.playbackRate = engine.rate;
-      } else if (key === 'subtitle') engine.selectSubtitle(item.value);
+      } else if (key === 'subtitle') await engine.selectSubtitle(item.value);
       else await engine.changeSource({ [key]: key === 'audio' ? Number(item.value) : item.value });
       if (element.isConnected && !engine.disposed) {
         syncOptions(engine);

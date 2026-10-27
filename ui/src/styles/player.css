@@ -19,7 +19,7 @@
 #player-video::cue {
   color: white;
   background: #000b;
-  font-size: 1.2em;
+  font-size: clamp(16px, 2vw, 26px);
 }
 @media (max-width: 720px) {
   #player-art .art-control-back-ten,

@@ -18,6 +18,8 @@ export function Player({
   tv?: boolean;
 }) {
   const [currentID, setCurrentID] = useState(id);
+  const [subtitle, setSubtitle] = useState<number>();
+  const [burnID, setBurnID] = useState<number>();
   const [mode, setMode] = useState('original');
   const [target, setTarget] = useState<number>();
   const [source, setSource] = useState<{ info: PlaybackInfo; start: number }>();
@@ -27,7 +29,7 @@ export function Player({
     setSource(undefined);
     setError('');
     client
-      .playback(currentID, mode, target || 0)
+      .playback(currentID, mode, target || 0, undefined, burnID)
       .then((info) => {
         if (active) setSource({ info, start: target ?? info.resume_position });
       })
@@ -37,7 +39,7 @@ export function Player({
     return () => {
       active = false;
     };
-  }, [client, currentID, mode, target]);
+  }, [client, currentID, mode, target, burnID]);
   if (!source)
     return (
       <View style={styles.centered}>
@@ -53,16 +55,28 @@ export function Player({
       info={source.info}
       start={source.start}
       tv={tv}
+      track={subtitle}
+      selectSubtitle={(id, position) => {
+        const selected = source.info.subtitles.find((value) => value.id === id);
+        setSubtitle(id);
+        if (burnID !== undefined || selected?.delivery === 'burn') {
+          setSource(undefined);
+          setTarget(position);
+          setBurnID(selected?.delivery === 'burn' ? id : undefined);
+        }
+      }}
       close={close}
       restart={(position, compatible) => {
         setSource(undefined);
-        setMode(compatible ? 'compatible' : 'original');
+        if (burnID === undefined) setMode(compatible ? 'compatible' : 'original');
         setTarget(position);
       }}
       next={() => {
         if (source.info.next_episode) {
           setSource(undefined);
           setMode('original');
+          setSubtitle(undefined);
+          setBurnID(undefined);
           setTarget(undefined);
           setCurrentID(source.info.next_episode.id);
         }

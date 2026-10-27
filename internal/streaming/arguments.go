@@ -15,17 +15,25 @@ func Arguments(path string, plan playback.Plan) []string {
 		// allowing the MP4 header to be written before the delayed first audio packet.
 		args = append(args, "-threads", "1", "-ss", start, "-protocol_whitelist", "file,pipe", "-i", path)
 	}
-	args = append(args, "-map", "0:V:0")
+	if plan.Subtitle != nil {
+		graph := "[0:V:0]scale=w='min(1280,iw)':h=-2[base];[0:" + strconv.Itoa(*plan.Subtitle) + "][base]scale2ref[caption][video];[video][caption]overlay=eof_action=pass:shortest=0[v]"
+		args = append(args, "-filter_complex_threads", "1", "-filter_complex", graph, "-map", "[v]")
+	} else {
+		args = append(args, "-map", "0:V:0")
+	}
 	if plan.Audio >= 0 {
 		args = append(args, "-map", "1:"+strconv.Itoa(plan.Audio), "-c:a", "aac", "-ac", "2", "-b:a", "192k", "-af", "aresample=async=1:first_pts=0")
 	} else {
 		args = append(args, "-an")
 	}
 	args = append(args, "-sn", "-dn", "-map_metadata", "-1", "-map_chapters", "-1", "-filter_threads", "1")
-	if plan.Mode == "remux" {
+	if plan.Mode == "remux" && plan.Subtitle == nil {
 		args = append(args, "-c:v", "copy")
 	} else {
-		args = append(args, "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-pix_fmt", "yuv420p", "-vf", "scale=w='min(1280,iw)':h=-2", "-threads", "2", "-g", "48", "-keyint_min", "48", "-sc_threshold", "0")
+		args = append(args, "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-pix_fmt", "yuv420p", "-threads", "2", "-g", "48", "-keyint_min", "48", "-sc_threshold", "0")
+	}
+	if plan.Mode != "remux" && plan.Subtitle == nil {
+		args = append(args, "-vf", "scale=w='min(1280,iw)':h=-2")
 	}
 	return append(args, "-avoid_negative_ts", "make_zero", "-f", "mp4", "-movflags", "frag_keyframe+empty_moov+default_base_moof", "-frag_duration", "2000000", "pipe:1")
 }

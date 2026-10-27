@@ -8,21 +8,26 @@ export function Subtitles({
   id,
   track,
   time,
+  embedded = false,
   failed,
 }: {
   client: Client;
   id: number;
   track?: number;
   time: number;
+  embedded?: boolean;
   failed: (error: string) => void;
 }) {
   const [cues, setCues] = useState<Cue[]>([]);
+  const window = embedded ? Math.floor(time / 60) : 0;
+  useEffect(() => {
+    setCues([]);
+  }, [client, id, track]);
   useEffect(() => {
     const controller = new AbortController();
-    setCues([]);
     if (track === undefined) return;
     client
-      .text(`/api/playback/${id}/subtitles/${track}`, controller.signal)
+      .text(`/api/playback/${id}/subtitles/${track}?start=${window * 60}`, controller.signal)
       .then((data) => {
         if (!controller.signal.aborted) setCues(parseVTT(data));
       })
@@ -30,7 +35,7 @@ export function Subtitles({
         if (!controller.signal.aborted) failed('字幕加载失败。');
       });
     return () => controller.abort();
-  }, [client, id, track]);
+  }, [client, id, track, window]);
   const text = activeCue(cues, time);
   return text ? (
     <View

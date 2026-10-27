@@ -69,6 +69,13 @@ func requestPlan(r *http.Request, item media.Item) (playback.Plan, error) {
 	if err == nil && mode == "original" {
 		plan.Mode = "direct"
 	}
+	if err == nil && r.URL.Query().Has("subtitle") {
+		id, parseErr := strconv.Atoi(r.URL.Query().Get("subtitle"))
+		if parseErr != nil {
+			return plan, playback.ErrSubtitle
+		}
+		return playback.WithSubtitle(plan, id, item.Tracks)
+	}
 	return plan, err
 }
 func streamURL(id int64, plan playback.Plan, compatible bool) string {
@@ -77,6 +84,9 @@ func streamURL(id int64, plan playback.Plan, compatible bool) string {
 		query.Set("mode", "original")
 	} else if compatible {
 		query.Set("mode", "compatible")
+	}
+	if plan.Subtitle != nil {
+		query.Set("subtitle", strconv.Itoa(-*plan.Subtitle-1))
 	}
 	if plan.Audio >= 0 {
 		query.Set("audio", strconv.Itoa(plan.Audio))

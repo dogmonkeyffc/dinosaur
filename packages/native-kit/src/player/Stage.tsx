@@ -17,6 +17,8 @@ export function Stage({
   restart,
   next,
   tv,
+  track,
+  selectSubtitle,
 }: {
   client: Client;
   info: PlaybackInfo;
@@ -25,9 +27,10 @@ export function Stage({
   restart: (position: number, compatible: boolean) => void;
   next: () => void;
   tv: boolean;
+  track?: number;
+  selectSubtitle: (track: number | undefined, position: number) => void;
 }) {
   const [error, setError] = useState('');
-  const [track, setTrack] = useState<number>();
   const [audio, setAudio] = useState('音轨');
   const compatible = info.plan.mode !== 'direct';
   const playback = usePlayback(
@@ -76,8 +79,12 @@ export function Stage({
   function subtitle() {
     const available = info.subtitles;
     const index = available.findIndex((value) => value.id === track);
-    setTrack(index + 1 >= available.length ? undefined : available[index + 1].id);
+    selectSubtitle(
+      index + 1 >= available.length ? undefined : available[index + 1].id,
+      playback.position.current,
+    );
   }
+  const selected = info.subtitles.find((value) => value.id === track);
   return (
     <View style={[styles.screen, { padding: tv ? 28 : 16, paddingTop: tv ? 28 : 48, gap: 14 }]}>
       <View style={styles.row}>
@@ -93,7 +100,14 @@ export function Stage({
           contentFit="contain"
           surfaceType="textureView"
         />
-        <Subtitles client={client} id={info.item.id} track={track} time={playback.time} failed={setError} />
+        <Subtitles
+          client={client}
+          id={info.item.id}
+          track={selected?.delivery === 'burn' ? undefined : track}
+          embedded={selected?.kind === 'embedded'}
+          time={playback.time}
+          failed={setError}
+        />
       </View>
       <Text style={styles.muted}>
         {clock(playback.time)} / {clock(info.item.duration)} · {compatible ? '兼容播放' : '原片播放'}

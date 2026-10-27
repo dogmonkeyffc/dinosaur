@@ -19,9 +19,10 @@ type Source struct {
 }
 
 type Plan struct {
-	Mode  string  `json:"mode"`
-	Audio int     `json:"audio"`
-	Start float64 `json:"start"`
+	Subtitle *int    `json:"subtitle,omitempty"`
+	Mode     string  `json:"mode"`
+	Audio    int     `json:"audio"`
+	Start    float64 `json:"start"`
 }
 
 // SelectPlan uses a small portable browser baseline; the client can explicitly

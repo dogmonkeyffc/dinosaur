@@ -1,4 +1,4 @@
-import { api } from '../lib/api';
+import { changeSource, selectSubtitle, type SourceSelection } from './source';
 import { message } from '../lib/errors';
 import { saveProgress } from '../lib/progress';
 import type { PlaybackInfo } from '../lib/types';
@@ -31,10 +31,11 @@ export class PlaybackEngine {
   subtitle = '';
   rate = 1;
   subtitleRevision = 0;
+  subtitleWindow = -1;
   pauseTimer?: number;
   private seekTimer?: number;
   private progressTimer: number;
-  private sourceRequest?: AbortController;
+  sourceRequest?: AbortController;
 
   constructor(
     public root: HTMLElement,
@@ -181,32 +182,12 @@ export class PlaybackEngine {
     }, 180);
   }
 
-  async changeSource(selection: { mode?: string; audio?: number } = {}) {
-    const position = this.position();
-    const mode = selection.mode ?? this.mode;
-    const audio = selection.audio ?? this.audio;
-    this.sourceRequest?.abort();
-    const request = new AbortController();
-    this.sourceRequest = request;
-    const query = new URLSearchParams({ mode });
-    if (audio >= 0) query.set('audio', String(audio));
-    try {
-      const info = await api<PlaybackInfo>(`/api/playback/${this.info.item.id}?${query}`, {
-        signal: request.signal,
-      });
-      if (this.disposed || request.signal.aborted) return;
-      this.info = info;
-      this.audio = info.plan.audio;
-      this.mode = mode;
-      this.start(position);
-    } catch (error) {
-      if (!this.disposed && !request.signal.aborted) this.callbacks.error(message(error));
-    }
+  changeSource(selection: SourceSelection = {}) {
+    return changeSource(this, selection);
   }
 
   selectSubtitle(value: string) {
-    this.subtitle = value;
-    applySubtitle(this);
+    return selectSubtitle(this, value);
   }
 
   persist(keepalive = false, ended = false) {

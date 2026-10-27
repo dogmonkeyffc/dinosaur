@@ -120,7 +120,7 @@ export function SeriesDetailPage() {
             <div className="series-seasons">
               <label>
                 选择季度
-                <Select value={season ?? ''} onChange={(event) => setSeason(Number(event.target.value))}>
+                <Select value={season ?? ''} onValueChange={(value) => setSeason(Number(value))}>
                   {data.seasons.map((item) => (
                     <option key={item.number} value={item.number}>
                       {item.number === 0 ? '特别篇' : `第 ${item.number} 季`} · {item.episodes.length} 个文件

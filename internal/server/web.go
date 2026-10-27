@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"dinosaur/internal/auth"
 	"dinosaur/web"
 )
 
@@ -22,13 +23,19 @@ func (s *Server) mountWeb(mux *http.ServeMux) error {
 		return fmt.Errorf("React assets are missing; run ./build.sh before starting Go: %w", err)
 	}
 	render := func(w http.ResponseWriter, r *http.Request) {
+		nonce, err := auth.NewToken()
+		if err != nil {
+			s.internal(w, r, err)
+			return
+		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-store")
 		// Artplayer creates a version link with the exact style "width:100%;".
-		// Permit only that attribute hash, keeping scripts and style elements local.
-		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; style-src-attr 'unsafe-hashes' 'sha256-nMxMqdZhkHxz5vAuW/PAoLvECzzsmeAxD/BNwG15HuA='; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'")
+		// Component style elements use a per-response nonce; attribute rules stay restricted.
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'nonce-"+nonce+"'; style-src-attr 'unsafe-hashes' 'sha256-nMxMqdZhkHxz5vAuW/PAoLvECzzsmeAxD/BNwG15HuA='; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'")
 		w.Header().Set("Referrer-Policy", "same-origin")
-		_, _ = w.Write(page)
+		meta := []byte(`<meta name="dinosaur-style-nonce" content="` + nonce + `"></head>`)
+		_, _ = w.Write(bytes.Replace(page, []byte("</head>"), meta, 1))
 	}
 	for _, path := range []string{"GET /{$}", "GET /login", "GET /setup", "GET /settings", "GET /settings/account", "GET /settings/metadata", "GET /settings/scraping", "GET /settings/system", "GET /movies", "GET /movies/{id}", "GET /series", "GET /series/{id}", "GET /watch/{id}"} {
 		mux.HandleFunc(path, render)

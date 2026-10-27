@@ -94,7 +94,7 @@ export function ScrapingPage() {
           <form className="scrape-admin-filters" onSubmit={(event) => event.preventDefault()}>
             <label>
               媒体库
-              <Select value={library} onChange={(event) => filter(setLibrary, event.target.value)}>
+              <Select value={library} onValueChange={(value) => filter(setLibrary, value)}>
                 <option value="">全部媒体库</option>
                 {libraries
                   .filter((item) => item.type === 'movie')
@@ -107,7 +107,7 @@ export function ScrapingPage() {
             </label>
             <label>
               识别状态
-              <Select value={status} onChange={(event) => filter(setStatus, event.target.value)}>
+              <Select value={status} onValueChange={(value) => filter(setStatus, value)}>
                 {states.map((value) => (
                   <option key={value} value={value}>
                     {value ? stateNames[value] : '全部状态'}

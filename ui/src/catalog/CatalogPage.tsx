@@ -59,7 +59,7 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
       <div className="movie-toolbar">
         <label className="library-select">
           <span className="sr-only">选择媒体库</span>
-          <Select value={library} onChange={(event) => change('library_id', event.target.value)}>
+          <Select value={library} onValueChange={(value) => change('library_id', value)}>
             <option value="">全部{tv ? '剧集' : ''}媒体库</option>
             {choices.map((item) => (
               <option key={item.id} value={item.id}>

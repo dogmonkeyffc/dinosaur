@@ -1,40 +1,37 @@
 .select-control {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   width: 100%;
   min-width: 0;
   min-height: 42px;
-  padding: 10px 46px 10px 14px;
-  appearance: none;
-  border: 1px solid #d7e0d2;
-  border-radius: 10px;
-  background-color: var(--surface);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23eff4ea'/%3E%3Cpath d='m8 10 4 4 4-4' fill='none' stroke='%235d7850' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 9px center;
-  background-size: 24px;
-  box-shadow: 0 1px 2px #25342d05;
+  padding: 10px 12px 10px 14px;
+  border: 1px solid #dce3d7;
+  border-radius: 8px;
+  background: var(--surface);
   color: var(--ink);
   font: inherit;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 450;
   line-height: 20px;
-  text-overflow: ellipsis;
+  text-align: left;
   cursor: pointer;
   transition:
-    border-color 0.18s,
-    box-shadow 0.18s;
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
-.select-control:hover:not(:disabled) {
-  border-color: #a6bb9a;
+.select-control:hover:not(:disabled),
+.select-control[data-state='open'] {
+  border-color: #a7b99b;
 }
 .select-control:focus-visible {
-  outline: 2px solid #729560;
-  outline-offset: 2px;
-  border-color: #729560;
-  box-shadow: 0 0 0 4px #72956012;
+  outline: none;
+  border-color: #819d71;
+  box-shadow: 0 0 0 2px #819d7126;
 }
 .select-control:disabled {
-  background-color: #f2f4ef;
+  background: #f2f4ef;
   color: var(--muted);
   cursor: not-allowed;
   opacity: 0.65;
@@ -42,20 +39,101 @@
 .select-control[aria-invalid='true'] {
   border-color: var(--danger);
 }
-.select-control option,
-.select-control optgroup {
+.select-value {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.select-chevron,
+.select-check {
+  display: flex;
+  flex-shrink: 0;
+  color: #74886b;
+}
+.select-chevron svg,
+.select-check svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.select-control[data-state='open'] .select-chevron {
+  transform: rotate(180deg);
+}
+.select-menu {
+  z-index: 100;
+  width: var(--radix-select-trigger-width);
+  max-width: calc(100vw - 24px);
+  max-height: min(300px, var(--radix-select-content-available-height));
+  overflow: hidden;
+  padding: 5px;
+  border: 1px solid #dfe6d9;
+  border-radius: 10px;
   background: var(--surface);
   color: var(--ink);
+  box-shadow:
+    0 8px 28px #25342d17,
+    0 2px 6px #25342d08;
+}
+.select-options {
+  width: 100%;
+}
+.select-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 32px 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 20px;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  user-select: none;
+}
+.select-option[data-state='checked'] {
+  background: #edf4e7;
+  color: #376044;
+  font-weight: 550;
+}
+.select-option[data-highlighted] {
+  outline: none;
+  background: #f0f4ec;
+}
+.select-option[data-state='checked'][data-highlighted] {
+  background: #e5efdd;
+}
+.select-option[data-disabled] {
+  color: var(--muted);
+  opacity: 0.5;
+  cursor: default;
+}
+.select-check {
+  position: absolute;
+  right: 10px;
+  color: var(--green);
+}
+.select-scroll {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  color: var(--muted);
 }
 @media (pointer: coarse) {
-  .select-control {
+  .select-control,
+  .select-option {
     min-height: 44px;
   }
 }
 @media (forced-colors: active) {
-  .select-control {
-    appearance: auto;
-    background-image: none;
-    padding-right: 14px;
+  .select-control:focus-visible,
+  .select-option[data-highlighted] {
+    outline: 2px solid Highlight;
+  }
+  .select-option[data-state='checked'] {
+    border: 1px solid Highlight;
   }
 }

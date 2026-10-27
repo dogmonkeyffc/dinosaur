@@ -55,3 +55,21 @@ func TestAssetHandlerRejectsTraversalAndDirectories(t *testing.T) {
 		status(t, w, 404)
 	}
 }
+
+func TestComponentStylesUseUniqueResponseNonce(t *testing.T) {
+	s, _ := fixture(t)
+	seen := map[string]bool{}
+	pattern := regexp.MustCompile(`<meta name="dinosaur-style-nonce" content="([A-Za-z0-9_-]{43})">`)
+	for range 2 {
+		w := request(t, s, "GET", "/series", nil, nil, nil)
+		match := pattern.FindStringSubmatch(w.Body.String())
+		if len(match) != 2 || seen[match[1]] {
+			t.Fatal("each page must carry a fresh style nonce")
+		}
+		seen[match[1]] = true
+		policy := w.Header().Get("Content-Security-Policy")
+		if !strings.Contains(policy, "style-src 'self' 'nonce-"+match[1]+"'") || strings.Contains(policy, "'unsafe-inline'") {
+			t.Fatal("component styles must use the nonce without allowing arbitrary inline styles")
+		}
+	}
+}

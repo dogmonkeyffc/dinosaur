@@ -36,8 +36,8 @@ export function JobsView() {
           任务状态
           <Select
             value={status}
-            onChange={(event) => {
-              setStatus(event.target.value);
+            onValueChange={(value) => {
+              setStatus(value);
               setPage(1);
             }}
           >

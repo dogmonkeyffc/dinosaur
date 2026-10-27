@@ -59,7 +59,7 @@ export function MetadataPage() {
           <fieldset disabled={!resource.data || resource.loading || action.busy}>
             <label>
               凭据类型
-              <Select value={type} onChange={(event) => setType(event.target.value)}>
+              <Select value={type} onValueChange={(value) => setType(value)}>
                 <option value="bearer">API Read Access Token（推荐）</option>
                 <option value="api_key">API Key</option>
               </Select>
@@ -81,7 +81,7 @@ export function MetadataPage() {
             </label>
             <label>
               首选资料语言
-              <Select value={language} onChange={(event) => setLanguage(event.target.value)}>
+              <Select value={language} onValueChange={(value) => setLanguage(value)}>
                 <option value="zh-CN">简体中文</option>
                 <option value="zh-TW">繁体中文（台湾）</option>
                 <option value="zh-HK">繁体中文（香港）</option>

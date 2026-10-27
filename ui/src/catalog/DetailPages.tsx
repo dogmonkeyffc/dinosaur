@@ -103,6 +103,19 @@ export function SeriesDetailPage() {
               info={item.metadata}
               reload={reload}
             />
+            {data.folders?.length > 0 && (
+              <div className="series-folders">
+                <h2>所在文件夹</h2>
+                <ul>
+                  {data.folders.map((folder) => (
+                    <li key={folder}>
+                      <span className="muted">{item.library_name}</span>
+                      <code>{folder === '.' ? '媒体库根目录' : folder}</code>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <div className="series-seasons">
               <label>
                 选择季度

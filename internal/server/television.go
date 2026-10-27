@@ -52,7 +52,7 @@ func (s *Server) seriesDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	setSeriesPoster(&item)
-	result := television.Detail{Series: item, Seasons: []television.Season{}}
+	result := television.Detail{Series: item, Folders: television.EpisodeFolders(episodes), Seasons: []television.Season{}}
 	for i := range episodes {
 		setPosterURL(&episodes[i])
 		if episodes[i].Watched {

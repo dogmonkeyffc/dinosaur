@@ -84,6 +84,9 @@ func TestSeriesBrowsingPlaybackAndPermissions(t *testing.T) {
 	if err := json.Unmarshal(detail.Body.Bytes(), &series); err != nil || len(series.Seasons) != 2 || series.Resume.Position != 35 {
 		t.Fatal("episode progress not reflected in detail")
 	}
+	if len(series.Folders) != 1 || series.Folders[0] != "Example (2020)" || strings.Contains(detail.Body.String(), root) {
+		t.Fatal("detail must return distinct library-relative folders without leaking the server root")
+	}
 	other := request(t, s, "GET", "/api/series/1", nil, &admin, nil)
 	status(t, other, 200)
 	if strings.Contains(other.Body.String(), `"position":35`) {

@@ -37,6 +37,7 @@ type Season struct {
 
 type Detail struct {
 	Series  Series      `json:"series"`
+	Folders []string    `json:"folders"`
 	Seasons []Season    `json:"seasons"`
 	Resume  *media.Item `json:"resume,omitempty"`
 }

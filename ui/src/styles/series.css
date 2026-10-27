@@ -9,6 +9,34 @@
 .series-back .icon {
   transform: rotate(180deg);
 }
+.series-folders {
+  margin-top: 24px;
+}
+.series-folders h2 {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+.series-folders ul {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+  list-style: none;
+}
+.series-folders li {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 12px;
+}
+.series-folders code {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  user-select: text;
+}
 .series-seasons {
   margin-top: 30px;
 }

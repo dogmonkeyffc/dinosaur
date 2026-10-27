@@ -84,6 +84,7 @@ export interface Series {
 }
 export interface SeriesDetail {
   series: Series;
+  folders: string[];
   seasons: { number: number; episodes: Movie[] }[];
   resume?: Movie;
 }

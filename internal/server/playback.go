@@ -22,7 +22,8 @@ func (s *Server) playbackInfo(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	plan, err := requestPlan(r, source.Item)
+	subtitles := streaming.Subtitles(source.Root, source.Item.RelativePath, source.Item.Tracks...)
+	plan, selected, err := playbackPreference(r, source.Item, subtitles)
 	if err != nil {
 		fail(w, 400, "invalid_playback", err.Error())
 		return
@@ -48,7 +49,7 @@ func (s *Server) playbackInfo(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, map[string]any{
 		"item": source.Item, "next_episode": next, "plan": plan, "stream_url": streamURL(source.Item.ID, plan, r.URL.Query().Get("mode") == "compatible"),
 		"progress": progress, "resume_position": progress.ResumePosition(), "audio_tracks": audio,
-		"subtitles": streaming.Subtitles(source.Root, source.Item.RelativePath, source.Item.Tracks...),
+		"subtitles": subtitles, "selected_subtitle": selected,
 	})
 }
 func (s *Server) savePlaybackProgress(w http.ResponseWriter, r *http.Request) {

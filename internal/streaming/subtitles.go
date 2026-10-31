@@ -16,6 +16,7 @@ var ErrSubtitle = errors.New("subtitle unavailable or unsupported")
 type Subtitle struct {
 	ID           int    `json:"id"`
 	Label        string `json:"label"`
+	Title        string `json:"title,omitempty"`
 	Kind         string `json:"kind"`
 	Delivery     string `json:"delivery"`
 	Codec        string `json:"codec,omitempty"`
@@ -57,7 +58,7 @@ func Subtitles(root, video string, tracks ...media.Track) []Subtitle {
 		if label == "" {
 			label = "外挂字幕"
 		}
-		result = append(result, Subtitle{ID: externalID, Label: label, Kind: "external", Delivery: "text", RelativePath: relative})
+		result = append(result, Subtitle{ID: externalID, Label: label, Title: strings.Trim(name[len(stem):], ". "), Kind: "external", Delivery: "text", RelativePath: relative})
 		externalID++
 	}
 	return result

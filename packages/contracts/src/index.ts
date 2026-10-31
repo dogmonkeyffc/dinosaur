@@ -81,6 +81,7 @@ export interface SeriesDetail {
   resume?: Movie;
 }
 export interface PlaybackInfo {
+  selected_subtitle?: number | null;
   item: Movie;
   next_episode?: Movie;
   plan: { mode: 'direct' | 'remux' | 'transcode'; audio: number; start: number; subtitle?: number };

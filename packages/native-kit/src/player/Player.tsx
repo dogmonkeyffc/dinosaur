@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import type { Client } from '@dinosaur/client';
 import type { PlaybackInfo } from '@dinosaur/contracts';
@@ -18,8 +18,9 @@ export function Player({
   tv?: boolean;
 }) {
   const [currentID, setCurrentID] = useState(id);
-  const [subtitle, setSubtitle] = useState<number>();
-  const [burnID, setBurnID] = useState<number>();
+  const [subtitle, setSubtitle] = useState<number | null>();
+  const burnID = useRef<number | undefined>(undefined);
+  const [revision, setRevision] = useState(0);
   const [mode, setMode] = useState('original');
   const [target, setTarget] = useState<number>();
   const [source, setSource] = useState<{ info: PlaybackInfo; start: number }>();
@@ -29,9 +30,25 @@ export function Player({
     setSource(undefined);
     setError('');
     client
-      .playback(currentID, mode, target || 0, undefined, burnID)
+      .playback(
+        currentID,
+        mode,
+        target || 0,
+        undefined,
+        burnID.current ?? (subtitle === undefined ? 'auto' : undefined),
+      )
       .then((info) => {
-        if (active) setSource({ info, start: target ?? info.resume_position });
+        if (active) {
+          if (subtitle === undefined) {
+            const selected = info.selected_subtitle ?? null;
+            setSubtitle(selected);
+            burnID.current =
+              info.subtitles.find((track) => track.id === selected)?.delivery === 'burn'
+                ? (selected ?? undefined)
+                : undefined;
+          }
+          setSource({ info, start: target ?? info.resume_position });
+        }
       })
       .catch((reason) => {
         if (active) setError(reason instanceof Error ? reason.message : '无法开始播放。');
@@ -39,7 +56,7 @@ export function Player({
     return () => {
       active = false;
     };
-  }, [client, currentID, mode, target, burnID]);
+  }, [client, currentID, mode, target, revision]);
   if (!source)
     return (
       <View style={styles.centered}>
@@ -55,20 +72,21 @@ export function Player({
       info={source.info}
       start={source.start}
       tv={tv}
-      track={subtitle}
+      track={subtitle ?? undefined}
       selectSubtitle={(id, position) => {
         const selected = source.info.subtitles.find((value) => value.id === id);
-        setSubtitle(id);
-        if (burnID !== undefined || selected?.delivery === 'burn') {
+        setSubtitle(id ?? null);
+        if (burnID.current !== undefined || selected?.delivery === 'burn') {
           setSource(undefined);
           setTarget(position);
-          setBurnID(selected?.delivery === 'burn' ? id : undefined);
+          burnID.current = selected?.delivery === 'burn' ? id : undefined;
+          setRevision((value) => value + 1);
         }
       }}
       close={close}
       restart={(position, compatible) => {
         setSource(undefined);
-        if (burnID === undefined) setMode(compatible ? 'compatible' : 'original');
+        if (burnID.current === undefined) setMode(compatible ? 'compatible' : 'original');
         setTarget(position);
       }}
       next={() => {
@@ -76,7 +94,7 @@ export function Player({
           setSource(undefined);
           setMode('original');
           setSubtitle(undefined);
-          setBurnID(undefined);
+          burnID.current = undefined;
           setTarget(undefined);
           setCurrentID(source.info.next_episode.id);
         }

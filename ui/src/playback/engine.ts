@@ -44,6 +44,7 @@ export class PlaybackEngine {
     beginning: boolean,
   ) {
     this.audio = info.plan.audio;
+    this.subtitle = info.selected_subtitle == null ? '' : String(info.selected_subtitle);
     const Artplayer = window.Artplayer;
     Artplayer.LOG_VERSION = false;
     Artplayer.CONTEXTMENU = false;

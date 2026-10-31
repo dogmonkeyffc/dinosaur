@@ -17,7 +17,7 @@ export function PlayerPage() {
   const engine = useRef<PlaybackEngine | null>(null);
   const [status, setStatus] = useState('正在准备…');
   const [error, setError] = useState('');
-  const resource = useResource<PlaybackInfo>(`/api/playback/${id}`);
+  const resource = useResource<PlaybackInfo>(`/api/playback/${id}?subtitle=auto`);
   const info = resource.data;
   const beginning = params.get('beginning') === '1';
   useEffect(() => {

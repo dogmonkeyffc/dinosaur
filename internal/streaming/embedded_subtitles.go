@@ -35,7 +35,7 @@ func embeddedSubtitles(tracks []media.Track) []Subtitle {
 		if delivery == "burn" {
 			label += "（转码）"
 		}
-		result = append(result, Subtitle{ID: -track.Index - 1, Label: label, Kind: "embedded", Delivery: delivery, Codec: track.Codec, Language: track.Language})
+		result = append(result, Subtitle{ID: -track.Index - 1, Label: label, Title: track.Title, Kind: "embedded", Delivery: delivery, Codec: track.Codec, Language: track.Language})
 	}
 	return result
 }

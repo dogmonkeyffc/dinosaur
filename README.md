@@ -97,7 +97,7 @@ curl -sS -X POST -b /tmp/dinosaur-cookies.txt \
 | GET | `/api/media` | 电影列表；参数 `q`、`library_id`、`page`（默认 1）、`page_size`（默认 24，最多 100） |
 | GET | `/api/media/{id}` | 电影详情，包含音轨、字幕轨与受鉴权保护的封面 URL |
 | GET | `/api/media/{id}/poster` | 受登录保护的 JPEG 封面；不可用时返回 404 |
-| GET | `/api/playback/{id}` | 播放信息：自动播放方案、视频地址、用户进度、音轨、内嵌/外挂字幕；可选 `audio`、`mode`、图片字幕 `subtitle` |
+| GET | `/api/playback/{id}` | 播放信息：自动播放方案、视频地址、用户进度、音轨、内嵌/外挂字幕；可选 `audio`、`mode`、图片字幕 `subtitle`；`subtitle=auto` 返回自动选择结果 `selected_subtitle` |
 | GET / HEAD | `/api/playback/{id}/stream` | 受鉴权的视频流；原文件支持 Range；兼容模式支持按 `start` 秒重新取流 |
 | PUT | `/api/playback/{id}/progress` | 保存自己的进度；请求体 `position`（秒）或 `watched`（布尔） |
 | GET | `/api/playback/continue` | 当前用户最近未看完的影片，最多 12 部 |
@@ -200,7 +200,7 @@ Linux 原生部署从挂载表及文件系统容量接口读取，不遍历媒�
 
 播放期间约每 10 秒保存一次进度，暂停、关闭和页面离开时也会尝试保存。进度与已看状态按用户隔离，重启后保留；观看达到影片 90% 时自动标记已看。手动标记未看会重置进度。
 
-外挂字幕支持与视频同名的 `.vtt`、`.srt`，以及 `影片名.en.srt` 这样的语言后缀；仅读取媒体库目录内、UTF-8 编码、不超过 2 MiB 的文件。视频拖动后字幕时间轴会跟随偏移。内嵌 SRT/SubRip、ASS/SSA、WebVTT、MOV text 等文字字幕会按播放位置分段提取为 WebVTT，支持跳转与持续播放；ASS 的排版、字体与特效不保留。PGS、DVD、DVB 图片字幕在选择后通过兼容转码合成进视频，沿用最高 720p 和最多两个兼容播放任务的限制；关闭图片字幕后恢复原播放方式。字幕菜单标注来源、语言和格式，默认关闭，由用户选择。
+外挂字幕支持与视频同名的 `.vtt`、`.srt`，以及 `影片名.en.srt` 这样的语言后缀；仅读取媒体库目录内、UTF-8 编码、不超过 2 MiB 的文件。视频拖动后字幕时间轴会跟随偏移。内嵌 SRT/SubRip、ASS/SSA、WebVTT、MOV text 等文字字幕会按播放位置分段提取为 WebVTT，支持跳转与持续播放；ASS 的排版、字体与特效不保留。PGS、DVD、DVB 图片字幕在选择后通过兼容转码合成进视频，沿用最高 720p 和最多两个兼容播放任务的限制；关闭图片字幕后恢复原播放方式。字幕菜单标注来源、语言和格式。开始播放时自动选择中文，其次英语；语言标记优先，未标明时检查字幕轨标题或外挂文件名的语言后缀（中文、CHS、CHT、zh-CN 等），不根据影片名称判断。中文轨同等条件优先完整文字字幕和简体字幕，只有中文图片字幕时自动进入兼容转码；均无可靠语言标识时保持关闭。手动选择或关闭后，跳转、音轨与播放方式切换不会重新套用自动选择。
 
 ## Artplayer 与 React 评估
 

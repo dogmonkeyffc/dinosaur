@@ -2,8 +2,6 @@
 
 React + TypeScript + Vite，页面直接调用同源 Go API。生产运行只有一个 Go 进程。
 
-视觉规范见 [DESIGN.md](./DESIGN.md)，全局主题入口为 `src/styles/sketch.css`。
-
 ## 统一构建
 
 ```sh

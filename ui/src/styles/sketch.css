@@ -1,6 +1,0 @@
-/* Shared visual language; page layout and behavior stay in their own modules. */
-@import url('./sketch-tokens.css');
-@import url('./sketch-controls.css');
-@import url('./sketch-shell.css');
-@import url('./sketch-surfaces.css');
-@import url('./sketch-catalog.css');

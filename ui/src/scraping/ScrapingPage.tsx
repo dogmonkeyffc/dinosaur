@@ -34,13 +34,11 @@ export function ScrapingPage() {
           媒体库
           <Select value={library} onValueChange={(value) => filter(setLibrary, value)}>
             <option value="">全部媒体库</option>
-            {libraries
-              .filter((item) => item.type === 'movie')
-              .map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
+            {libraries.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
+              </option>
+            ))}
           </Select>
         </label>
         <label>
@@ -54,7 +52,7 @@ export function ScrapingPage() {
           </Select>
         </label>
         <label>
-          搜索影片
+          搜索媒体
           <input
             type="search"
             maxLength={128}
@@ -65,11 +63,11 @@ export function ScrapingPage() {
         </label>
       </form>
       {resource.loading && !resource.data && <Loading />}
-      <div className="scrape-table-wrap" role="region" aria-label="影片识别结果" tabIndex={0}>
+      <div className="scrape-table-wrap" role="region" aria-label="媒体识别结果" tabIndex={0}>
         <table className="scrape-table">
           <thead>
             <tr>
-              <th>影片 / 文件</th>
+              <th>媒体 / 文件</th>
               <th>媒体库</th>
               <th>状态 / 提示</th>
               <th>资料来源 / 语言</th>
@@ -79,7 +77,7 @@ export function ScrapingPage() {
           </thead>
           <tbody>
             {resource.data?.items.map((item) => (
-              <tr key={item.media_id}>
+              <tr key={item.series_id ? `tv:${item.series_id}` : `movie:${item.media_id}`}>
                 <td>
                   <strong>{item.title}</strong>
                   <small>{item.filename}</small>
@@ -91,7 +89,7 @@ export function ScrapingPage() {
                   <RecordCandidates item={item} reload={resource.reload} />
                 </td>
                 <td>
-                  <SourceReference item={item} />
+                  <SourceReference item={item} kind={item.series_id ? 'tv' : 'movie'} />
                   <small>{item.language}</small>
                 </td>
                 <td>{time(item.updated_at)}</td>
@@ -104,7 +102,7 @@ export function ScrapingPage() {
         </table>
       </div>
       {!resource.loading && resource.data && !resource.data.total && (
-        <p className="scrape-admin-empty">没有符合筛选条件的影片。</p>
+        <p className="scrape-admin-empty">没有符合筛选条件的媒体。</p>
       )}
       <Pagination page={page} total={resource.data?.total || 0} size={20} onChange={setPage} />
     </section>

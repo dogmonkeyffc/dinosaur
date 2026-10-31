@@ -45,7 +45,9 @@ export function RecordActions({ item, reload }: { item: ScrapeRecord; reload: ()
 export function RecordCandidates({ item, reload }: { item: ScrapeRecord; reload: () => void }) {
   const ambiguous = item.message?.split(',').includes('ambiguous');
   const resource = useResource<{ candidates: Candidate[] }>(
-    ambiguous && !item.candidates?.length ? `/api/admin/media/${item.media_id}/metadata/candidates` : null,
+    ambiguous && !item.candidates?.length
+      ? `/api/admin/${item.series_id ? 'series' : 'media'}/${item.series_id || item.media_id}/metadata/candidates`
+      : null,
   );
   const match = useManualMatch(item.series_id ? 'tv' : 'movie', item.series_id || item.media_id, reload);
   const candidates = resource.data?.candidates || item.candidates || [];

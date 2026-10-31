@@ -2,6 +2,7 @@ package metadata
 
 // Record is an administrator's view of current identification results.
 type Record struct {
+	SeriesID    int64       `json:"series_id,omitempty"`
 	Candidates  []Candidate `json:"candidates,omitempty"`
 	MediaID     int64       `json:"media_id"`
 	LibraryID   int64       `json:"library_id"`

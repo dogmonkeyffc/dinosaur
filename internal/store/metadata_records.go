@@ -9,20 +9,21 @@ import (
 	"dinosaur/internal/metadata"
 )
 
-const recordStatus = `CASE WHEN (md.tmdb_id>0 OR md.bangumi_id>0) THEN 'matched' WHEN md.status='failed' THEN 'failed' WHEN md.status='needs_review' THEN 'needs_review' ELSE 'unmatched' END`
-
 func (s *Store) MetadataRecords(ctx context.Context, filter metadata.ReportFilter) (metadata.RecordPage, error) {
 	page := metadata.RecordPage{Items: []metadata.Record{}, Summary: map[string]int{}, Page: filter.Page, PageSize: filter.PageSize}
-	where := ` WHERE m.missing=0 AND l.type='movie'`
+	where := ` WHERE 1=1`
 	args := []any{}
 	if filter.LibraryID > 0 {
-		where += ` AND m.library_id=?`
+		where += ` AND r.library_id=?`
 		args = append(args, filter.LibraryID)
 	}
 	if filter.Query != "" {
-		where += ` AND (` + displayTitle + ` LIKE ? ESCAPE '\' OR m.relative_path LIKE ? ESCAPE '\' OR md.original_title LIKE ? ESCAPE '\' OR md.aliases LIKE ? ESCAPE '\')`
+		where += ` AND (r.title LIKE ? ESCAPE '\' OR r.local_title LIKE ? ESCAPE '\'
+   OR r.original_title LIKE ? ESCAPE '\' OR r.aliases LIKE ? ESCAPE '\' OR r.filename LIKE ? ESCAPE '\'
+   OR (r.media_type='tv' AND EXISTS(SELECT 1 FROM tv_episodes e JOIN media_items m ON m.id=e.media_id
+    WHERE e.series_id=r.series_id AND m.missing=0 AND m.relative_path LIKE ? ESCAPE '\')))`
 		query := "%" + strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`).Replace(filter.Query) + "%"
-		for range 4 {
+		for range 6 {
 			args = append(args, query)
 		}
 	}
@@ -31,7 +32,7 @@ func (s *Store) MetadataRecords(ctx context.Context, filter metadata.ReportFilte
 		return page, err
 	}
 	defer tx.Rollback()
-	rows, err := tx.QueryContext(ctx, `SELECT `+recordStatus+`,count(*),sum(CASE WHEN (md.tmdb_id>0 OR md.bangumi_id>0) AND md.message<>'' THEN 1 ELSE 0 END)`+mediaFrom+where+` GROUP BY 1`, args...)
+	rows, err := tx.QueryContext(ctx, metadataRecordSources+`SELECT `+recordStatus+`,count(*),sum(CASE WHEN (tmdb_id>0 OR bangumi_id>0) AND message<>'' THEN 1 ELSE 0 END)`+` FROM sources r`+where+` GROUP BY 1`, args...)
 	if err != nil {
 		return page, err
 	}
@@ -53,7 +54,7 @@ func (s *Store) MetadataRecords(ctx context.Context, filter metadata.ReportFilte
 	rows.Close()
 	page.Total = page.Summary["all"]
 	if filter.Status == "warning" {
-		where += ` AND (md.tmdb_id>0 OR md.bangumi_id>0) AND md.message<>''`
+		where += ` AND (tmdb_id>0 OR bangumi_id>0) AND message<>''`
 		page.Total = page.Summary["warning"]
 	} else if filter.Status != "" {
 		where += ` AND (` + recordStatus + `)=?`
@@ -61,14 +62,16 @@ func (s *Store) MetadataRecords(ctx context.Context, filter metadata.ReportFilte
 		page.Total = page.Summary[filter.Status]
 	}
 	args = append(args, filter.PageSize, (filter.Page-1)*filter.PageSize)
-	rows, err = tx.QueryContext(ctx, `SELECT m.id,m.library_id,l.name,`+displayTitle+`,m.relative_path,COALESCE(md.tmdb_id,0),COALESCE(md.language,''),`+recordStatus+`,COALESCE(md.message,''),COALESCE(md.updated_at,0),COALESCE(md.candidates_json,'[]'),COALESCE(md.bangumi_id,0)`+mediaFrom+where+` ORDER BY m.id LIMIT ? OFFSET ?`, args...)
+	rows, err = tx.QueryContext(ctx, metadataRecordSources+`SELECT r.media_id,r.series_id,r.library_id,r.library_name,r.title,r.filename,
+ r.tmdb_id,r.language,`+recordStatus+`,r.message,r.updated_at,r.candidates_json,r.bangumi_id
+ FROM sources r`+where+` ORDER BY r.media_type,r.sort_id LIMIT ? OFFSET ?`, args...)
 	if err != nil {
 		return page, err
 	}
 	for rows.Next() {
 		var item metadata.Record
 		var candidates string
-		if err := rows.Scan(&item.MediaID, &item.LibraryID, &item.LibraryName, &item.Title, &item.Filename, &item.TMDBID, &item.Language, &item.Status, &item.Message, &item.UpdatedAt, &candidates, &item.BangumiID); err != nil {
+		if err := rows.Scan(&item.MediaID, &item.SeriesID, &item.LibraryID, &item.LibraryName, &item.Title, &item.Filename, &item.TMDBID, &item.Language, &item.Status, &item.Message, &item.UpdatedAt, &candidates, &item.BangumiID); err != nil {
 			rows.Close()
 			return page, err
 		}

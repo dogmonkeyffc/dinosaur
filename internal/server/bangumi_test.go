@@ -83,6 +83,19 @@ func TestBangumiAPISourceSelectionAndPermissions(t *testing.T) {
 			if !strings.Contains(response.Body.String(), `"bangumi_id":123`) || !strings.Contains(response.Body.String(), `"tmdb_id":0`) {
 				t.Fatal("metadata IDs conflated")
 			}
+			report := request(t, s, "GET", "/api/admin/metadata/records", nil, &admin, nil)
+			status(t, report, 200)
+			var page metadata.RecordPage
+			if err := json.Unmarshal(report.Body.Bytes(), &page); err != nil {
+				t.Fatal(err)
+			}
+			if page.Total != 1 || page.Items[0].BangumiID != 123 {
+				t.Fatalf("missing source in report: %+v", page)
+			}
+			if kind == "tv" && (page.Items[0].SeriesID != 1 || page.Items[0].MediaID != 0) {
+				t.Fatal("TV report exposed an episode as a series target")
+			}
+
 		})
 	}
 }

@@ -1,0 +1,122 @@
+.sidebar {
+  background: var(--sidebar);
+  color: var(--ink);
+  border-right: 1.5px solid var(--line);
+}
+.brand,
+.sidebar > .brand,
+.auth-form-wrap .brand {
+  color: var(--ink);
+  font-size: 27px;
+  letter-spacing: -0.5px;
+}
+.brand-mark,
+.sidebar .brand-mark {
+  background: var(--dp-color-highlight);
+  color: var(--ink);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--dp-radius-control);
+  transform: rotate(-4deg);
+}
+.brand-period {
+  color: var(--dp-color-accent);
+}
+.nav-item,
+.sidebar .nav-item {
+  color: var(--muted);
+  font-size: 20px;
+  border: 1px solid transparent;
+  border-radius: var(--dp-radius-control);
+  padding-inline: 10px;
+  gap: 9px;
+}
+.nav-item:hover {
+  color: var(--ink);
+  background: #e5dcc9;
+}
+.nav-item.active {
+  background: var(--dp-color-highlight);
+  color: var(--ink);
+  border-color: var(--line);
+  box-shadow: 2px 2px 0 #b3ac9d60;
+}
+.nav-count {
+  background: var(--surface);
+  color: var(--dp-color-annotation);
+  font-size: 15px;
+}
+.server-health {
+  background: transparent;
+  border: 0;
+  border-top: 1px dashed var(--line);
+  border-radius: 0;
+  padding-inline: 4px;
+}
+.server-health strong {
+  color: var(--muted);
+  font-size: 16px;
+}
+.status-dot.online {
+  background: var(--dp-color-annotation);
+  box-shadow: none;
+}
+.sidebar-account,
+.sidebar nav {
+  border-color: var(--line);
+}
+.avatar {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--dp-color-annotation);
+  font-size: 17px;
+}
+.user-area div > strong {
+  color: var(--ink);
+  font-size: 17px;
+}
+.user-area div > span {
+  color: var(--muted);
+  font-size: 14px;
+}
+.mobile-menu-toggle {
+  color: var(--dp-color-annotation);
+  background: var(--surface);
+  font-size: 18px;
+}
+.main-content {
+  padding-top: 36px;
+}
+.page-heading {
+  margin-bottom: 32px;
+}
+@media (min-width: 1050px) {
+  .app-shell {
+    grid-template-columns: 248px minmax(0, 1fr);
+  }
+}
+@media (max-width: 720px), (max-width: 1000px) and (max-height: 500px) and (pointer: coarse) {
+  .sidebar {
+    border-right: 0;
+    border-bottom: 1.5px solid var(--line);
+  }
+  .sidebar .nav-item {
+    font-size: 19px;
+  }
+  .content .page-heading {
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .content .page-heading > .button {
+    font-size: 18px;
+  }
+  .brand-mark,
+  .sidebar .brand-mark {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-mark,
+  .sidebar .brand-mark {
+    transform: none;
+  }
+}

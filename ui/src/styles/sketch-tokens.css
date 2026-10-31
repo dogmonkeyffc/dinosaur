@@ -1,0 +1,112 @@
+:root {
+  --dp-color-ground: #f7f2e7;
+  --dp-color-ink: #38352f;
+  --dp-color-ink-muted: #514d44;
+  --dp-color-line: #b3ac9d;
+  --dp-color-accent: #9e3a2e;
+  --dp-color-annotation: #344c69;
+  --dp-color-highlight: #f0dfa0;
+  --dp-color-scrap: #fcf8ef;
+  --dp-typography-reading-face:
+    'Sketch Working Hand', 'Segoe Print', 'Kaiti SC', 'STKaiti', 'KaiTi', 'Noto Serif CJK SC', serif;
+  --dp-typography-display-face:
+    'Sketch Working Marker', 'Comic Sans MS', 'Kaiti SC', 'STKaiti', 'KaiTi', 'Noto Serif CJK SC', serif;
+  --dp-typography-body: 24px;
+  --dp-typography-reading: 23px;
+  --dp-typography-detail: 21px;
+  --dp-spacing-item-gap: 16px;
+  --dp-radius-control: 9px 4px 17px 5px / 4px 12px 5px 9px;
+  --dp-border-fine-stroke: 1.5px;
+  --dp-motion-control: 100ms;
+  --bg: var(--dp-color-ground);
+  --surface: var(--dp-color-scrap);
+  --ink: var(--dp-color-ink);
+  --muted: var(--dp-color-ink-muted);
+  --line: var(--dp-color-line);
+  --green: var(--dp-color-accent);
+  --green-dark: #7b2c23;
+  --lime: var(--dp-color-highlight);
+  --sidebar: #eee7d8;
+  --danger: var(--dp-color-accent);
+  font-family: var(--dp-typography-reading-face);
+}
+body {
+  font-size: var(--dp-typography-reading);
+  line-height: 1.6;
+  background-image: radial-gradient(#514d440b 0.65px, transparent 0.65px);
+  background-size: 6px 6px;
+}
+::selection {
+  background: var(--dp-color-highlight);
+  color: var(--ink);
+}
+h1,
+h2,
+h3,
+.brand {
+  font-family: var(--dp-typography-display-face);
+  letter-spacing: 0;
+  line-height: 1.4;
+  font-weight: 700;
+}
+h1,
+.page-heading h1,
+.auth-form-wrap h1 {
+  font-size: clamp(30px, 3vw, 42px);
+}
+h2 {
+  font-size: 27px;
+}
+.page-heading h1 {
+  display: inline-block;
+  padding-bottom: 8px;
+  border-bottom: 3px solid var(--dp-color-accent);
+  border-radius: 0 0 45% 8%;
+}
+label,
+.modal label,
+.metadata-card label,
+.scrape-admin-filters label,
+.movie-matching label,
+.type-fieldset legend {
+  font-size: var(--dp-typography-detail);
+  line-height: 1.6;
+}
+.muted,
+.field-help,
+.movie-original-title,
+.movie-metadata-status,
+.movie-meta,
+.scan-summary {
+  color: var(--muted);
+}
+.small-label,
+.eyebrow {
+  color: var(--dp-color-annotation);
+  font-size: 15px;
+  letter-spacing: 0.4px;
+}
+/* Dense data and paths use upright type rather than small handwriting. */
+code,
+.path-input,
+.card-path,
+.scrape-table {
+  font-family: ui-monospace, 'Microsoft YaHei', sans-serif;
+}
+.player-page {
+  font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  --green: #c2df9e;
+  --ink: #e2edda;
+  --muted: #bdc9b6;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}

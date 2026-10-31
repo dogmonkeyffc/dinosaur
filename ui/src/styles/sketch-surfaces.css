@@ -1,0 +1,199 @@
+.auth-panel,
+.library-card,
+.account-card,
+.metadata-card,
+.disk-card,
+.modal,
+.series-episode,
+.series-folders li,
+.scrape-summary-card,
+.scrape-table-wrap {
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: var(--dp-radius-control);
+  box-shadow: 3px 4px 0 #38352f12;
+}
+.auth-panel {
+  width: min(100%, 480px);
+  padding: 36px;
+  border-top: 3px solid var(--dp-color-annotation);
+}
+.modal::backdrop {
+  background: #38352f66;
+}
+.library-card:hover {
+  border-color: var(--dp-color-annotation);
+  box-shadow: 3px 4px 0 #38352f24;
+}
+.library-type-icon,
+.banner-icon,
+.delete-symbol {
+  color: var(--dp-color-annotation);
+  background: var(--dp-color-highlight);
+  border-radius: var(--dp-radius-control);
+}
+.library-type-icon.tv {
+  color: var(--dp-color-accent);
+  background: #f0e5d4;
+}
+.library-card h2 {
+  font-size: 25px;
+}
+.card-path,
+.card-footer,
+.library-stats,
+.disk-heading span,
+.disk-capacity dt,
+.movie-scan-status,
+.scan-summary,
+.loading-message {
+  color: var(--muted);
+  font-size: 16px;
+}
+.disk-heading h3,
+.disk-section-heading h2,
+.metadata-card h2,
+.device-card-heading h2 {
+  font-size: 25px;
+}
+.disk-capacity dd {
+  font-size: 28px;
+  color: var(--dp-color-annotation);
+}
+.disk-progress,
+.disk-progress::-webkit-progress-bar {
+  background: #e5dcc9;
+  border-radius: var(--dp-radius-control);
+}
+.disk-progress::-webkit-progress-value {
+  background: var(--dp-color-annotation);
+}
+.disk-progress::-moz-progress-bar {
+  background: var(--dp-color-annotation);
+}
+.disk-progress {
+  accent-color: var(--dp-color-annotation);
+}
+.filter-tab {
+  color: var(--muted);
+  font-size: 20px;
+}
+.filter-tab.active {
+  color: var(--dp-color-accent);
+}
+.filter-tab.active::after {
+  background: var(--dp-color-accent);
+  border-radius: 40%;
+}
+.filter-tab span,
+.text-button > span,
+.version-tag {
+  background: var(--dp-color-highlight);
+  color: var(--ink);
+  font-size: 15px;
+}
+.scrape-admin-tabs [aria-selected='true'],
+.scrape-summary-card[aria-pressed='true'] {
+  background: var(--dp-color-highlight);
+  border-color: var(--dp-color-annotation);
+  color: var(--ink);
+}
+.scrape-table {
+  font-size: 14px;
+}
+.scrape-table th,
+.candidate-preview,
+.info-banner {
+  background: #eee7d8;
+  color: var(--ink);
+  border-color: var(--line);
+}
+.scrape-state {
+  background: var(--dp-color-highlight);
+  color: var(--dp-color-annotation);
+}
+.scrape-state-failed,
+.scrape-state-interrupted,
+.form-error {
+  color: var(--dp-color-accent);
+  background: #f6e5dc;
+}
+.info-banner strong,
+#tmdb-state,
+#tmdb-message {
+  color: var(--dp-color-annotation);
+}
+.toast {
+  background: var(--dp-color-annotation);
+  border-color: var(--ink);
+  font-size: 18px;
+}
+.toast.error {
+  background: var(--dp-color-accent);
+}
+.device-list li {
+  border-color: var(--line);
+}
+.mobile-login-qr svg {
+  background: white;
+  padding: 8px;
+}
+@media (max-width: 480px) {
+  .auth-panel {
+    padding: 24px;
+  }
+}
+
+.type-tag {
+  background: #eee7d8;
+  color: var(--muted);
+  font-size: 15px;
+}
+.card-bottom {
+  border-color: var(--line);
+}
+.card-status {
+  color: var(--muted);
+  font-size: 16px;
+}
+.card-status .status-dot {
+  background: var(--dp-color-annotation);
+}
+.card-actions .icon-button {
+  width: 40px;
+  height: 40px;
+}
+.card-actions .icon {
+  width: 18px;
+  height: 18px;
+}
+.empty-state {
+  background: transparent;
+  border-color: var(--line);
+  border-radius: var(--dp-radius-control);
+}
+.empty-state h2 {
+  font-size: 27px;
+  color: var(--ink);
+}
+.empty-state > .button {
+  font-size: 21px;
+}
+.form-error,
+.field-help,
+.device-list span,
+.mobile-login-qr span,
+.movie-pagination,
+.metadata-candidate p,
+.metadata-candidate span,
+.tmdb-attribution,
+.scrape-pagination {
+  font-size: 16px;
+}
+@media (pointer: coarse) {
+  .card-actions .icon-button,
+  .icon-button {
+    width: 44px;
+    height: 44px;
+  }
+}

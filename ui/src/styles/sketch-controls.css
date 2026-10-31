@@ -1,0 +1,152 @@
+.button,
+.select-control,
+input:not([type='radio']):not([type='checkbox']),
+.metadata-card input,
+.scrape-admin-filters input,
+.mobile-menu-toggle {
+  border: var(--dp-border-fine-stroke) solid var(--line);
+  border-radius: var(--dp-radius-control);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--dp-typography-detail);
+  line-height: 1.5;
+  min-height: 46px;
+}
+.button,
+.page-heading > .button,
+.modal-actions .button,
+.account-card form > .button {
+  font-size: var(--dp-typography-detail);
+  box-shadow: 2px 3px 0 var(--line);
+  transition:
+    transform var(--dp-motion-control),
+    box-shadow var(--dp-motion-control);
+}
+.button.primary,
+.button.danger {
+  background: var(--dp-color-accent);
+  color: var(--surface);
+  border-color: var(--dp-color-accent);
+  box-shadow: 2px 3px 0 var(--ink);
+}
+.button.primary:hover:not(:disabled),
+.button.danger:hover:not(:disabled) {
+  background: var(--green-dark);
+}
+.button.secondary:hover:not(:disabled) {
+  background: var(--dp-color-highlight);
+  border-color: var(--ink);
+}
+.button:hover:not(:disabled) {
+  transform: rotate(-0.5deg);
+  box-shadow: 1px 2px 0 var(--line);
+}
+.button:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+:where(button, a, summary, textarea, select, [tabindex]):focus-visible,
+input:focus-visible,
+.select-control:focus-visible {
+  outline: 2px dashed var(--dp-color-annotation);
+  outline-offset: 4px;
+  box-shadow: none;
+}
+input:focus {
+  border-color: var(--dp-color-annotation);
+  box-shadow: none;
+}
+input::placeholder {
+  color: var(--muted);
+  opacity: 0.8;
+}
+.select-control:hover:not(:disabled),
+.select-control[data-state='open'] {
+  border-color: var(--dp-color-annotation);
+}
+.select-menu,
+.info-tip-content {
+  background: var(--surface);
+  border-color: var(--line);
+  border-radius: var(--dp-radius-control);
+  box-shadow: 3px 4px 0 #38352f24;
+  font-size: 18px;
+}
+.select-option {
+  font-size: 19px;
+  line-height: 1.6;
+  min-height: 44px;
+  border-radius: var(--dp-radius-control);
+}
+.select-option[data-state='checked'],
+.select-option[data-state='checked'][data-highlighted] {
+  background: var(--dp-color-highlight);
+  color: var(--ink);
+}
+.select-option[data-highlighted] {
+  background: #eee7d8;
+  outline: 1px dashed var(--dp-color-annotation);
+  outline-offset: -2px;
+}
+.select-check,
+.select-chevron,
+.text-button,
+.movie-technical summary,
+.movie-matching summary,
+.info-tip > button {
+  color: var(--dp-color-annotation);
+}
+.text-button {
+  font-size: 18px;
+}
+.icon-button {
+  color: var(--muted);
+}
+.icon-button:hover,
+.info-tip > button:hover,
+.info-tip > button[aria-expanded='true'] {
+  color: var(--dp-color-annotation);
+  background: var(--dp-color-highlight);
+}
+.type-option {
+  border-color: var(--line);
+  border-radius: var(--dp-radius-control);
+}
+.type-option:has(:checked) {
+  border-color: var(--dp-color-annotation);
+  background: var(--dp-color-highlight);
+}
+.type-option strong {
+  font-size: 19px;
+}
+.type-option > .icon {
+  color: var(--dp-color-annotation);
+}
+.search-field input {
+  font-size: 18px;
+  background: var(--surface);
+  padding-left: 36px;
+}
+.search-field .icon {
+  top: 16px;
+  color: var(--muted);
+}
+.show-password {
+  top: 10px;
+  font-size: 16px;
+  color: var(--dp-color-annotation);
+}
+.password-field input {
+  padding-right: 66px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .button:hover:not(:disabled),
+  .button:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+input.path-input:not([type='radio']):not([type='checkbox']) {
+  font-size: 16px;
+  font-weight: 400;
+}

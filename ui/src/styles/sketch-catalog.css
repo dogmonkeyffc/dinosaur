@@ -1,0 +1,134 @@
+.movie-grid {
+  gap: 32px 24px;
+  padding-top: 8px;
+}
+.movie-artwork,
+.detail-poster-frame {
+  border: 7px solid var(--surface);
+  border-bottom-width: 16px;
+  border-radius: 3px 6px 4px 2px;
+  box-shadow: 2px 3px 0 #38352f30;
+  background: #e5dcc9;
+}
+.movie-card {
+  position: relative;
+}
+/* A single small piece of tape; it does not intercept pointer events. */
+.movie-card::before,
+.detail-artwork::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: calc(50% - 22px);
+  width: 44px;
+  height: 15px;
+  background: #e1cf93aa;
+  border-inline: 2px dashed #b3ac9d55;
+  transform: rotate(-5deg);
+  z-index: 2;
+  pointer-events: none;
+}
+.movie-artwork {
+  transition: box-shadow var(--dp-motion-control);
+}
+.movie-card:hover .movie-artwork {
+  transform: none;
+  box-shadow: 3px 5px 0 #38352f45;
+}
+.movie-placeholder {
+  color: var(--dp-color-annotation);
+  background: #eee7d8;
+}
+.movie-title {
+  font-family: var(--dp-typography-display-face);
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+.movie-meta {
+  font-size: 17px;
+}
+.movie-meta > span {
+  color: var(--line);
+}
+.movie-quality {
+  background: var(--dp-color-highlight);
+  color: var(--ink);
+  border-color: var(--line);
+  font-size: 13px;
+  border-radius: var(--dp-radius-control);
+}
+.detail-page-header,
+.detail-meta,
+.movie-original-title,
+.movie-metadata-status,
+.movie-technical summary,
+.movie-facts dd,
+.movie-file,
+.series-folders li,
+.series-episode p,
+.series-episode summary {
+  font-size: 18px;
+}
+.movie-overview {
+  font-size: var(--dp-typography-reading);
+  line-height: 1.9;
+}
+.movie-facts dt,
+.movie-tracks li {
+  font-size: 17px;
+}
+.series-folders h2,
+.series-episode h2,
+#movie-detail h3 {
+  font-size: 24px;
+}
+.detail-page-header {
+  background: var(--surface);
+  border-bottom-style: dashed;
+}
+.movie-technical,
+.movie-matching {
+  border-top-style: dashed;
+}
+@media (max-width: 720px) {
+  .movie-grid {
+    gap: 26px 16px;
+  }
+  .movie-artwork {
+    border-width: 5px;
+    border-bottom-width: 12px;
+  }
+  .movie-title {
+    font-size: 21px;
+  }
+  .movie-meta {
+    font-size: 15px;
+  }
+  .movie-card::before,
+  .detail-artwork::before {
+    transform: none;
+  }
+  .movie-toolbar .library-select,
+  .movie-toolbar .search-field {
+    width: 100%;
+    max-width: none;
+    flex: 1 1 100%;
+  }
+  .movie-facts {
+    gap: var(--dp-spacing-item-gap);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .movie-card::before,
+  .detail-artwork::before {
+    transform: none;
+  }
+}
+
+.movie-artwork-caption {
+  font-size: 14px;
+}
+
+.detail-poster-placeholder {
+  color: var(--dp-color-annotation);
+}

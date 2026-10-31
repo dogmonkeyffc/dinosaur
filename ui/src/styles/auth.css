@@ -1,212 +1,34 @@
 .auth-screen {
   display: grid;
-  grid-template-columns: 1.03fr 1fr;
+  place-items: center;
   min-height: 100dvh;
+  padding: 40px 20px;
 }
-
-.auth-story {
-  background: #192820;
-  position: relative;
-  overflow: hidden;
-  color: #eef2e8;
-  padding: 42px 10% 32px;
-  display: flex;
-  flex-direction: column;
-  min-height: 760px;
-}
-
-.auth-story:after {
-  content: '';
-  position: absolute;
-  pointer-events: none;
-  width: 650px;
-  height: 650px;
-  background: radial-gradient(circle, #5e7a411c, transparent 65%);
-  left: 0;
-  top: 100px;
-}
-
-.auth-story .brand {
-  font-size: 27px;
-}
-
-.story-content {
-  margin: auto 0;
-  padding-top: 72px;
-  position: relative;
-  z-index: 1;
-}
-
-.eyebrow {
-  color: #9bac8b;
-  font-size: 9px;
-  letter-spacing: 2.5px;
-}
-
-.story-content h1 {
-  font-size: clamp(34px, 3.8vw, 58px);
-  line-height: 1.45;
-  font-weight: 530;
-  letter-spacing: 1px;
-  margin: 24px 0 22px;
-}
-
-.story-content h1 > span {
-  color: var(--lime);
-}
-
-.story-content p {
-  color: #a5b3a8;
-  font-size: 13px;
-  line-height: 2.1;
-  letter-spacing: 0.6px;
-}
-
-.story-footer {
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: #819182;
-  margin-top: 34px;
-}
-
-.collection-art {
-  height: 250px;
-  width: 320px;
-  position: relative;
-  margin: 25px 0 0 10px;
-}
-
-.art-grid {
-  position: absolute;
-  inset: 10px -50px -10px -30px;
-  background-image: radial-gradient(#a6b49428 1px, transparent 1px);
-  background-size: 20px 20px;
-  mask-image: linear-gradient(to bottom, transparent, #000 40%, transparent);
-}
-
-.art-card {
-  width: 142px;
-  height: 176px;
-  position: absolute;
-  border-radius: 11px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 12px 26px #0002;
-}
-
-.art-back {
-  background: #465342;
-  border: 1px solid #66745a;
-  top: 21px;
-  left: 135px;
-  transform: rotate(14deg);
-  color: #bbc6ab;
-}
-
-.art-back .icon {
-  width: 60px;
-  height: 60px;
-  stroke-width: 0.8;
-}
-
-.art-front {
-  top: 45px;
-  left: 27px;
-  background: #b8c69d;
-  border: 1px solid #ccd7b7;
-  transform: rotate(-11deg);
-  color: #465b3a;
-}
-
-.art-front > .icon {
-  width: 61px;
-  height: 61px;
-  stroke-width: 1;
-}
-
-.art-lines {
-  display: flex;
-  gap: 4px;
-  margin-top: 18px;
-  width: 80px;
-}
-
-.art-lines span {
-  height: 3px;
-  background: #7c8b65;
-  border-radius: 2px;
-  width: 70%;
-}
-
-.art-lines span + span {
-  width: 30%;
-  opacity: 0.4;
-}
-
-.art-caption {
-  font-size: 5px;
-  letter-spacing: 1.2px;
-  margin-top: 11px;
-}
-
-.art-orbit {
-  width: 300px;
-  height: 150px;
-  border: 1px solid #adbd8e26;
-  position: absolute;
-  top: 80px;
-  left: 0;
-  transform: rotate(-26deg);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.art-spark {
-  position: absolute;
-  top: 7px;
-  left: 54px;
-  font-size: 24px;
-  color: #a9c28a;
-}
-
 .auth-panel {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fbfcf9;
-  padding: 65px 42px;
+  width: min(100%, 420px);
+  padding: 32px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
 }
-
-.auth-form-wrap {
-  max-width: 350px;
-  width: 100%;
-  padding: 28px 0;
+.auth-form-wrap .brand {
+  color: var(--ink);
+  font-size: 24px;
+  margin-bottom: 28px;
 }
-
-.auth-form-wrap h2 {
-  font-size: 31px;
-  margin: 15px 0 10px;
-  font-weight: 620;
-  letter-spacing: -0.8px;
+.auth-form-wrap h1 {
+  margin: 0 0 24px;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
 }
-
-.auth-form-wrap > .muted {
-  font-size: 12px;
-  margin-bottom: 34px;
-}
-
 .password-field {
   display: flex;
   position: relative;
 }
-
 .password-field input {
   padding-right: 60px;
 }
-
 .show-password {
   position: absolute;
   right: 8px;
@@ -218,24 +40,20 @@
   font-size: 11px;
   border-radius: 4px;
 }
-
 .show-password:hover {
   background: #f0f3ea;
 }
-
 .auth-submit {
   width: 100%;
-  margin-top: 29px;
+  margin-top: 28px;
   justify-content: space-between;
   padding: 13px 17px;
 }
-
-.auth-footnote {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  font-size: 10px;
-  color: #939e8b;
-  margin: 24px 0 0;
+@media (max-width: 480px) {
+  .auth-screen {
+    padding: 24px 16px;
+  }
+  .auth-panel {
+    padding: 24px;
+  }
 }

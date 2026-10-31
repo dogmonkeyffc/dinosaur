@@ -1,3 +1,4 @@
+import { InfoTip } from '../components/InfoTip';
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '../auth/AuthProvider';
 import { ErrorMessage } from '../components/common';
@@ -114,9 +115,17 @@ export function MetadataEditor({
           >
             <summary>匹配 / 更正{kind === 'tv' ? '剧集' : '电影'}</summary>
             <form onSubmit={find}>
-              <label>
-                {kind === 'tv' ? '剧名' : '电影名'}
-                <input name="query" maxLength={128} placeholder="留空使用本地名称" />
+              <label htmlFor={`metadata-query-${kind}-${id}`}>
+                <span className="field-label">
+                  <span id={`metadata-query-label-${kind}-${id}`}>{kind === 'tv' ? '剧名' : '电影名'}</span>
+                  <InfoTip label="候选搜索名称">留空使用本地名称。</InfoTip>
+                </span>
+                <input
+                  aria-labelledby={`metadata-query-label-${kind}-${id}`}
+                  id={`metadata-query-${kind}-${id}`}
+                  name="query"
+                  maxLength={128}
+                />
               </label>
               <label>
                 年份
@@ -126,7 +135,7 @@ export function MetadataEditor({
                   min={0}
                   max={2100}
                   defaultValue={year || ''}
-                  placeholder="0 表示不限年份"
+                  placeholder="不限"
                 />
               </label>
               <button className="button secondary" disabled={search.loading}>
@@ -139,15 +148,19 @@ export function MetadataEditor({
                 start(Number(new FormData(event.currentTarget).get('tmdb_id')));
               }}
             >
-              <label>
-                TMDB ID
+              <label htmlFor={`metadata-tmdb-${kind}-${id}`}>
+                <span className="field-label">
+                  <span id={`metadata-tmdb-label-${kind}-${id}`}>TMDB ID</span>
+                  <InfoTip label="TMDB ID 位置">TMDB 电影或剧集详情页网址中的数字 ID。</InfoTip>
+                </span>
                 <input
+                  aria-labelledby={`metadata-tmdb-label-${kind}-${id}`}
+                  id={`metadata-tmdb-${kind}-${id}`}
                   name="tmdb_id"
                   type="number"
                   min={1}
                   max={2147483647}
                   required
-                  placeholder="官网页面的数字 ID"
                 />
               </label>
               <button className="button secondary" disabled={jobs.busy || jobs.running}>
@@ -157,9 +170,7 @@ export function MetadataEditor({
             <ErrorMessage error={search.error} />
             {search.loading && <p role="status">正在搜索候选…</p>}
             <CandidateList candidates={candidates} select={start} disabled={jobs.busy || jobs.running} />
-            {search.data && !candidates.length && (
-              <p className="field-help">未找到候选，可调整名称或年份，也可以直接填写 TMDB ID。</p>
-            )}
+            {search.data && !candidates.length && <p className="field-help">未找到候选</p>}
           </details>
         </>
       )}

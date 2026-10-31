@@ -49,7 +49,7 @@ export function MobileLogin() {
             level="M"
             title="使用 Dinosaur 手机 App 扫码登录"
           />
-          <span role="status">{seconds} 秒后过期 · 仅可使用一次</span>
+          <span role="status">{seconds} 秒后过期</span>
         </div>
       )}
       {ticket && !seconds && <p role="status">二维码已过期</p>}

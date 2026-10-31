@@ -33,8 +33,6 @@
     height: 30px;
   }
 
-  .sidebar .workspace-label,
-  .sidebar .nav-label,
   .sidebar .sidebar-bottom,
   .sidebar .nav-count {
     display: none;

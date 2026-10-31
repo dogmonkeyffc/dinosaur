@@ -36,7 +36,6 @@ export function MediaCard({ item, resume = false }: { item: Movie | Series; resu
       <span className="movie-artwork">
         <span className="movie-placeholder">
           <Icon name={series ? 'tv' : 'film'} />
-          <span>DINOSAUR COLLECTION</span>
         </span>
         <Poster url={item.poster_url} title={title} className="movie-poster" />
         {badge && <span className="movie-metadata-badge">{badge}</span>}
@@ -54,7 +53,7 @@ export function MediaCard({ item, resume = false }: { item: Movie | Series; resu
       </span>
       <span className="movie-title">{title}</span>
       <span className="movie-meta">
-        {item.year || '年份未知'} ·{' '}
+        {item.year ? `${item.year} · ` : ''}
         {series
           ? `${series.season_count} 季 · ${series.episode_count} 个文件`
           : resume

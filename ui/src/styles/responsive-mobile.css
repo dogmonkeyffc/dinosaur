@@ -1,31 +1,4 @@
 @media (max-width: 720px) {
-  .auth-screen {
-    display: block;
-  }
-  .auth-story {
-    min-height: 0;
-    padding: 22px 26px;
-    background: #192820;
-  }
-  .auth-story .brand {
-    font-size: 23px;
-  }
-  .story-content,
-  .story-footer {
-    display: none;
-  }
-  .auth-panel {
-    min-height: calc(100dvh - 82px);
-    padding: 35px 28px 75px;
-    align-items: flex-start;
-  }
-  .auth-form-wrap {
-    max-width: 390px;
-    padding-top: 25px;
-  }
-  .auth-form-wrap h2 {
-    font-size: 28px;
-  }
   .main-content {
     padding: 29px 22px 0;
   }
@@ -112,9 +85,6 @@
   }
   .section-footnote .icon {
     margin-top: 2px;
-  }
-  .workspace-footer {
-    font-size: 8px;
   }
   .modal {
     padding: 23px;

@@ -129,7 +129,7 @@ export function EpisodeCard({ item, reload }: { item: Movie; reload: () => void 
           <progress value={item.position} max={item.duration} aria-label="观看进度" />
         )}
         <TechnicalInfo item={item} />
-        {item.probe_error && <p className="field-help">信息读取失败，可重新扫描。</p>}
+        {item.probe_error && <p className="field-help">视频信息读取失败</p>}
       </div>
       <div className="series-episode-actions">
         <Link className="button secondary" to={`/watch/${item.id}`} state={{ kind: 'tv' }}>

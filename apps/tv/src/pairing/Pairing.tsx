@@ -76,13 +76,11 @@ export function Pairing({
       <Text style={styles.subtitle}>{server.name}</Text>
       <Text style={styles.muted}>{server.url}</Text>
       <View style={[styles.card, { alignItems: 'center', padding: 36 }]}>
-        <Text style={styles.text}>在手机 Dinosaur App 中打开「登录电视」</Text>
+        <Text style={styles.text}>手机 App → 登录电视</Text>
         <Text selectable style={{ color: '#c2df9e', fontSize: 76, fontWeight: '700', letterSpacing: 14 }}>
           {pairing && remaining > 0 ? pairing.code : pairing ? '已过期' : '••••••'}
         </Text>
-        {pairing && remaining > 0 && (
-          <Text style={styles.muted}>{remaining} 秒内输入配对码并确认登录账号</Text>
-        )}
+        {pairing && remaining > 0 && <Text style={styles.muted}>{remaining} 秒后过期</Text>}
       </View>
       <ErrorText error={error} />
       <View style={styles.row}>

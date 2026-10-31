@@ -1,3 +1,4 @@
+import { InfoTip } from '../components/InfoTip';
 import { useState, type FormEvent } from 'react';
 import { api } from '../lib/api';
 import { useAction } from '../lib/hooks';
@@ -27,13 +28,7 @@ export function LibraryDialog({ item, close }: { item?: Library; close: () => vo
       <form id="library-form" onSubmit={submit}>
         <label>
           媒体库名称
-          <input
-            name="name"
-            required
-            maxLength={80}
-            defaultValue={item?.name || ''}
-            placeholder="例如：我的电影收藏"
-          />
+          <input name="name" required maxLength={80} defaultValue={item?.name || ''} />
         </label>
         <fieldset className="type-fieldset">
           <legend>内容类型</legend>
@@ -50,15 +45,19 @@ export function LibraryDialog({ item, close }: { item?: Library; close: () => vo
                 <Icon name={value === 'tv' ? 'tv' : 'film'} />
                 <span>
                   <strong>{value === 'tv' ? '电视剧' : '电影'}</strong>
-                  <small>{value === 'tv' ? '按季与集整理的剧集' : '独立影片与电影收藏'}</small>
                 </span>
               </label>
             ))}
           </div>
         </fieldset>
-        <label>
-          媒体目录
+        <label htmlFor="library-path">
+          <span className="field-label">
+            <span id="library-path-label">媒体目录</span>
+            <InfoTip label="媒体目录要求">填写服务器上的绝对路径，目录需已存在且可读取。</InfoTip>
+          </span>
           <input
+            aria-labelledby="library-path-label"
+            id="library-path"
             name="path"
             className="path-input"
             required
@@ -66,7 +65,6 @@ export function LibraryDialog({ item, close }: { item?: Library; close: () => vo
             defaultValue={item?.root_path || ''}
             placeholder="/mnt/media/movies"
           />
-          <span className="field-help">填写服务器上的绝对路径，目录需已存在且可读取。</span>
         </label>
         <ErrorMessage error={action.error} />
         <div className="modal-actions">

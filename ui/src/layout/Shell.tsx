@@ -89,10 +89,6 @@ export function Shell() {
           <Icon name={menu ? 'close' : 'menu'} />
           <span>{menu ? '收起' : '菜单'}</span>
         </button>
-        <div className="workspace-label">
-          你的媒体服务器<span>PERSONAL MEDIA SERVER</span>
-        </div>
-        <span className="nav-label">媒体空间</span>
         <nav id="workspace-navigation" aria-label="媒体空间">
           {entries
             .filter(([, , , role]) => !role || user?.role === role)
@@ -117,7 +113,6 @@ export function Shell() {
             <span className={`status-dot ${health.error ? 'offline' : health.data ? 'online' : ''}`} />
             <div>
               <strong>{health.error ? '服务器连接异常' : health.data ? '服务器运行正常' : '正在连接'}</strong>
-              <span>Dinosaur Server</span>
             </div>
           </div>
         </div>
@@ -146,13 +141,6 @@ export function Shell() {
         <main ref={content} id="content-main" className="main-content">
           <ErrorMessage error={action.error} />
           <Outlet context={{ setPlayingKind }} />
-          {!playing && !detail && (
-            <footer className="workspace-footer">
-              <span>
-                Dinosaur<span className="brand-period">.</span>
-              </span>
-            </footer>
-          )}
         </main>
       </div>
     </div>

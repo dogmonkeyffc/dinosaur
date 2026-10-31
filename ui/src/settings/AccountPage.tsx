@@ -44,7 +44,7 @@ export function AccountPage() {
             />
           </label>
           <label>
-            新密码
+            新密码（至少 12 字节）
             <input
               name="new_password"
               type="password"
@@ -52,7 +52,6 @@ export function AccountPage() {
               required
               maxLength={1024}
             />
-            <span className="field-help">至少 12 字节，建议使用较长的密码短语。</span>
           </label>
           <label>
             确认新密码

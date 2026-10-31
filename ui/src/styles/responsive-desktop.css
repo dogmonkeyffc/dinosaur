@@ -2,17 +2,6 @@
   .main-content {
     padding-top: 58px;
   }
-  .auth-story {
-    padding-left: 13%;
-    padding-right: 13%;
-  }
-  .story-content {
-    padding-top: 45px;
-  }
-  .collection-art {
-    margin-top: 40px;
-    height: 280px;
-  }
 }
 
 @media (max-width: 1000px) {
@@ -30,22 +19,6 @@
   }
   .version-tag {
     display: none;
-  }
-  .auth-story {
-    padding: 35px 9%;
-    min-height: 720px;
-  }
-  .story-content h1 {
-    font-size: 38px;
-  }
-  .collection-art {
-    transform: scale(0.86);
-    transform-origin: left center;
-    margin-left: -5px;
-    width: 280px;
-  }
-  .auth-panel {
-    padding: 50px 30px;
   }
   .filter-tabs {
     gap: 16px;

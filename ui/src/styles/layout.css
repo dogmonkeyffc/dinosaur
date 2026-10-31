@@ -27,13 +27,9 @@
   margin: 0;
   overflow-y: auto;
 }
-.main-content > section:not(#player-section):not(#detail-section):not(#series-detail-section),
-.main-content > .workspace-footer {
+.main-content > section:not(#player-section):not(#detail-section):not(#series-detail-section) {
   max-width: 1400px;
   margin-inline: auto;
-}
-.content.is-playing .workspace-footer {
-  display: none;
 }
 .content.is-playing > .main-content {
   padding: 0;

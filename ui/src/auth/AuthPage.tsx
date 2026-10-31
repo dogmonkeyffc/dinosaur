@@ -1,3 +1,4 @@
+import { InfoTip } from '../components/InfoTip';
 import { useState, type FormEvent } from 'react';
 import { useAuth } from './AuthProvider';
 import { api } from '../lib/api';
@@ -33,52 +34,28 @@ export function AuthPage() {
   }
   return (
     <main id="auth-screen" className="auth-screen">
-      <section className="auth-story">
-        <Brand />
-        <div className="story-content">
-          <span className="eyebrow">YOUR COLLECTION. YOUR SPACE.</span>
-          <h1>
-            让好故事，
-            <br />
-            有自己的家<span>。</span>
-          </h1>
-          <div className="collection-art" aria-hidden="true">
-            <div className="art-grid" />
-            <div className="art-card art-back">
-              <Icon name="tv" />
-            </div>
-            <div className="art-card art-front">
-              <Icon name="film" />
-              <div className="art-lines">
-                <span />
-                <span />
-              </div>
-              <span className="art-caption">THE PERSONAL COLLECTION</span>
-            </div>
-            <span className="art-orbit" />
-            <span className="art-spark">✳</span>
-          </div>
-        </div>
-      </section>
       <section className="auth-panel">
         <div className="auth-form-wrap">
-          <span className="small-label">{setup ? 'MAKE YOURSELF AT HOME' : 'WELCOME BACK'}</span>
-          <h2>{setup ? '开启你的私人空间' : '欢迎回来'}</h2>
+          <Brand />
+          <h1>{setup ? '创建管理员' : '登录'}</h1>
           {notice && <p role="status">{notice}</p>}
           <form id="auth-form" onSubmit={submit}>
             {setup && (
-              <label>
-                初始化令牌
+              <label htmlFor="setup-token">
+                <span className="field-label">
+                  <span id="setup-token-label">初始化令牌</span>
+                  <InfoTip label="初始化令牌位置">
+                    默认位于 ~/.cache/dinosaur/setup-token；自定义路径见服务启动日志。
+                  </InfoTip>
+                </span>
                 <input
+                  aria-labelledby="setup-token-label"
+                  id="setup-token"
                   name="token"
                   type="password"
                   autoComplete="off"
                   required
-                  placeholder="粘贴服务器的初始化令牌"
                 />
-                <span className="field-help">
-                  默认位于 ~/.cache/dinosaur/setup-token；自定义路径见服务启动日志。
-                </span>
               </label>
             )}
             <label>
@@ -90,20 +67,19 @@ export function AuthPage() {
                 required
                 maxLength={32}
                 pattern={'[A-Za-z0-9][A-Za-z0-9_.\\-]{2,31}'}
-                placeholder="输入你的用户名"
               />
             </label>
             <label>
-              密码
+              <span id="password-label">{setup ? '密码（至少 12 字节）' : '密码'}</span>
               <span className="password-field">
                 <input
+                  aria-labelledby="password-label"
                   id="password"
                   name="password"
                   type={visible ? 'text' : 'password'}
                   autoComplete={setup ? 'new-password' : 'current-password'}
                   required
                   maxLength={1024}
-                  placeholder="输入密码"
                 />
                 <button
                   type="button"
@@ -118,14 +94,7 @@ export function AuthPage() {
             {setup && (
               <label>
                 确认密码
-                <input
-                  name="confirm"
-                  type="password"
-                  autoComplete="new-password"
-                  required
-                  maxLength={1024}
-                  placeholder="再次输入密码"
-                />
+                <input name="confirm" type="password" autoComplete="new-password" required maxLength={1024} />
               </label>
             )}
             <ErrorMessage error={action.error} />
@@ -135,7 +104,6 @@ export function AuthPage() {
             </button>
           </form>
         </div>
-        <span className="panel-footer">Dinosaur Media Server</span>
       </section>
     </main>
   );

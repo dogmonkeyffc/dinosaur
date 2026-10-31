@@ -22,24 +22,10 @@ export function Brand() {
   );
 }
 
-export function Heading({
-  title,
-  label,
-  description,
-  children,
-}: {
-  title: ReactNode;
-  label?: string;
-  description?: string;
-  children?: ReactNode;
-}) {
+export function Heading({ title, children }: { title: ReactNode; children?: ReactNode }) {
   return (
     <div className="page-heading">
-      <div>
-        <span className="small-label">{label}</span>
-        <h1>{title}</h1>
-        {description && <p className="muted">{description}</p>}
-      </div>
+      <h1>{title}</h1>
       {children}
     </div>
   );

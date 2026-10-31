@@ -1,0 +1,52 @@
+.field-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.info-tip {
+  display: inline-flex;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+.info-tip > button {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 2px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+}
+.info-tip > button .icon {
+  width: 15px;
+  height: 15px;
+}
+.info-tip > button:hover,
+.info-tip > button[aria-expanded='true'] {
+  background: #edf2e8;
+  color: var(--green);
+}
+.info-tip-content {
+  position: fixed;
+  inset: auto;
+  width: 260px;
+  max-width: calc(100vw - 24px);
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.7;
+  text-align: left;
+  overflow-wrap: anywhere;
+  box-shadow: 0 5px 20px #25342d14;
+}
+.info-tip-content::backdrop {
+  background: transparent;
+  pointer-events: none;
+}

@@ -25,12 +25,12 @@ export function SystemPage() {
       {loading && !data && <Loading />}
       {data?.incomplete && (
         <p className="muted" role="status">
-          部分磁盘暂时无法读取，当前仅显示可读取的磁盘。
+          部分磁盘无法读取
         </p>
       )}
       {!loading && !error && data && !data.disks.length && (
         <p className="muted" role="status">
-          暂无可显示的已挂载磁盘。
+          暂无已挂载磁盘
         </p>
       )}
       <div id="disk-list" className="disk-grid" aria-label="磁盘空间" aria-busy={loading}>

@@ -1,3 +1,4 @@
+import { InfoTip } from '../components/InfoTip';
 import { Select } from '../components/Select';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
@@ -35,13 +36,7 @@ export function MetadataPage() {
         body:
           mode === 'clear' ? undefined : { credential_type: type, language, credential: credential.trim() },
       });
-      setNotice(
-        mode === 'test'
-          ? '连接成功，凭据有效。测试不会保存配置。'
-          : mode === 'clear'
-            ? '凭据已移除。'
-            : '配置已保存。',
-      );
+      setNotice(mode === 'test' ? '连接成功' : mode === 'clear' ? '凭据已移除。' : '配置已保存。');
       if (mode !== 'test') resource.reload();
     });
   }
@@ -64,19 +59,23 @@ export function MetadataPage() {
                 <option value="api_key">API Key</option>
               </Select>
             </label>
-            <label>
-              凭据
+            <label htmlFor="tmdb-credential">
+              <span className="field-label">
+                <span id="tmdb-credential-label">凭据</span>
+                {resource.data?.configured && (
+                  <InfoTip label="凭据保存方式">留空保留现有凭据；填写新值后保存以替换。</InfoTip>
+                )}
+              </span>
               <input
+                id="tmdb-credential"
                 type="password"
-                aria-label="凭据"
+                aria-labelledby="tmdb-credential-label"
                 value={credential}
                 onChange={(event) => setCredential(event.target.value)}
                 maxLength={4096}
                 autoComplete="off"
                 spellCheck={false}
-                placeholder={
-                  resource.data?.configured ? '已配置；留空保留，输入新凭据可替换' : '粘贴 TMDB 凭据'
-                }
+                placeholder={resource.data?.configured ? '留空保留' : undefined}
               />
             </label>
             <label>
@@ -132,7 +131,6 @@ export function MetadataPage() {
           <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer">
             <img src="/assets/vendor/tmdb-logo.svg" alt="TMDB" />
           </a>
-          <strong>资料来源与致谢</strong>
           <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
         </div>
       </div>

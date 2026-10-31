@@ -89,7 +89,7 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
       </div>
       {!result.loading && !result.error && !result.data?.items.length && (
         <div className="empty-state">
-          <h2>{query || library ? '没有找到匹配的内容' : '珍藏，即将登场'}</h2>
+          <h2>{query || library ? '没有找到匹配的内容' : '暂无媒体'}</h2>
           <button
             className="button secondary"
             onClick={() => {

@@ -80,9 +80,11 @@ export function LibrariesPage() {
                 <span className="type-tag">{item.type === 'tv' ? '电视剧' : '电影'}</span>
               </div>
               <h2>{item.name}</h2>
-              <p className="card-path" title={item.root_path}>
-                {item.root_path || '目录由管理员管理'}
-              </p>
+              {item.root_path && (
+                <p className="card-path" title={item.root_path}>
+                  {item.root_path}
+                </p>
+              )}
               <div className="card-bottom">
                 <span className={`card-status ${admin && !item.available ? 'unavailable' : ''}`}>
                   <span className="status-dot" />
@@ -133,10 +135,10 @@ export function LibrariesPage() {
       </div>
       {!loading && !items.length && (
         <div className="empty-state">
-          <h2>{libraries.length ? '没有找到匹配的媒体库' : '你的媒体故事，从这里开始'}</h2>
+          <h2>{libraries.length ? '没有找到匹配的媒体库' : '暂无媒体库'}</h2>
           {admin && !libraries.length && (
             <button className="button secondary" onClick={() => setEditing(null)}>
-              添加第一个媒体库
+              添加媒体库
             </button>
           )}
         </div>

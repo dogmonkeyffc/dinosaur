@@ -43,9 +43,7 @@ export function MovieDetailPage() {
               info={item.metadata}
               reload={reload}
             />
-            {item.probe_error && (
-              <p className="form-error">视频信息暂未读取完整，可以重新扫描。电影文件已被索引。</p>
-            )}
+            {item.probe_error && <p className="form-error">视频信息读取失败</p>}
             <TechnicalInfo item={item} />
           </article>
         </div>

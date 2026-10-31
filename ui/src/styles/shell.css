@@ -31,27 +31,9 @@
   height: 26px;
 }
 
-.workspace-label {
-  font-size: 11px;
-  margin: 33px 12px 39px;
-  color: #b4bfb1;
+.sidebar nav {
+  margin-top: 32px;
 }
-
-.workspace-label > span {
-  display: block;
-  font-size: 7px;
-  letter-spacing: 1.3px;
-  color: #667d6c;
-  margin-top: 8px;
-}
-
-.nav-label {
-  font-size: 10px;
-  color: #758c7b;
-  margin-left: 13px;
-  margin-bottom: 13px;
-}
-
 .nav-item {
   width: 100%;
   display: flex;
@@ -128,13 +110,6 @@
   color: #c9d6c5;
   font-weight: 500;
   display: block;
-}
-
-.server-health div > span {
-  font-size: 9px;
-  color: #728b78;
-  display: block;
-  margin-top: 5px;
 }
 
 .sidebar-bottom > p {

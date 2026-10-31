@@ -8,14 +8,17 @@ import (
 )
 
 type Audio struct {
-	Index int
-	Codec string
+	Index                                 int
+	Codec                                 string
+	Language, Title                       string
+	Default, Original, Commentary, Dubbed bool
 }
 type Source struct {
-	Filename   string
-	VideoCodec string
-	Duration   float64
-	Audio      []Audio
+	OriginalLanguage string
+	Filename         string
+	VideoCodec       string
+	Duration         float64
+	Audio            []Audio
 }
 
 type Plan struct {
@@ -32,12 +35,14 @@ func SelectPlan(source Source, audio *int, compatible bool, start float64) (Plan
 		return Plan{}, ErrPosition
 	}
 	plan := Plan{Mode: "transcode", Audio: -1, Start: start}
-	first := -1
+	first := defaultAudioIndex(source.Audio)
+	plan.Audio = PreferredAudio(source.Audio, source.OriginalLanguage)
 	audioCodec := ""
-	if len(source.Audio) > 0 {
-		first = source.Audio[0].Index
-		plan.Audio = first
-		audioCodec = source.Audio[0].Codec
+	for _, track := range source.Audio {
+		if track.Index == plan.Audio {
+			audioCodec = track.Codec
+			break
+		}
 	}
 	if audio != nil {
 		found := false

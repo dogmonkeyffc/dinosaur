@@ -55,10 +55,10 @@ func requestPlan(r *http.Request, item media.Item) (playback.Plan, error) {
 		}
 		audio = &index
 	}
-	source := playback.Source{Filename: item.Filename, Duration: item.Duration, VideoCodec: item.VideoCodec}
+	source := playback.Source{OriginalLanguage: item.OriginalLanguage, Filename: item.Filename, Duration: item.Duration, VideoCodec: item.VideoCodec}
 	for _, track := range item.Tracks {
 		if track.Type == "audio" {
-			source.Audio = append(source.Audio, playback.Audio{Index: track.Index, Codec: track.Codec})
+			source.Audio = append(source.Audio, playback.Audio{Index: track.Index, Codec: track.Codec, Language: track.Language, Title: track.Title, Default: track.Default != nil && *track.Default, Original: track.Original, Commentary: track.Commentary, Dubbed: track.Dubbed})
 		}
 	}
 	mode := r.URL.Query().Get("mode")

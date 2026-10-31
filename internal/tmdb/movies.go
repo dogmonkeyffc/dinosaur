@@ -11,12 +11,13 @@ import (
 )
 
 type movieResult struct {
-	ID            int64  `json:"id"`
-	Title         string `json:"title"`
-	OriginalTitle string `json:"original_title"`
-	Overview      string `json:"overview"`
-	ReleaseDate   string `json:"release_date"`
-	PosterPath    string `json:"poster_path"`
+	OriginalLanguage string `json:"original_language"`
+	ID               int64  `json:"id"`
+	Title            string `json:"title"`
+	OriginalTitle    string `json:"original_title"`
+	Overview         string `json:"overview"`
+	ReleaseDate      string `json:"release_date"`
+	PosterPath       string `json:"poster_path"`
 }
 
 func movieYear(date string) int {
@@ -70,7 +71,7 @@ func (c *Client) Movie(ctx context.Context, settings metadata.Settings, id int64
 	}
 	movie := metadata.Movie{TMDBID: id, Title: result.Title, OriginalTitle: result.OriginalTitle,
 		Overview: result.Overview, Year: movieYear(result.ReleaseDate), ReleaseDate: result.ReleaseDate,
-		PosterPath: result.PosterPath, Language: settings.Language, Status: "matched"}
+		PosterPath: result.PosterPath, OriginalLanguage: result.OriginalLanguage, Language: settings.Language, Status: "matched"}
 	if strings.HasPrefix(settings.Language, "zh-") {
 		localizeChinese(&movie, settings.Language, result.Translations.Items)
 		if !strings.ContainsFunc(movie.Title, func(char rune) bool { return unicode.Is(unicode.Han, char) }) {

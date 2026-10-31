@@ -9,7 +9,7 @@ import (
 )
 
 func (s *Store) MediaSnapshot(ctx context.Context, libraryID int64) (map[string]media.Item, error) {
-	rows, err := s.DB.QueryContext(ctx, `SELECT id,relative_path,size,modified_ns,poster_key,probe_error,duration FROM media_items WHERE library_id=?`, libraryID)
+	rows, err := s.DB.QueryContext(ctx, `SELECT id,relative_path,size,modified_ns,poster_key,probe_error,duration,tracks_json FROM media_items WHERE library_id=?`, libraryID)
 	if err != nil {
 		return nil, err
 	}
@@ -17,8 +17,12 @@ func (s *Store) MediaSnapshot(ctx context.Context, libraryID int64) (map[string]
 	result := make(map[string]media.Item)
 	for rows.Next() {
 		var item media.Item
+		var tracks string
 		item.LibraryID = libraryID
-		if err := rows.Scan(&item.ID, &item.RelativePath, &item.Size, &item.ModifiedNS, &item.PosterKey, &item.ProbeError, &item.Duration); err != nil {
+		if err := rows.Scan(&item.ID, &item.RelativePath, &item.Size, &item.ModifiedNS, &item.PosterKey, &item.ProbeError, &item.Duration, &tracks); err != nil {
+			return nil, err
+		}
+		if err := json.Unmarshal([]byte(tracks), &item.Tracks); err != nil {
 			return nil, err
 		}
 		result[item.RelativePath] = item

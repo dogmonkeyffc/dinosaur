@@ -15,13 +15,13 @@ func (s *Store) SaveMovieMetadata(ctx context.Context, id int64, movie metadata.
 		return err
 	}
 	_, err = s.DB.ExecContext(ctx, `INSERT INTO movie_metadata
- (media_id,tmdb_id,title,original_title,overview,year,release_date,language,poster_key,aliases,status,message,updated_at,candidates_json)
- VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(media_id) DO UPDATE SET
+ (media_id,tmdb_id,title,original_title,overview,year,release_date,language,poster_key,aliases,status,message,updated_at,candidates_json,original_language)
+ VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(media_id) DO UPDATE SET
  tmdb_id=excluded.tmdb_id,title=excluded.title,original_title=excluded.original_title,overview=excluded.overview,
  year=excluded.year,release_date=excluded.release_date,language=excluded.language,poster_key=excluded.poster_key,
- aliases=excluded.aliases,status=excluded.status,message=excluded.message,updated_at=excluded.updated_at,candidates_json=excluded.candidates_json`,
+ aliases=excluded.aliases,status=excluded.status,message=excluded.message,updated_at=excluded.updated_at,candidates_json=excluded.candidates_json,original_language=excluded.original_language`,
 		id, movie.TMDBID, movie.Title, movie.OriginalTitle, movie.Overview, movie.Year, movie.ReleaseDate,
-		movie.Language, movie.PosterKey, movie.Aliases, movie.Status, movie.Message, time.Now().Unix(), string(candidates))
+		movie.Language, movie.PosterKey, movie.Aliases, movie.Status, movie.Message, time.Now().Unix(), string(candidates), movie.OriginalLanguage)
 	return err
 }
 

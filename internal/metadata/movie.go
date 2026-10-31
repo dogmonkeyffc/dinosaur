@@ -7,20 +7,21 @@ import (
 
 // Movie is provider information, independent of media files and HTTP DTOs.
 type Movie struct {
-	Candidates    []Candidate `json:"candidates,omitempty"`
-	TMDBID        int64       `json:"tmdb_id"`
-	Title         string      `json:"title"`
-	OriginalTitle string      `json:"original_title"`
-	Overview      string      `json:"overview"`
-	Year          int         `json:"year"`
-	ReleaseDate   string      `json:"release_date"`
-	Language      string      `json:"language"`
-	Status        string      `json:"status"`
-	Message       string      `json:"message"`
-	UpdatedAt     int64       `json:"updated_at"`
-	PosterKey     string      `json:"-"`
-	PosterPath    string      `json:"-"`
-	Aliases       string      `json:"-"`
+	OriginalLanguage string      `json:"original_language,omitempty"`
+	Candidates       []Candidate `json:"candidates,omitempty"`
+	TMDBID           int64       `json:"tmdb_id"`
+	Title            string      `json:"title"`
+	OriginalTitle    string      `json:"original_title"`
+	Overview         string      `json:"overview"`
+	Year             int         `json:"year"`
+	ReleaseDate      string      `json:"release_date"`
+	Language         string      `json:"language"`
+	Status           string      `json:"status"`
+	Message          string      `json:"message"`
+	UpdatedAt        int64       `json:"updated_at"`
+	PosterKey        string      `json:"-"`
+	PosterPath       string      `json:"-"`
+	Aliases          string      `json:"-"`
 }
 
 type Candidate struct {

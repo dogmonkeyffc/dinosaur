@@ -38,7 +38,7 @@ func Probe(ctx context.Context, executable, path string) (ProbeResult, error) {
 	}
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
-	cmd := exec.CommandContext(ctx, executable, "-v", "error", "-protocol_whitelist", "file,pipe", "-show_entries", "format=duration,format_name:stream=index,codec_type,codec_name,width,height,channels:stream_tags=language,title:stream_disposition=attached_pic", "-of", "json", path)
+	cmd := exec.CommandContext(ctx, executable, "-v", "error", "-protocol_whitelist", "file,pipe", "-show_entries", "format=duration,format_name:stream=index,codec_type,codec_name,width,height,channels:stream_tags=language,title:stream_disposition=attached_pic,default,original,comment,dub", "-of", "json", path)
 	cmd.WaitDelay = time.Second
 	output := &boundedBuffer{limit: 1024 * 1024}
 	cmd.Stdout = output
@@ -64,6 +64,10 @@ func Probe(ctx context.Context, executable, path string) (ProbeResult, error) {
 			} `json:"tags"`
 			Disposition struct {
 				AttachedPicture int `json:"attached_pic"`
+				Default         int `json:"default"`
+				Original        int `json:"original"`
+				Commentary      int `json:"comment"`
+				Dubbed          int `json:"dub"`
 			} `json:"disposition"`
 		} `json:"streams"`
 	}
@@ -82,7 +86,8 @@ func Probe(ctx context.Context, executable, path string) (ProbeResult, error) {
 			result.Height = stream.Height
 		}
 		if stream.Type == "audio" || stream.Type == "subtitle" {
-			result.Tracks = append(result.Tracks, Track{Index: stream.Index, Type: stream.Type, Codec: stream.Codec, Channels: stream.Channels, Language: stream.Tags.Language, Title: stream.Tags.Title})
+			isDefault := stream.Disposition.Default != 0
+			result.Tracks = append(result.Tracks, Track{Default: &isDefault, Original: stream.Disposition.Original != 0, Commentary: stream.Disposition.Commentary != 0, Dubbed: stream.Disposition.Dubbed != 0, Index: stream.Index, Type: stream.Type, Codec: stream.Codec, Channels: stream.Channels, Language: stream.Tags.Language, Title: stream.Tags.Title})
 		}
 	}
 	if result.VideoCodec == "" {

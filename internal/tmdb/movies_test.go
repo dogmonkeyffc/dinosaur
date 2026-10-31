@@ -18,7 +18,7 @@ func TestMovieSearchAndChineseFallback(t *testing.T) {
 		if r.Header.Get("Authorization") != "Bearer private-secret" || r.URL.Query().Get("language") != "zh-CN" {
 			t.Fatal("missing authentication or language")
 		}
-		body := `{"id":1,"title":"Original","original_title":"Original","release_date":"2004-03-17","overview":"English","poster_path":"/abc.jpg","translations":{"translations":[{"iso_639_1":"zh","iso_3166_1":"TW","data":{"title":"中文譯名","overview":"中文簡介"}}]},"alternative_titles":{"titles":[{"title":"Other alias"}]}}`
+		body := `{"id":1,"title":"Original","original_title":"Original","original_language":"fr","release_date":"2004-03-17","overview":"English","poster_path":"/abc.jpg","translations":{"translations":[{"iso_639_1":"zh","iso_3166_1":"TW","data":{"title":"中文譯名","overview":"中文簡介"}}]},"alternative_titles":{"titles":[{"title":"Other alias"}]}}`
 		if r.URL.Path == "/3/search/movie" {
 			if r.URL.Query().Get("query") != "The Chorus" || r.URL.Query().Get("primary_release_year") != "2004" {
 				t.Fatal("incorrect search query")
@@ -34,7 +34,7 @@ func TestMovieSearchAndChineseFallback(t *testing.T) {
 		t.Fatalf("invalid search: %+v %v", candidates, err)
 	}
 	movie, err := client.Movie(context.Background(), settings, 1)
-	if err != nil || movie.Title != "中文譯名" || movie.Language != "zh-TW" || movie.Overview != "中文簡介" || !strings.Contains(movie.Aliases, "Other alias") {
+	if err != nil || movie.Title != "中文譯名" || movie.Language != "zh-TW" || movie.OriginalLanguage != "fr" || movie.Overview != "中文簡介" || !strings.Contains(movie.Aliases, "Other alias") {
 		t.Fatalf("invalid localized details: %+v %v", movie, err)
 	}
 }

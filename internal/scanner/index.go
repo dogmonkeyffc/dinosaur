@@ -31,6 +31,12 @@ func (m *Manager) index(item library.Library, relative string, old media.Item, j
 		return err
 	}
 	unchanged := old.ID != 0 && old.Size == info.Size() && old.ModifiedNS == info.ModTime().UnixNano() && !old.ProbeError
+	for _, track := range old.Tracks {
+		if track.Type == "audio" && track.Default == nil {
+			unchanged = false
+			break
+		}
+	}
 	if unchanged {
 		if err := m.db.TouchMedia(m.ctx, old.ID, job.ID); err != nil {
 			return err

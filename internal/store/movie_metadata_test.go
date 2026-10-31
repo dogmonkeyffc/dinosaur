@@ -38,7 +38,7 @@ func TestMetadataSurvivesRescanAndKeepsProgress(t *testing.T) {
 	if err := db.SavePlaybackProgress(ctx, u.ID, playback.Progress{MediaID: id, Position: 120}); err != nil {
 		t.Fatal(err)
 	}
-	info := metadata.Movie{TMDBID: 1, Title: "放牛班的春天", OriginalTitle: "Les Choristes", Aliases: "The Chorus\n唱诗班", Year: 2004, Status: "matched", Overview: "中文简介"}
+	info := metadata.Movie{TMDBID: 1, Title: "放牛班的春天", OriginalLanguage: "fr", OriginalTitle: "Les Choristes", Aliases: "The Chorus\n唱诗班", Year: 2004, Status: "matched", Overview: "中文简介"}
 	if err := db.SaveMovieMetadata(ctx, id, info); err != nil {
 		t.Fatal(err)
 	}
@@ -57,7 +57,7 @@ func TestMetadataSurvivesRescanAndKeepsProgress(t *testing.T) {
 		t.Fatal(err)
 	}
 	item, err := db.MediaByID(ctx, id)
-	if err != nil || item.Title != info.Title || item.Metadata.Status != "matched" || item.Duration != 1100 || item.Filename != "The.Chorus.2004.mkv" {
+	if err != nil || item.Title != info.Title || item.Metadata.Status != "matched" || item.Duration != 1100 || item.OriginalLanguage != "fr" || item.Metadata.OriginalLanguage != "fr" || item.Filename != "The.Chorus.2004.mkv" {
 		t.Fatalf("metadata or file identity changed: %+v %v", item, err)
 	}
 	for _, query := range []string{"放牛班", "Les Choristes", "The Chorus", "唱诗班"} {

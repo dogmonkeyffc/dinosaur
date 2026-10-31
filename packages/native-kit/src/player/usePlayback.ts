@@ -39,9 +39,14 @@ export function usePlayback(
       if (started.current) queue.save(position.current).catch(report);
     };
     const listeners = [
-      player.addListener('sourceLoad', () => {
+      player.addListener('sourceLoad', ({ availableAudioTracks }) => {
         if (started.current) return;
         player.currentTime = info.plan.mode === 'direct' ? start : 0;
+        if (info.plan.mode === 'direct') {
+          const ordinal = info.audio_tracks.findIndex((track) => track.index === info.plan.audio);
+          const selected = availableAudioTracks[ordinal];
+          if (selected) player.audioTrack = selected;
+        }
         player.subtitleTrack = null;
         started.current = true;
         player.play();

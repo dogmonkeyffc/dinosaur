@@ -29,7 +29,7 @@ func TestTVNamespaceSearchAndChineseNames(t *testing.T) {
 			if r.URL.Query().Get("append_to_response") != "translations,alternative_titles" {
 				t.Fatal("missing translations")
 			}
-			body = `{"id":1,"name":"Example","original_name":"Example","first_air_date":"2020-01-02","translations":{"translations":[{"iso_639_1":"zh","iso_3166_1":"CN","data":{"name":"中文剧名","overview":"中文简介"}}]},"alternative_titles":{"results":[{"title":"Another alias"}]}}`
+			body = `{"id":1,"name":"Example","original_name":"Example","original_language":"ko","first_air_date":"2020-01-02","translations":{"translations":[{"iso_639_1":"zh","iso_3166_1":"CN","data":{"name":"中文剧名","overview":"中文简介"}}]},"alternative_titles":{"results":[{"title":"Another alias"}]}}`
 		default:
 			t.Fatalf("unexpected endpoint %s", r.URL.Path)
 		}
@@ -40,7 +40,7 @@ func TestTVNamespaceSearchAndChineseNames(t *testing.T) {
 		t.Fatalf("search=%+v %v", results, err)
 	}
 	info, err := provider.Movie(context.Background(), settings, 1)
-	if err != nil || info.Title != "中文剧名" || info.Overview != "中文简介" || !strings.Contains(info.Aliases, "Another alias") {
+	if err != nil || info.Title != "中文剧名" || info.OriginalLanguage != "ko" || info.Overview != "中文简介" || !strings.Contains(info.Aliases, "Another alias") {
 		t.Fatalf("details=%+v %v", info, err)
 	}
 }

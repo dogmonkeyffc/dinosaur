@@ -14,12 +14,13 @@ import (
 type Television struct{ *Client }
 
 type seriesResult struct {
-	ID           int64  `json:"id"`
-	Name         string `json:"name"`
-	OriginalName string `json:"original_name"`
-	Overview     string `json:"overview"`
-	FirstAirDate string `json:"first_air_date"`
-	PosterPath   string `json:"poster_path"`
+	OriginalLanguage string `json:"original_language"`
+	ID               int64  `json:"id"`
+	Name             string `json:"name"`
+	OriginalName     string `json:"original_name"`
+	Overview         string `json:"overview"`
+	FirstAirDate     string `json:"first_air_date"`
+	PosterPath       string `json:"poster_path"`
 }
 
 func (c Television) Search(ctx context.Context, settings metadata.Settings, title string, year int) ([]metadata.Candidate, error) {
@@ -62,7 +63,7 @@ func (c Television) Movie(ctx context.Context, settings metadata.Settings, id in
 		return metadata.Movie{}, ErrUnavailable
 	}
 	info := metadata.Movie{TMDBID: id, Title: response.Name, OriginalTitle: response.OriginalName, Overview: response.Overview,
-		Year: movieYear(response.FirstAirDate), ReleaseDate: response.FirstAirDate, PosterPath: response.PosterPath, Language: settings.Language, Status: "matched"}
+		Year: movieYear(response.FirstAirDate), ReleaseDate: response.FirstAirDate, PosterPath: response.PosterPath, OriginalLanguage: response.OriginalLanguage, Language: settings.Language, Status: "matched"}
 	aliases := []string{response.Name, response.OriginalName}
 	for i := range response.Translations.Items {
 		item := &response.Translations.Items[i]

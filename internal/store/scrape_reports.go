@@ -68,13 +68,13 @@ func (s *Store) ScrapeJobDetail(ctx context.Context, id int64, filter metadata.R
 	if err := tx.QueryRowContext(ctx, `SELECT count(*) FROM scrape_job_items WHERE job_id=?`, id).Scan(&result.Total); err != nil {
 		return result, err
 	}
-	rows, err := tx.QueryContext(ctx, `SELECT id,COALESCE(media_id,0),title,filename,library_name,status,message,tmdb_id,updated_at,COALESCE(series_id,0) FROM scrape_job_items WHERE job_id=? ORDER BY id LIMIT ? OFFSET ?`, id, filter.PageSize, (filter.Page-1)*filter.PageSize)
+	rows, err := tx.QueryContext(ctx, `SELECT id,COALESCE(media_id,0),title,filename,library_name,status,message,tmdb_id,updated_at,COALESCE(series_id,0),bangumi_id FROM scrape_job_items WHERE job_id=? ORDER BY id LIMIT ? OFFSET ?`, id, filter.PageSize, (filter.Page-1)*filter.PageSize)
 	if err != nil {
 		return result, err
 	}
 	for rows.Next() {
 		var item metadata.JobItem
-		if err := rows.Scan(&item.ID, &item.MediaID, &item.Title, &item.Filename, &item.Library, &item.Status, &item.Message, &item.TMDBID, &item.UpdatedAt, &item.SeriesID); err != nil {
+		if err := rows.Scan(&item.ID, &item.MediaID, &item.Title, &item.Filename, &item.Library, &item.Status, &item.Message, &item.TMDBID, &item.UpdatedAt, &item.SeriesID, &item.BangumiID); err != nil {
 			rows.Close()
 			return result, err
 		}

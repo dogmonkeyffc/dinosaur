@@ -18,13 +18,14 @@ func (s *Server) startSeriesScrape(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		LibraryID int64 `json:"library_id"`
 		SeriesID  int64 `json:"series_id"`
+		BangumiID int64 `json:"bangumi_id"`
 		TMDBID    int64 `json:"tmdb_id"`
 		Refresh   bool  `json:"refresh"`
 	}
 	if !decodeJSON(w, r, &body) {
 		return
 	}
-	request := metadata.ScrapeRequest{LibraryID: body.LibraryID, MediaID: body.SeriesID, TMDBID: body.TMDBID, Refresh: body.Refresh}
+	request := metadata.ScrapeRequest{LibraryID: body.LibraryID, MediaID: body.SeriesID, TMDBID: body.TMDBID, BangumiID: body.BangumiID, Refresh: body.Refresh}
 	job, err := s.tvScraper.Start(r.Context(), request)
 	if s.scrapeError(w, r, err) {
 		return

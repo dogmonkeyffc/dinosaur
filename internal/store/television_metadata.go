@@ -20,7 +20,7 @@ func (s TelevisionRepository) SaveMovieMetadata(ctx context.Context, id int64, i
 
 func (s TelevisionRepository) RecordScrapeFailure(ctx context.Context, id int64, status, message string) error {
 	_, err := s.DB.ExecContext(ctx, `UPDATE tv_series SET metadata_json=json_set(metadata_json,
- '$.status',CASE WHEN COALESCE(json_extract(metadata_json,'$.tmdb_id'),0)>0 THEN json_extract(metadata_json,'$.status') ELSE ? END,
+ '$.status',CASE WHEN (COALESCE(json_extract(metadata_json,'$.tmdb_id'),0)>0 OR COALESCE(json_extract(metadata_json,'$.bangumi_id'),0)>0) THEN json_extract(metadata_json,'$.status') ELSE ? END,
  '$.message',?,'$.updated_at',?) WHERE id=?`, status, message, time.Now().Unix(), id)
 	return err
 }
@@ -35,6 +35,6 @@ func (s TelevisionRepository) RecordScrapeReview(ctx context.Context, id int64, 
 		return err
 	}
 	_, err = s.DB.ExecContext(ctx, `UPDATE tv_series SET metadata_json=json_set(metadata_json,'$.status','needs_review',
- '$.message',?,'$.candidates',json(?),'$.updated_at',?) WHERE id=? AND COALESCE(json_extract(metadata_json,'$.tmdb_id'),0)=0`, message, string(raw), time.Now().Unix(), id)
+ '$.message',?,'$.candidates',json(?),'$.updated_at',?) WHERE id=? AND COALESCE(json_extract(metadata_json,'$.tmdb_id'),0)=0 AND COALESCE(json_extract(metadata_json,'$.bangumi_id'),0)=0`, message, string(raw), time.Now().Unix(), id)
 	return err
 }

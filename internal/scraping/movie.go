@@ -13,41 +13,57 @@ func (m *Manager) scrape(ctx context.Context, settings metadata.Settings, reques
 	if err != nil {
 		return "failed", err
 	}
-	if current.Metadata != nil && current.Metadata.TMDBID > 0 && !request.Refresh {
+	if current.Metadata.Matched() && !request.Refresh {
 		return "skipped", nil
 	}
-	id := request.TMDBID
-	if id == 0 && request.Refresh && current.Metadata != nil {
-		id = current.Metadata.TMDBID
+	source, id := "tmdb", request.TMDBID
+	if request.BangumiID > 0 {
+		source, id = "bangumi", request.BangumiID
 	}
-	if id == 0 {
-		query, year := media.ParseFilename(item.Filename)
-		candidates, err := m.provider.Search(ctx, settings, query, year)
+	if id == 0 && request.Refresh {
+		source, id = current.Metadata.Identity()
+	}
+	automatic := id == 0
+	query, year := media.ParseFilename(item.Filename)
+	if automatic {
+		candidates, err := m.search(ctx, settings, query, year, false)
 		if err != nil {
 			return m.failure(ctx, item.ID, err)
 		}
-		if len(candidates) == 0 && year > 0 {
-			candidates, err = m.provider.Search(ctx, settings, query, 0)
-			if err != nil {
-				return m.failure(ctx, item.ID, err)
+		candidate, matched := metadata.AutoCandidate(query, year, candidates)
+		if !matched {
+			return "review", m.repo.RecordScrapeReview(ctx, item.ID, metadata.TopCandidates(query, year, candidates))
+		}
+		source, id = candidate.Provider, candidate.ID
+	}
+	provider := m.source(source)
+	if provider == nil {
+		return m.failure(ctx, item.ID, metadata.ErrProviderUnavailable)
+	}
+	movie, err := provider.Movie(ctx, providerSettings(settings, source), id)
+	if err != nil && automatic && source != "bangumi" && m.fallback != nil {
+		candidates, fallbackErr := m.secondary(ctx, settings, query, year)
+		if fallbackErr == nil {
+			if selected, matched := metadata.AutoCandidate(query, year, candidates); matched {
+				source, id, provider = "bangumi", selected.ID, m.fallback
+				movie, err = provider.Movie(ctx, providerSettings(settings, source), id)
+			} else if len(candidates) > 0 {
+				return "review", m.repo.RecordScrapeReview(ctx, item.ID, metadata.TopCandidates(query, year, candidates))
 			}
 		}
-		var matched bool
-		id, matched = metadata.AutoMatch(query, year, candidates)
-		if !matched {
-			err := m.repo.RecordScrapeReview(ctx, item.ID, metadata.TopCandidates(query, year, candidates))
-			return "review", err
-		}
 	}
-	movie, err := m.provider.Movie(ctx, settings, id)
 	if err != nil {
 		return m.failure(ctx, item.ID, err)
 	}
 	if movie.PosterPath != "" {
-		key, err := m.provider.CachePoster(ctx, movie.PosterPath, m.dataDir)
+		key, err := provider.CachePoster(ctx, movie.PosterPath, m.dataDir)
 		if err != nil {
 			movie.Message = strings.Trim(movie.Message+",poster_unavailable", ",")
-			if current.Metadata != nil && current.Metadata.TMDBID == id {
+			previousSource, previousID := current.Metadata.Identity()
+			if source == "" {
+				source = "tmdb"
+			}
+			if previousSource == source && previousID == id {
 				movie.PosterKey = current.PosterKey
 			}
 		} else {
@@ -58,6 +74,13 @@ func (m *Manager) scrape(ctx context.Context, settings metadata.Settings, reques
 		return "failed", err
 	}
 	return "matched", nil
+}
+
+func providerSettings(settings metadata.Settings, source string) metadata.Settings {
+	if source == "bangumi" {
+		return metadata.Settings{Language: settings.Language}
+	}
+	return settings
 }
 
 func (m *Manager) failure(ctx context.Context, id int64, cause error) (string, error) {

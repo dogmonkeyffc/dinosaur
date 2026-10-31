@@ -1,3 +1,5 @@
+import { Select } from '../components/Select';
+import { SourceReference } from './SourceReference';
 import { InfoTip } from '../components/InfoTip';
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '../auth/AuthProvider';
@@ -13,20 +15,24 @@ export function CandidateList({
   disabled = false,
 }: {
   candidates: Candidate[];
-  select: (id: number) => void;
+  select: (id: number, provider?: string) => void;
   disabled?: boolean;
 }) {
   return (
     <div className="candidate-list">
       {candidates.slice(0, 5).map((item) => (
-        <article key={item.id} className="metadata-candidate">
+        <article key={`${item.provider || 'tmdb'}:${item.id}`} className="metadata-candidate">
           <strong>
             {item.title} ({item.year || '年份未知'})
           </strong>
           <span>{item.original_title}</span>
           <p>{item.overview}</p>
-          <button className="button secondary" disabled={disabled} onClick={() => select(item.id)}>
-            选择此候选 · {item.id}
+          <button
+            className="button secondary"
+            disabled={disabled}
+            onClick={() => select(item.id, item.provider)}
+          >
+            {item.provider === 'bangumi' ? 'Bangumi' : 'TMDB'} · {item.id} · 选择
           </button>
         </article>
       ))}
@@ -49,7 +55,8 @@ export function MetadataEditor({
 }) {
   const { user } = useAuth();
   const admin = user?.role === 'admin';
-  const matched = (info?.tmdb_id || 0) > 0;
+  const matched = !!(info?.tmdb_id || info?.bangumi_id);
+  const [source, setSource] = useState(info?.bangumi_id ? 'bangumi' : 'tmdb');
   const endpoint = `/api/admin/${kind === 'tv' ? 'series' : 'media'}/${id}/metadata/candidates`;
   const [query, setQuery] = useState<string | null>(null);
   const ambiguous = !info?.candidates?.length && info?.message?.split(',').includes('ambiguous');
@@ -58,11 +65,11 @@ export function MetadataEditor({
   );
   const jobs = useJobs(kind, reload);
   const candidates = search.data?.candidates || info?.candidates || [];
-  const start = (tmdbID?: number) =>
+  const start = (providerID?: number, provider = 'tmdb') =>
     jobs.start({
       [kind === 'tv' ? 'series_id' : 'media_id']: id,
-      refresh: matched && !tmdbID,
-      ...(tmdbID ? { tmdb_id: tmdbID } : {}),
+      refresh: matched && !providerID,
+      ...(providerID ? { [provider === 'bangumi' ? 'bangumi_id' : 'tmdb_id']: providerID } : {}),
     });
   function find(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -79,21 +86,13 @@ export function MetadataEditor({
       {info?.overview && <p className="movie-overview">{info.overview}</p>}
       <p className="movie-metadata-status">
         {matched
-          ? '已匹配 TMDB'
+          ? '已匹配'
           : info?.status === 'needs_review'
             ? '需要确认匹配'
             : info?.status === 'failed'
               ? '刮削失败'
               : '尚未识别资料'}{' '}
-        {matched && (
-          <a
-            href={`https://www.themoviedb.org/${kind === 'tv' ? 'tv' : 'movie'}/${info!.tmdb_id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            TMDB · {info!.tmdb_id}
-          </a>
-        )}
+        {matched && <SourceReference item={info} kind={kind} />}
       </p>
       {info?.message && <p className="field-help">{scrapeMessage(info.message)}</p>}
       {admin && (
@@ -145,18 +144,31 @@ export function MetadataEditor({
             <form
               onSubmit={(event) => {
                 event.preventDefault();
-                start(Number(new FormData(event.currentTarget).get('tmdb_id')));
+                start(Number(new FormData(event.currentTarget).get('provider_id')), source);
               }}
             >
-              <label htmlFor={`metadata-tmdb-${kind}-${id}`}>
+              <label>
+                资料来源
+                <Select value={source} onValueChange={setSource}>
+                  <option value="tmdb">TMDB</option>
+                  <option value="bangumi">Bangumi</option>
+                </Select>
+              </label>
+              <label htmlFor={`metadata-provider-${kind}-${id}`}>
                 <span className="field-label">
-                  <span id={`metadata-tmdb-label-${kind}-${id}`}>TMDB ID</span>
-                  <InfoTip label="TMDB ID 位置">TMDB 电影或剧集详情页网址中的数字 ID。</InfoTip>
+                  <span id={`metadata-provider-label-${kind}-${id}`}>
+                    {source === 'bangumi' ? 'Bangumi ID' : 'TMDB ID'}
+                  </span>
+                  <InfoTip label="条目 ID 位置">
+                    {source === 'bangumi'
+                      ? 'Bangumi 条目网址 subject/ 后的数字 ID。'
+                      : 'TMDB 电影或剧集详情页网址中的数字 ID。'}
+                  </InfoTip>
                 </span>
                 <input
-                  aria-labelledby={`metadata-tmdb-label-${kind}-${id}`}
-                  id={`metadata-tmdb-${kind}-${id}`}
-                  name="tmdb_id"
+                  aria-labelledby={`metadata-provider-label-${kind}-${id}`}
+                  id={`metadata-provider-${kind}-${id}`}
+                  name="provider_id"
                   type="number"
                   min={1}
                   max={2147483647}

@@ -39,6 +39,7 @@ type Provider interface {
 type Manager struct {
 	repo        Repository
 	provider    Provider
+	fallback    Provider
 	dataDir     string
 	libraryType string
 	ctx         context.Context
@@ -75,11 +76,12 @@ func (m *Manager) startLocked(ctx context.Context, request metadata.ScrapeReques
 	if m.active {
 		return metadata.Job{}, ErrRunning
 	}
-	if request.LibraryID < 0 || request.MediaID < 0 || request.TMDBID < 0 || request.TMDBID > 2147483647 ||
+	if request.BangumiID < 0 || request.BangumiID > 2147483647 || (request.BangumiID > 0 && (request.MediaID == 0 || request.TMDBID > 0 || m.fallback == nil)) ||
+		request.LibraryID < 0 || request.MediaID < 0 || request.TMDBID < 0 || request.TMDBID > 2147483647 ||
 		(request.Refresh && request.MediaID == 0) || (request.TMDBID > 0 && request.MediaID == 0) {
 		return metadata.Job{}, ErrRequest
 	}
-	if request.TMDBID > 0 {
+	if request.TMDBID > 0 || request.BangumiID > 0 {
 		request.Refresh = true
 	}
 	if err := m.validateScope(ctx, request); err != nil {
@@ -89,7 +91,7 @@ func (m *Manager) startLocked(ctx context.Context, request metadata.ScrapeReques
 	if err != nil {
 		return metadata.Job{}, err
 	}
-	if settings.Credential == "" {
+	if settings.Credential == "" && (m.fallback == nil || request.TMDBID > 0) {
 		return metadata.Job{}, metadata.ErrMissingCredential
 	}
 	items, err := m.repo.ScrapeTargets(ctx, request)

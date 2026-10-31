@@ -42,10 +42,10 @@ export function scanDescription(scan: Scan) {
 }
 const scrapeMessages: Record<string, string> = {
   ambiguous: '有多个相近候选，请手动匹配',
-  not_found: '未找到匹配资料，请更换关键词或填写 TMDB ID',
-  invalid_credential: 'TMDB 凭据无效，请检查元数据设置',
-  rate_limited: 'TMDB 请求过于频繁，请稍后重试',
-  provider_unavailable: '无法读取 TMDB 资料，请检查网络后重试',
+  not_found: '未找到匹配资料，请更换关键词或指定条目 ID',
+  invalid_credential: '资料来源拒绝访问，请检查元数据设置',
+  rate_limited: '资料来源请求过于频繁，请稍后重试',
+  provider_unavailable: '无法读取资料来源，请检查网络后重试',
   poster_unavailable: '海报未下载成功，保留现有封面',
   no_chinese_title: '暂无中文译名，已保留原名',
   interrupted: '任务已中断，可以重新刮削',

@@ -64,3 +64,12 @@
 .metadata-card .select-control {
   margin-top: 8px;
 }
+
+.metadata-source-order {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 24px;
+}

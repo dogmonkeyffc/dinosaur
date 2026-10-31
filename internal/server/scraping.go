@@ -91,11 +91,11 @@ func (s *Server) scrapeError(w http.ResponseWriter, r *http.Request, err error) 
 	case errors.Is(err, metadata.ErrMissingCredential):
 		fail(w, 400, "tmdb_not_configured", "TMDB credential is not configured")
 	case errors.Is(err, metadata.ErrProviderAuth):
-		fail(w, 422, "tmdb_invalid_credential", "TMDB rejected the credential")
+		fail(w, 422, "metadata_access_denied", "metadata provider rejected access")
 	case errors.Is(err, metadata.ErrProviderRateLimited):
-		fail(w, 503, "tmdb_rate_limited", "TMDB rate limit exceeded")
+		fail(w, 503, "metadata_rate_limited", "metadata provider rate limit exceeded")
 	case errors.Is(err, metadata.ErrProviderUnavailable):
-		fail(w, 502, "tmdb_unavailable", "cannot connect to TMDB")
+		fail(w, 502, "metadata_unavailable", "cannot connect to metadata provider")
 	case errors.Is(err, scraping.ErrRunning):
 		fail(w, 409, "scrape_running", "a scraping job is already running")
 	case errors.Is(err, scraping.ErrRequest):

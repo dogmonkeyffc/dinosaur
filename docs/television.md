@@ -55,10 +55,14 @@ TMDB 实现参考官方 [TV 搜索](https://developer.themoviedb.org/reference/s
 | GET | `/api/series/{id}/poster` | 登录保护的本地海报 |
 | GET | `/api/playback/continue?type=tv` | 当前用户按剧集归并的继续观看；省略 `type` 仍返回电影 |
 | GET | `/api/playback/{id}` | 单集使用媒体文件 ID；额外返回 `next_episode` |
-| POST | `/api/admin/tv/metadata/jobs` | 刮削未识别剧集，支持 `library_id`；单剧支持 `series_id`、`refresh` 或 `tmdb_id` |
+| POST | `/api/admin/tv/metadata/jobs` | 刮削未识别剧集，支持 `library_id`；单剧支持 `series_id`、`refresh` 或 `tmdb_id` / `bangumi_id`（二选一） |
 | GET | `/api/admin/tv/metadata/jobs` | 剧集刮削历史，支持分页和状态筛选 |
 | GET | `/api/admin/series/{id}/metadata/candidates` | 剧集候选，支持 `q`、`year`（0 不限年份） |
 
 剧集单集的进度、流和字幕仍使用 `/api/playback/{媒体文件ID}/...`；剧集 ID 只用于剧集资料与分季浏览。电影列表 `/api/media` 和默认电影继续观看不会混入电视剧。
 
 新增迁移 `009_television.sql`，保留原电影索引和观看记录。上线前按现有部署说明备份数据库；旧程序不支持浏览新增的剧集表。
+
+## 第二资料来源
+
+TMDB 没有明确匹配、不可用或尚未配置时，整剧资料会尝试 Bangumi。候选区分来源；可在匹配更正中选择 Bangumi 并填写条目 ID，API 对应 `bangumi_id`（与 `tmdb_id` 二选一）。电影与剧集条目不会混配。已匹配的整剧按原来源刷新，失败保留原资料和观看记录；普通扫描不重复刮削。Bangumi 仅提供条目层资料，不改变本地分季、分集结构。

@@ -24,6 +24,7 @@ export interface Library {
   scan?: Scan;
 }
 export interface Candidate {
+  provider?: 'tmdb' | 'bangumi';
   id: number;
   title: string;
   original_title: string;
@@ -32,6 +33,7 @@ export interface Candidate {
 }
 export interface Metadata {
   tmdb_id: number;
+  bangumi_id?: number;
   status: string;
   overview: string;
   original_title: string;
@@ -117,6 +119,7 @@ export interface ScrapeRecord {
   title: string;
   filename: string;
   tmdb_id: number;
+  bangumi_id?: number;
   language?: string;
   status: string;
   message: string;

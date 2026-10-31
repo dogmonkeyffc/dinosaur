@@ -8,6 +8,7 @@ type Record struct {
 	LibraryName string      `json:"library_name"`
 	Title       string      `json:"title"`
 	Filename    string      `json:"filename"`
+	BangumiID   int64       `json:"bangumi_id,omitempty"`
 	TMDBID      int64       `json:"tmdb_id"`
 	Language    string      `json:"language"`
 	Status      string      `json:"status"`
@@ -42,6 +43,7 @@ type JobItem struct {
 	Library   string `json:"library_name"`
 	Status    string `json:"status"`
 	Message   string `json:"message"`
+	BangumiID int64  `json:"bangumi_id,omitempty"`
 	TMDBID    int64  `json:"tmdb_id"`
 	UpdatedAt int64  `json:"updated_at"`
 }

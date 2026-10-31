@@ -25,13 +25,16 @@ export function RecordActions({ item, reload }: { item: ScrapeRecord; reload: ()
           action.run(async () => {
             await api(`/api/admin/${item.series_id ? 'tv/' : ''}metadata/jobs`, {
               method: 'POST',
-              body: { [item.series_id ? 'series_id' : 'media_id']: id, refresh: item.tmdb_id > 0 },
+              body: {
+                [item.series_id ? 'series_id' : 'media_id']: id,
+                refresh: item.tmdb_id > 0 || !!item.bangumi_id,
+              },
             });
             reload();
           })
         }
       >
-        {item.tmdb_id > 0 ? '刷新资料' : '重试识别'}
+        {item.tmdb_id > 0 || !!item.bangumi_id ? '刷新资料' : '重试识别'}
       </button>
       <ErrorMessage error={action.error} />
     </div>
@@ -53,11 +56,11 @@ export function RecordCandidates({ item, reload }: { item: ScrapeRecord; reload:
       <CandidateList
         candidates={candidates}
         disabled={action.busy}
-        select={(id) =>
+        select={(id, provider) =>
           action.run(async () => {
             await api('/api/admin/metadata/jobs', {
               method: 'POST',
-              body: { media_id: item.media_id, tmdb_id: id },
+              body: { media_id: item.media_id, [provider === 'bangumi' ? 'bangumi_id' : 'tmdb_id']: id },
             });
             reload();
           })

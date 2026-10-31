@@ -1,3 +1,4 @@
+import { SourceReference } from '../metadata/SourceReference';
 import { Select } from '../components/Select';
 import { useState } from 'react';
 import { ErrorMessage, Loading, Pagination } from '../components/common';
@@ -128,7 +129,7 @@ function JobDetail({ id }: { id: number }) {
             <tr>
               <th>媒体 / 文件</th>
               <th>当时状态 / 提示</th>
-              <th>TMDB ID</th>
+              <th>资料来源 / ID</th>
               <th>记录时间</th>
               <th>操作</th>
             </tr>
@@ -146,7 +147,9 @@ function JobDetail({ id }: { id: number }) {
                   <Badge status={item.status} />
                   <p className="scrape-row-note">{scrapeMessage(item.message)}</p>
                 </td>
-                <td>{item.tmdb_id || '—'}</td>
+                <td>
+                  <SourceReference item={item} kind={item.series_id ? 'tv' : 'movie'} />
+                </td>
                 <td>{time(item.updated_at)}</td>
                 <td>
                   <RecordActions item={item} reload={resource.reload} />

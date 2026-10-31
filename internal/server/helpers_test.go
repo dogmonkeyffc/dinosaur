@@ -36,6 +36,9 @@ func fixture(t *testing.T) (*Server, *store.Store) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// Existing HTTP tests isolate the primary provider; fallback tests opt in explicitly.
+	s.scraper.WithFallback(nil)
+	s.tvScraper.WithFallback(nil)
 	t.Cleanup(s.Close)
 	return s, db
 }

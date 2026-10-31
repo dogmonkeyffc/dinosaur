@@ -39,18 +39,9 @@ func (m *Manager) Candidates(ctx context.Context, mediaID int64, query string, y
 	if err != nil {
 		return SearchResult{}, err
 	}
-	if settings.Credential == "" {
-		return SearchResult{}, metadata.ErrMissingCredential
-	}
-	candidates, err := m.provider.Search(ctx, settings, name, releaseYear)
+	candidates, err := m.search(ctx, settings, name, releaseYear, true)
 	if err != nil {
 		return SearchResult{}, err
-	}
-	if len(candidates) == 0 && releaseYear > 0 && query == "" && year == nil {
-		candidates, err = m.provider.Search(ctx, settings, name, 0)
-		if err != nil {
-			return SearchResult{}, err
-		}
 	}
 	candidates = metadata.TopCandidates(name, releaseYear, candidates)
 	if query == "" && year == nil && item.Metadata != nil && item.Metadata.Status == "needs_review" {

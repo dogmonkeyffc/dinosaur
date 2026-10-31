@@ -9,12 +9,23 @@ import (
 // order for ties. It never changes which films are automatically identified.
 func TopCandidates(query string, year int, candidates []Candidate) []Candidate {
 	result := make([]Candidate, 0, 5)
-	seen := make(map[int64]bool)
+	seen := make(map[struct {
+		provider string
+		id       int64
+	}]bool)
 	for _, candidate := range candidates {
-		if candidate.ID <= 0 || seen[candidate.ID] {
+		provider := candidate.Provider
+		if provider == "" {
+			provider = "tmdb"
+		}
+		key := struct {
+			provider string
+			id       int64
+		}{provider, candidate.ID}
+		if candidate.ID <= 0 || seen[key] {
 			continue
 		}
-		seen[candidate.ID] = true
+		seen[key] = true
 		result = append(result, candidate)
 	}
 	score := func(candidate Candidate) float64 {

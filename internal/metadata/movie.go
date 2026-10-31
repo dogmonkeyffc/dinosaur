@@ -9,6 +9,7 @@ import (
 type Movie struct {
 	OriginalLanguage string      `json:"original_language,omitempty"`
 	Candidates       []Candidate `json:"candidates,omitempty"`
+	BangumiID        int64       `json:"bangumi_id,omitempty"`
 	TMDBID           int64       `json:"tmdb_id"`
 	Title            string      `json:"title"`
 	OriginalTitle    string      `json:"original_title"`
@@ -25,6 +26,7 @@ type Movie struct {
 }
 
 type Candidate struct {
+	Provider      string `json:"provider,omitempty"`
 	ID            int64  `json:"id"`
 	Title         string `json:"title"`
 	OriginalTitle string `json:"original_title"`

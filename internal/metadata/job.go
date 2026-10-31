@@ -19,6 +19,7 @@ type Job struct {
 }
 
 type ScrapeRequest struct {
+	BangumiID int64  `json:"bangumi_id,omitempty"`
 	MediaType string `json:"-"`
 	LibraryID int64  `json:"library_id"`
 	MediaID   int64  `json:"media_id"`

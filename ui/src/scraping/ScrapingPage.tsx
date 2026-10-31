@@ -1,3 +1,4 @@
+import { SourceReference } from '../metadata/SourceReference';
 import { Select } from '../components/Select';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -37,7 +38,7 @@ export function ScrapingPage() {
       <Heading title="刮削管理">
         <div className="metadata-actions">
           <Link className="text-button" to="/settings/metadata">
-            TMDB 设置
+            元数据设置
           </Link>
           <button
             className="button secondary"
@@ -134,7 +135,7 @@ export function ScrapingPage() {
                   <th>影片 / 文件</th>
                   <th>媒体库</th>
                   <th>状态 / 提示</th>
-                  <th>TMDB / 语言</th>
+                  <th>资料来源 / 语言</th>
                   <th>更新时间</th>
                   <th>操作</th>
                 </tr>
@@ -153,7 +154,7 @@ export function ScrapingPage() {
                       <RecordCandidates item={item} reload={resource.reload} />
                     </td>
                     <td>
-                      {item.tmdb_id || '—'}
+                      <SourceReference item={item} />
                       <small>{item.language}</small>
                     </td>
                     <td>{time(item.updated_at)}</td>

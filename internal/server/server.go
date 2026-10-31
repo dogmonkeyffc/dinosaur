@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"dinosaur/internal/auth"
+	"dinosaur/internal/bangumi"
 	"dinosaur/internal/config"
 	"dinosaur/internal/deviceauth"
 	"dinosaur/internal/disk"
@@ -73,8 +74,8 @@ func New(c config.Config, db *store.Store, logger *slog.Logger) (*Server, error)
 	s.transcoder = streaming.New(c.FFmpegPath)
 	s.subtitles = streaming.NewSubtitleExtractor(c.FFmpegPath)
 	s.tmdb = tmdb.New()
-	s.scraper = scraping.New(db, s.tmdb, c.DataDir)
-	s.tvScraper = scraping.NewTelevision(store.TelevisionRepository{Store: db}, tmdb.Television{Client: s.tmdb}, c.DataDir)
+	s.scraper = scraping.New(db, s.tmdb, c.DataDir).WithFallback(bangumi.New("movie"))
+	s.tvScraper = scraping.NewTelevision(store.TelevisionRepository{Store: db}, tmdb.Television{Client: s.tmdb}, c.DataDir).WithFallback(bangumi.New("tv"))
 	s.scanner.AfterScan = func() { s.scraper.Schedule(); s.tvScraper.Schedule() }
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health/live", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, map[string]string{"status": "ok"}) })

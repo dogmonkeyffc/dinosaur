@@ -43,6 +43,12 @@ export function MetadataPage() {
   return (
     <section id="metadata-section">
       <Heading title="元数据设置" />
+      <p className="metadata-source-order">
+        TMDB → Bangumi
+        <InfoTip label="刮削来源顺序">
+          TMDB 优先；未找到明确匹配或服务不可用时尝试 Bangumi。公开条目查询无需填写 Bangumi 凭据。
+        </InfoTip>
+      </p>
       <div className="metadata-card">
         <h2>TMDB</h2>
         {resource.loading && !resource.data ? (

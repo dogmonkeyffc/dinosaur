@@ -1,0 +1,2 @@
+ALTER TABLE movie_metadata ADD COLUMN bangumi_id INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE scrape_job_items ADD COLUMN bangumi_id INTEGER NOT NULL DEFAULT 0;

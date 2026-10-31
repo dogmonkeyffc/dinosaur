@@ -39,7 +39,7 @@ func (s TelevisionRepository) ScrapeTargets(ctx context.Context, request metadat
 		args = append(args, request.MediaID)
 	}
 	if !request.Refresh {
-		query += ` AND COALESCE(json_extract(s.metadata_json,'$.tmdb_id'),0)=0 AND COALESCE(json_extract(s.metadata_json,'$.bangumi_id'),0)=0`
+		query += ` AND COALESCE(json_extract(s.metadata_json,'$.tmdb_id'),0)=0 AND COALESCE(json_extract(s.metadata_json,'$.bangumi_id'),0)=0 AND COALESCE(json_extract(s.metadata_json,'$.source'),'') NOT IN ('agent','nfo')`
 	}
 	rows, err := s.DB.QueryContext(ctx, query+` ORDER BY s.id`, args...)
 	if err != nil {

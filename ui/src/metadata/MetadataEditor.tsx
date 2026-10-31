@@ -56,7 +56,8 @@ export function MetadataEditor({
 }) {
   const { user } = useAuth();
   const admin = user?.role === 'admin';
-  const matched = !!(info?.tmdb_id || info?.bangumi_id);
+  const managed = info?.source === 'agent' || info?.source === 'nfo';
+  const matched = managed || !!(info?.tmdb_id || info?.bangumi_id);
   const [source, setSource] = useState(info?.bangumi_id ? 'bangumi' : 'tmdb');
   const endpoint = `/api/admin/${kind === 'tv' ? 'series' : 'media'}/${id}/metadata/candidates`;
   const [query, setQuery] = useState<string | null>(null);
@@ -98,7 +99,7 @@ export function MetadataEditor({
         {matched && <SourceReference item={info} kind={kind} />}
       </p>
       {info?.message && <p className="field-help">{scrapeMessage(info.message)}</p>}
-      {admin && (
+      {admin && !managed && (
         <>
           <div className="metadata-detail-actions">
             <button className="text-button" disabled={jobs.busy || jobs.running} onClick={() => start()}>

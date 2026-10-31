@@ -19,6 +19,7 @@ import './styles/layout.css';
 import './styles/player-page.css';
 import './styles/player-options.css';
 import './styles/mobile-layout.css';
+import './styles/agent-keys.css';
 
 createRoot(document.getElementById('root')!).render(
   <BrowserRouter>

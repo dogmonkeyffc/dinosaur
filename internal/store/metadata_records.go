@@ -32,7 +32,7 @@ func (s *Store) MetadataRecords(ctx context.Context, filter metadata.ReportFilte
 		return page, err
 	}
 	defer tx.Rollback()
-	rows, err := tx.QueryContext(ctx, metadataRecordSources+`SELECT `+recordStatus+`,count(*),sum(CASE WHEN (tmdb_id>0 OR bangumi_id>0) AND message<>'' THEN 1 ELSE 0 END)`+` FROM sources r`+where+` GROUP BY 1`, args...)
+	rows, err := tx.QueryContext(ctx, metadataRecordSources+`SELECT `+recordStatus+`,count(*),sum(CASE WHEN (tmdb_id>0 OR bangumi_id>0 OR source IN ('agent','nfo')) AND message<>'' THEN 1 ELSE 0 END)`+` FROM sources r`+where+` GROUP BY 1`, args...)
 	if err != nil {
 		return page, err
 	}
@@ -54,8 +54,11 @@ func (s *Store) MetadataRecords(ctx context.Context, filter metadata.ReportFilte
 	rows.Close()
 	page.Total = page.Summary["all"]
 	if filter.Status == "warning" {
-		where += ` AND (tmdb_id>0 OR bangumi_id>0) AND message<>''`
+		where += ` AND (tmdb_id>0 OR bangumi_id>0 OR source IN ('agent','nfo')) AND message<>''`
 		page.Total = page.Summary["warning"]
+	} else if filter.Status == "pending" {
+		where += ` AND (` + recordStatus + `) IN ('unmatched','needs_review','failed')`
+		page.Total = page.Summary["unmatched"] + page.Summary["needs_review"] + page.Summary["failed"]
 	} else if filter.Status != "" {
 		where += ` AND (` + recordStatus + `)=?`
 		args = append(args, filter.Status)
@@ -63,7 +66,7 @@ func (s *Store) MetadataRecords(ctx context.Context, filter metadata.ReportFilte
 	}
 	args = append(args, filter.PageSize, (filter.Page-1)*filter.PageSize)
 	rows, err = tx.QueryContext(ctx, metadataRecordSources+`SELECT r.media_id,r.series_id,r.library_id,r.library_name,r.title,r.filename,
- r.tmdb_id,r.language,`+recordStatus+`,r.message,r.updated_at,r.candidates_json,r.bangumi_id
+ r.tmdb_id,r.language,`+recordStatus+`,r.message,r.updated_at,r.candidates_json,r.bangumi_id,r.source,r.source_url,r.revision
  FROM sources r`+where+` ORDER BY r.media_type,r.sort_id LIMIT ? OFFSET ?`, args...)
 	if err != nil {
 		return page, err
@@ -71,7 +74,7 @@ func (s *Store) MetadataRecords(ctx context.Context, filter metadata.ReportFilte
 	for rows.Next() {
 		var item metadata.Record
 		var candidates string
-		if err := rows.Scan(&item.MediaID, &item.SeriesID, &item.LibraryID, &item.LibraryName, &item.Title, &item.Filename, &item.TMDBID, &item.Language, &item.Status, &item.Message, &item.UpdatedAt, &candidates, &item.BangumiID); err != nil {
+		if err := rows.Scan(&item.MediaID, &item.SeriesID, &item.LibraryID, &item.LibraryName, &item.Title, &item.Filename, &item.TMDBID, &item.Language, &item.Status, &item.Message, &item.UpdatedAt, &candidates, &item.BangumiID, &item.Source, &item.SourceURL, &item.Version); err != nil {
 			rows.Close()
 			return page, err
 		}
@@ -79,6 +82,7 @@ func (s *Store) MetadataRecords(ctx context.Context, filter metadata.ReportFilte
 			rows.Close()
 			return page, err
 		}
+		item.RelativePath = item.Filename
 		item.Filename = filepath.Base(item.Filename)
 		page.Items = append(page.Items, item)
 	}

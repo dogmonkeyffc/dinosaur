@@ -1,0 +1,34 @@
+.agent-key-options {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+  margin-top: 22px;
+}
+.agent-key-options label {
+  min-width: 0;
+}
+.agent-key-created {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+}
+.agent-key-created input {
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+}
+.agent-key-created .metadata-actions {
+  margin-top: 10px;
+}
+.agent-keys .device-list {
+  margin-top: 24px;
+}
+.agent-keys .device-card-heading h2 {
+  margin: 0;
+}
+@media (max-width: 480px) {
+  .agent-key-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

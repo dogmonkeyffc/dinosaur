@@ -9,7 +9,7 @@ const metadataRecordSources = `WITH sources AS (
  COALESCE(md.original_title,'') AS original_title,COALESCE(md.aliases,'') AS aliases,
  COALESCE(md.language,'') AS language,COALESCE(md.status,'') AS raw_status,
  COALESCE(md.message,'') AS message,COALESCE(md.updated_at,0) AS updated_at,
- COALESCE(md.candidates_json,'[]') AS candidates_json
+ COALESCE(md.candidates_json,'[]') AS candidates_json,COALESCE(md.source,'') AS source,COALESCE(md.source_url,'') AS source_url,COALESCE(md.revision,0) AS revision
  ` + mediaFrom + ` WHERE m.missing=0 AND l.type='movie'
  UNION ALL
  SELECT 0,s.id,s.id,'tv',s.library_id,l.name,` + seriesTitle + `,s.title,
@@ -22,9 +22,9 @@ const metadataRecordSources = `WITH sources AS (
  COALESCE(json_extract(s.metadata_json,'$.status'),''),
  COALESCE(json_extract(s.metadata_json,'$.message'),''),
  COALESCE(json_extract(s.metadata_json,'$.updated_at'),0),
- COALESCE(json_extract(s.metadata_json,'$.candidates'),'[]')
+ COALESCE(json_extract(s.metadata_json,'$.candidates'),'[]'),COALESCE(json_extract(s.metadata_json,'$.source'),''),COALESCE(json_extract(s.metadata_json,'$.source_url'),''),s.metadata_version
  ` + seriesFrom + ` WHERE l.type='tv' AND ` + seriesVisible + `)
  `
 
-const recordStatus = `CASE WHEN (tmdb_id>0 OR bangumi_id>0) THEN 'matched'
+const recordStatus = `CASE WHEN (tmdb_id>0 OR bangumi_id>0 OR source IN ('agent','nfo')) THEN 'matched'
  WHEN raw_status='failed' THEN 'failed' WHEN raw_status='needs_review' THEN 'needs_review' ELSE 'unmatched' END`

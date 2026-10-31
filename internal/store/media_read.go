@@ -14,13 +14,13 @@ const mediaFrom = ` FROM media_items m JOIN libraries l ON l.id=m.library_id LEF
  LEFT JOIN tv_episodes ep ON ep.media_id=m.id LEFT JOIN tv_series ts ON ts.id=ep.series_id`
 const displayTitle = `COALESCE(NULLIF(md.title,''),m.title)`
 const mediaColumns = `m.id,m.library_id,l.name,m.relative_path,` + displayTitle + `,COALESCE(NULLIF(md.year,0),m.year),m.size,m.modified_ns,m.duration,m.format,m.video_codec,m.width,m.height,m.tracks_json,COALESCE(NULLIF(md.poster_key,''),m.poster_key),m.probe_error,m.missing,
- COALESCE(md.tmdb_id,0),COALESCE(md.original_title,''),COALESCE(md.overview,''),COALESCE(md.release_date,''),COALESCE(md.language,''),COALESCE(md.status,''),COALESCE(md.message,''),COALESCE(md.updated_at,0),COALESCE(md.candidates_json,'[]'),l.type,COALESCE(ep.series_id,0),COALESCE(NULLIF(json_extract(ts.metadata_json,'$.title'),''),ts.title,''),COALESCE(ep.season_number,0),COALESCE(ep.episode_number,0),COALESCE(ep.episode_end,0),COALESCE(NULLIF(md.original_language,''),json_extract(ts.metadata_json,'$.original_language'),''),COALESCE(md.bangumi_id,0)`
+ COALESCE(md.tmdb_id,0),COALESCE(md.original_title,''),COALESCE(md.overview,''),COALESCE(md.release_date,''),COALESCE(md.language,''),COALESCE(md.status,''),COALESCE(md.message,''),COALESCE(md.updated_at,0),COALESCE(md.candidates_json,'[]'),l.type,COALESCE(ep.series_id,0),COALESCE(NULLIF(json_extract(ts.metadata_json,'$.title'),''),ts.title,''),COALESCE(ep.season_number,0),COALESCE(ep.episode_number,0),COALESCE(ep.episode_end,0),COALESCE(NULLIF(md.original_language,''),json_extract(ts.metadata_json,'$.original_language'),''),COALESCE(md.bangumi_id,0),COALESCE(md.source,''),COALESCE(md.source_url,''),COALESCE(md.external_ids_json,'{}'),COALESCE(md.revision,0),COALESCE(md.aliases,'')`
 
 func scanMedia(row interface{ Scan(...any) error }) (media.Item, error) {
 	var item media.Item
-	var tracks, candidates string
+	var tracks, candidates, externalIDs string
 	var info metadata.Movie
-	err := row.Scan(&item.ID, &item.LibraryID, &item.LibraryName, &item.RelativePath, &item.Title, &item.Year, &item.Size, &item.ModifiedNS, &item.Duration, &item.Format, &item.VideoCodec, &item.Width, &item.Height, &tracks, &item.PosterKey, &item.ProbeError, &item.Missing, &info.TMDBID, &info.OriginalTitle, &info.Overview, &info.ReleaseDate, &info.Language, &info.Status, &info.Message, &info.UpdatedAt, &candidates, &item.Type, &item.SeriesID, &item.SeriesTitle, &item.SeasonNumber, &item.EpisodeNumber, &item.EpisodeEnd, &item.OriginalLanguage, &info.BangumiID)
+	err := row.Scan(&item.ID, &item.LibraryID, &item.LibraryName, &item.RelativePath, &item.Title, &item.Year, &item.Size, &item.ModifiedNS, &item.Duration, &item.Format, &item.VideoCodec, &item.Width, &item.Height, &tracks, &item.PosterKey, &item.ProbeError, &item.Missing, &info.TMDBID, &info.OriginalTitle, &info.Overview, &info.ReleaseDate, &info.Language, &info.Status, &info.Message, &info.UpdatedAt, &candidates, &item.Type, &item.SeriesID, &item.SeriesTitle, &item.SeasonNumber, &item.EpisodeNumber, &item.EpisodeEnd, &item.OriginalLanguage, &info.BangumiID, &info.Source, &info.SourceURL, &externalIDs, &info.Version, &info.Aliases)
 	if err != nil {
 		return item, err
 	}
@@ -30,6 +30,10 @@ func scanMedia(row interface{ Scan(...any) error }) (media.Item, error) {
 		if err := json.Unmarshal([]byte(candidates), &info.Candidates); err != nil {
 			return item, err
 		}
+		if err := json.Unmarshal([]byte(externalIDs), &info.ExternalIDs); err != nil {
+			return item, err
+		}
+		info.PosterKey = item.PosterKey
 		item.Metadata = &info
 	}
 	err = json.Unmarshal([]byte(tracks), &item.Tracks)

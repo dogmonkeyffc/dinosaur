@@ -13,6 +13,9 @@ func (m *Manager) scrape(ctx context.Context, settings metadata.Settings, reques
 	if err != nil {
 		return "failed", err
 	}
+	if current.Metadata.Managed() && request.Refresh {
+		return m.failure(ctx, item.ID, metadata.ErrConflict)
+	}
 	if current.Metadata.Matched() && !request.Refresh {
 		return "skipped", nil
 	}

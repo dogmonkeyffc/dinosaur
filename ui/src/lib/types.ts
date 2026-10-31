@@ -34,6 +34,9 @@ export interface Candidate {
 export interface Metadata {
   tmdb_id: number;
   bangumi_id?: number;
+  source?: string;
+  source_url?: string;
+  version?: number;
   status: string;
   overview: string;
   original_title: string;
@@ -120,6 +123,9 @@ export interface ScrapeRecord {
   filename: string;
   tmdb_id: number;
   bangumi_id?: number;
+  source?: string;
+  source_url?: string;
+  version?: number;
   language?: string;
   status: string;
   message: string;

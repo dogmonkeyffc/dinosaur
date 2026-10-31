@@ -9,6 +9,7 @@ import { ErrorMessage } from '../components/common';
 export function RecordActions({ item, reload }: { item: ScrapeRecord; reload: () => void }) {
   const action = useAction();
   const id = item.series_id || item.media_id;
+  const managed = item.source === 'agent' || item.source === 'nfo';
   if (!id) return <span className="muted">媒体已移除</span>;
   return (
     <div className="scrape-row-actions">
@@ -17,26 +18,28 @@ export function RecordActions({ item, reload }: { item: ScrapeRecord; reload: ()
         to={`/${item.series_id ? 'series' : 'movies'}/${id}`}
         state={{ from: '/settings/scraping' }}
       >
-        详情 / 匹配更正
+        {managed ? '查看详情' : '详情 / 匹配更正'}
       </Link>
-      <button
-        className="text-button"
-        disabled={action.busy}
-        onClick={() =>
-          action.run(async () => {
-            await api(`/api/admin/${item.series_id ? 'tv/' : ''}metadata/jobs`, {
-              method: 'POST',
-              body: {
-                [item.series_id ? 'series_id' : 'media_id']: id,
-                refresh: item.tmdb_id > 0 || !!item.bangumi_id,
-              },
-            });
-            reload();
-          })
-        }
-      >
-        {item.tmdb_id > 0 || !!item.bangumi_id ? '刷新资料' : '重试识别'}
-      </button>
+      {!managed && (
+        <button
+          className="text-button"
+          disabled={action.busy}
+          onClick={() =>
+            action.run(async () => {
+              await api(`/api/admin/${item.series_id ? 'tv/' : ''}metadata/jobs`, {
+                method: 'POST',
+                body: {
+                  [item.series_id ? 'series_id' : 'media_id']: id,
+                  refresh: item.tmdb_id > 0 || !!item.bangumi_id,
+                },
+              });
+              reload();
+            })
+          }
+        >
+          {item.tmdb_id > 0 || !!item.bangumi_id ? '刷新资料' : '重试识别'}
+        </button>
+      )}
       <ErrorMessage error={action.error} />
     </div>
   );

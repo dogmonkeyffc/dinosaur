@@ -42,6 +42,7 @@ export function scanDescription(scan: Scan) {
 }
 const scrapeMessages: Record<string, string> = {
   ambiguous: '有多个相近候选，请手动匹配',
+  metadata_conflict: '资料已更新或由 Agent 管理，请读取最新版本后再操作',
   not_found: '未找到匹配资料，请更换关键词或指定条目 ID',
   invalid_credential: '资料来源拒绝访问，请检查元数据设置',
   rate_limited: '资料来源请求过于频繁，请稍后重试',

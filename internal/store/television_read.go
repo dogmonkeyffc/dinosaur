@@ -12,7 +12,7 @@ import (
 
 const seriesTitle = `COALESCE(NULLIF(json_extract(s.metadata_json,'$.title'),''),s.title)`
 const seriesVisible = ` EXISTS(SELECT 1 FROM tv_episodes e JOIN media_items m ON m.id=e.media_id WHERE e.series_id=s.id AND m.missing=0)`
-const seriesColumns = `s.id,s.library_id,l.name,` + seriesTitle + `,
+const seriesColumns = `s.id,s.library_id,l.name,s.metadata_version,s.aliases,` + seriesTitle + `,
  COALESCE(NULLIF(json_extract(s.metadata_json,'$.year'),0),s.year),s.metadata_json,
  COALESCE(NULLIF(s.poster_key,''),(SELECT m.poster_key FROM tv_episodes e JOIN media_items m ON m.id=e.media_id WHERE e.series_id=s.id AND m.missing=0 AND m.poster_key<>'' ORDER BY e.season_number,e.episode_number,m.id LIMIT 1),''),
  (SELECT count(*) FROM tv_episodes e JOIN media_items m ON m.id=e.media_id WHERE e.series_id=s.id AND m.missing=0),
@@ -21,8 +21,9 @@ const seriesFrom = ` FROM tv_series s JOIN libraries l ON l.id=s.library_id`
 
 func scanSeries(row interface{ Scan(...any) error }) (television.Series, error) {
 	var item television.Series
-	var raw string
-	err := row.Scan(&item.ID, &item.LibraryID, &item.LibraryName, &item.Title, &item.Year, &raw, &item.PosterKey, &item.EpisodeCount, &item.SeasonCount)
+	var raw, aliases string
+	var version int64
+	err := row.Scan(&item.ID, &item.LibraryID, &item.LibraryName, &version, &aliases, &item.Title, &item.Year, &raw, &item.PosterKey, &item.EpisodeCount, &item.SeasonCount)
 	if err != nil {
 		return item, err
 	}
@@ -30,6 +31,7 @@ func scanSeries(row interface{ Scan(...any) error }) (television.Series, error) 
 	if err := json.Unmarshal([]byte(raw), &info); err != nil {
 		return item, err
 	}
+	info.Version, info.Aliases, info.PosterKey = version, aliases, item.PosterKey
 	if info.Status != "" {
 		item.Metadata = &info
 	}

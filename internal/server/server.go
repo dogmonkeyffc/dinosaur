@@ -105,6 +105,7 @@ func New(c config.Config, db *store.Store, logger *slog.Logger) (*Server, error)
 	s.mountSystem(mux)
 	s.mountDevices(mux)
 	s.mountScraping(mux)
+	s.mountAgent(mux)
 	if err := s.mountWeb(mux); err != nil {
 		return nil, err
 	}

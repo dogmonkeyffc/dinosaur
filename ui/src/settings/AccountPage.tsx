@@ -6,6 +6,7 @@ import { api } from '../lib/api';
 import { useAction } from '../lib/hooks';
 import { MobileLogin } from '../devices/MobileLogin';
 import { Devices } from '../devices/Devices';
+import { AgentKeys } from './AgentKeys';
 
 export function AccountPage() {
   const auth = useAuth();
@@ -30,6 +31,7 @@ export function AccountPage() {
       <Heading title="账户安全" />
       <MobileLogin />
       <Devices />
+      {auth.user?.role === 'admin' && <AgentKeys />}
       <div className="account-card">
         <h2>修改密码</h2>
         <form id="password-form" onSubmit={submit}>

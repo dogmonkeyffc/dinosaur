@@ -2,19 +2,23 @@ package metadata
 
 // Record is an administrator's view of current identification results.
 type Record struct {
-	SeriesID    int64       `json:"series_id,omitempty"`
-	Candidates  []Candidate `json:"candidates,omitempty"`
-	MediaID     int64       `json:"media_id"`
-	LibraryID   int64       `json:"library_id"`
-	LibraryName string      `json:"library_name"`
-	Title       string      `json:"title"`
-	Filename    string      `json:"filename"`
-	BangumiID   int64       `json:"bangumi_id,omitempty"`
-	TMDBID      int64       `json:"tmdb_id"`
-	Language    string      `json:"language"`
-	Status      string      `json:"status"`
-	Message     string      `json:"message"`
-	UpdatedAt   int64       `json:"updated_at"`
+	Source       string      `json:"source,omitempty"`
+	SourceURL    string      `json:"source_url,omitempty"`
+	Version      int64       `json:"version"`
+	RelativePath string      `json:"relative_path"`
+	SeriesID     int64       `json:"series_id,omitempty"`
+	Candidates   []Candidate `json:"candidates,omitempty"`
+	MediaID      int64       `json:"media_id"`
+	LibraryID    int64       `json:"library_id"`
+	LibraryName  string      `json:"library_name"`
+	Title        string      `json:"title"`
+	Filename     string      `json:"filename"`
+	BangumiID    int64       `json:"bangumi_id,omitempty"`
+	TMDBID       int64       `json:"tmdb_id"`
+	Language     string      `json:"language"`
+	Status       string      `json:"status"`
+	Message      string      `json:"message"`
+	UpdatedAt    int64       `json:"updated_at"`
 }
 
 type ReportFilter struct {

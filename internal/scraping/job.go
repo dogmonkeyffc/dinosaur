@@ -82,6 +82,8 @@ func (m *Manager) run(job metadata.Job, request metadata.ScrapeRequest, settings
 
 func errorMessage(err error) string {
 	switch {
+	case errors.Is(err, metadata.ErrConflict):
+		return "metadata_conflict"
 	case errors.Is(err, metadata.ErrProviderAuth):
 		return "invalid_credential"
 	case errors.Is(err, metadata.ErrProviderRateLimited):

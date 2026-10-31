@@ -15,6 +15,9 @@ func (m *Manager) run(job metadata.Job, request metadata.ScrapeRequest, settings
 		job.Status, job.Message = "failed", "storage_error"
 	} else {
 		for _, item := range items {
+			if request.TMDBID == 0 && request.BangumiID == 0 {
+				m.runManualJobs()
+			}
 			if m.ctx.Err() != nil {
 				break
 			}

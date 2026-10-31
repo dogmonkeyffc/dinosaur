@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAction, useResource } from '../lib/hooks';
 import type { Candidate, ScrapeRecord } from '../lib/types';
+import { useManualMatch } from '../metadata/useManualMatch';
 import { CandidateList } from '../metadata/MetadataEditor';
 import { ErrorMessage } from '../components/common';
 
@@ -46,26 +47,15 @@ export function RecordCandidates({ item, reload }: { item: ScrapeRecord; reload:
   const resource = useResource<{ candidates: Candidate[] }>(
     ambiguous && !item.candidates?.length ? `/api/admin/media/${item.media_id}/metadata/candidates` : null,
   );
-  const action = useAction();
+  const match = useManualMatch(item.series_id ? 'tv' : 'movie', item.series_id || item.media_id, reload);
   const candidates = resource.data?.candidates || item.candidates || [];
   if (!ambiguous && !candidates.length) return null;
   return (
     <section className="candidate-preview">
       <h3>相似候选（最多 5 部）</h3>
-      <ErrorMessage error={resource.error || action.error} />
-      <CandidateList
-        candidates={candidates}
-        disabled={action.busy}
-        select={(id, provider) =>
-          action.run(async () => {
-            await api('/api/admin/metadata/jobs', {
-              method: 'POST',
-              body: { media_id: item.media_id, [provider === 'bangumi' ? 'bangumi_id' : 'tmdb_id']: id },
-            });
-            reload();
-          })
-        }
-      />
+      <ErrorMessage error={resource.error || match.error} />
+      {match.notice && <p role="status">{match.notice}</p>}
+      <CandidateList candidates={candidates} disabled={match.busy} select={match.select} />
       {resource.error && (
         <button className="text-button" onClick={resource.reload}>
           重新加载候选

@@ -49,6 +49,7 @@ type Manager struct {
 	pending     bool
 	closed      bool
 	workers     sync.WaitGroup
+	manual      []scheduledJob
 }
 
 func New(repo Repository, provider Provider, dataDir string) *Manager {
@@ -73,7 +74,7 @@ func (m *Manager) startLocked(ctx context.Context, request metadata.ScrapeReques
 	if m.closed {
 		return metadata.Job{}, ErrClosed
 	}
-	if m.active {
+	if m.active && request.TMDBID == 0 && request.BangumiID == 0 {
 		return metadata.Job{}, ErrRunning
 	}
 	if request.BangumiID < 0 || request.BangumiID > 2147483647 || (request.BangumiID > 0 && (request.MediaID == 0 || request.TMDBID > 0 || m.fallback == nil)) ||
@@ -110,20 +111,14 @@ func (m *Manager) startLocked(ctx context.Context, request metadata.ScrapeReques
 		return job, err
 	}
 	job.Total = len(items)
+	task := scheduledJob{job: job, request: request, settings: settings, items: items}
+	if m.active {
+		m.manual = append(m.manual, task)
+		return job, nil
+	}
 	m.active = true
 	m.workers.Add(1)
-	go func() {
-		defer m.workers.Done()
-		m.run(job, request, settings, items)
-		m.mu.Lock()
-		m.active = false
-		pending := m.pending && !m.closed
-		m.pending = false
-		m.mu.Unlock()
-		if pending {
-			m.Schedule()
-		}
-	}()
+	go m.work(task)
 	return job, nil
 }
 

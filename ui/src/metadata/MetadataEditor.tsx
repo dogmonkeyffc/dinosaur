@@ -8,6 +8,7 @@ import { jobDescription, scrapeMessage } from '../lib/format';
 import { useResource } from '../lib/hooks';
 import type { Candidate, MediaKind, Metadata } from '../lib/types';
 import { useJobs } from './useJobs';
+import { useManualMatch } from './useManualMatch';
 
 export function CandidateList({
   candidates,
@@ -64,13 +65,15 @@ export function MetadataEditor({
     admin ? (query ?? (ambiguous ? endpoint : null)) : null,
   );
   const jobs = useJobs(kind, reload);
+  const manual = useManualMatch(kind, id, reload);
   const candidates = search.data?.candidates || info?.candidates || [];
   const start = (providerID?: number, provider = 'tmdb') =>
-    jobs.start({
-      [kind === 'tv' ? 'series_id' : 'media_id']: id,
-      refresh: matched && !providerID,
-      ...(providerID ? { [provider === 'bangumi' ? 'bangumi_id' : 'tmdb_id']: providerID } : {}),
-    });
+    providerID
+      ? manual.select(providerID, provider)
+      : jobs.start({
+          [kind === 'tv' ? 'series_id' : 'media_id']: id,
+          refresh: matched,
+        });
   function find(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const values = new FormData(event.currentTarget);
@@ -175,13 +178,14 @@ export function MetadataEditor({
                   required
                 />
               </label>
-              <button className="button secondary" disabled={jobs.busy || jobs.running}>
+              <button className="button secondary" disabled={manual.busy}>
                 使用此 ID 匹配
               </button>
             </form>
-            <ErrorMessage error={search.error} />
+            <ErrorMessage error={search.error || manual.error} />
+            {manual.notice && <p role="status">{manual.notice}</p>}
             {search.loading && <p role="status">正在搜索候选…</p>}
-            <CandidateList candidates={candidates} select={start} disabled={jobs.busy || jobs.running} />
+            <CandidateList candidates={candidates} select={start} disabled={manual.busy} />
             {search.data && !candidates.length && <p className="field-help">未找到候选</p>}
           </details>
         </>

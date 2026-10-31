@@ -39,7 +39,8 @@
 }
 .scrape-table {
   width: 100%;
-  min-width: 780px;
+  table-layout: fixed;
+  min-width: 1100px;
   border-collapse: collapse;
   text-align: left;
   font-size: 12px;
@@ -110,4 +111,39 @@
   .scrape-admin-filters label {
     flex-basis: 100%;
   }
+}
+
+.scrape-table th:nth-child(1) {
+  width: 22%;
+}
+.scrape-table th:nth-child(2) {
+  width: 8%;
+}
+.scrape-table th:nth-child(3) {
+  width: 34%;
+}
+.scrape-table th:nth-child(4) {
+  width: 12%;
+}
+.scrape-table th:nth-child(5) {
+  width: 13%;
+}
+.scrape-table th:nth-child(6) {
+  width: 11%;
+}
+.scrape-table th {
+  white-space: nowrap;
+}
+.scrape-table .candidate-preview {
+  min-width: 0;
+}
+.scrape-table .metadata-candidate {
+  min-width: 0;
+}
+.scrape-table .metadata-candidate > * {
+  max-width: 100%;
+}
+.scrape-table .metadata-candidate .button {
+  white-space: normal;
+  overflow-wrap: anywhere;
 }

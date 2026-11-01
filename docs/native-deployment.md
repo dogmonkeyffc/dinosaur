@@ -45,7 +45,7 @@ python3 dinosaur-<版本>/install.py
 
 若其他 Linux 主机尚未开启用户服务驻留，先执行一次 `sudo loginctl enable-linger <用户名>`。当前 NAS 已开启，不需重复设置。
 
-部署后访问 `http://192.168.31.197:18096`。初始化令牌在 NAS 的 `~/.cache/dinosaur/setup-token`，请在自己的终端读取并填入初始化页面。不要把令牌提交到仓库。TMDB 凭据在首次登录后从“元数据设置”单独配置。
+当前 NAS 通过 `https://dinosaur.monkeydog.com` 访问，反向代理连接 `192.168.31.197:18096`。初始化令牌在 NAS 的 `~/.cache/dinosaur/setup-token`，请在自己的终端读取并填入初始化页面。不要把令牌提交到仓库。TMDB 凭据在首次登录后从“元数据设置”单独配置。
 
 ## 常用操作
 
@@ -58,5 +58,14 @@ systemctl --user disable --now dinosaur.service
 ```
 
 修改 `dinosaur.env` 后重启生效。HTTPS 反向代理需要同时设置 `DINOSAUR_PUBLIC_URL=https://你的域名` 和 `DINOSAUR_COOKIE_SECURE=true`，并让代理保留 Host。局域网直接通过 HTTP 访问时保持默认值。
+
+当前 NAS 的 `~/.local/share/dinosaur/dinosaur.env` 必须包含：
+
+```dotenv
+DINOSAUR_PUBLIC_URL=https://dinosaur.monkeydog.com
+DINOSAUR_COOKIE_SECURE=true
+```
+
+保存后执行 `systemctl --user restart dinosaur.service`。启用此配置后，浏览器统一使用上述 HTTPS 域名登录。若域名可以打开页面，但登录提示“访问地址与服务器配置不一致”，先检查这两个配置是否生效；不要关闭 Origin 校验，也不要直接信任客户端传来的转发头。
 
 更新时上传新的发布包并再次运行安装器即可。备份应先停止服务，再复制整个 `~/.cache/dinosaur/` 和 `dinosaur.env`。回退程序版本可以把 `current` 切回旧目录后重启，但需要确认数据库兼容性；恢复旧数据库应使用对应版本的完整备份。

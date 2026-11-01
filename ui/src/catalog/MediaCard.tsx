@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Icon } from '../components/common';
-import { clock, duration, resolution } from '../lib/format';
+import { duration, resolution } from '../lib/format';
 import type { Movie, Series } from '../lib/types';
 
 export function Poster({ url, title, className }: { url?: string; title: string; className: string }) {
@@ -18,20 +18,20 @@ export function Poster({ url, title, className }: { url?: string; title: string;
   ) : null;
 }
 
-export function MediaCard({ item, resume = false }: { item: Movie | Series; resume?: boolean }) {
+export function MediaCard({ item }: { item: Movie | Series }) {
   const location = useLocation();
   const movie = 'duration' in item ? item : null;
   const series = 'episode_count' in item ? item : null;
   const title = movie?.series_id ? `${movie.series_title} · ${movie.title}` : item.title;
   const status = item.metadata?.status;
   const badge = status === 'needs_review' ? '待确认匹配' : status === 'failed' ? '刮削失败' : '';
-  const path = resume ? `/watch/${item.id}` : `/${series ? 'series' : 'movies'}/${item.id}`;
+  const path = `/${series ? 'series' : 'movies'}/${item.id}`;
   return (
     <Link
       to={path}
       state={{ kind: movie?.type || (series ? 'tv' : 'movie'), from: location.pathname + location.search }}
       className="movie-card"
-      aria-label={`${resume ? '继续观看' : '查看'} ${title}`}
+      aria-label={`查看 ${title}`}
     >
       <span className="movie-artwork">
         <span className="movie-placeholder">
@@ -56,9 +56,7 @@ export function MediaCard({ item, resume = false }: { item: Movie | Series; resu
         {item.year ? `${item.year} · ` : ''}
         {series
           ? `${series.season_count} 季 · ${series.episode_count} 个文件`
-          : resume
-            ? `已看 ${clock(movie?.position)}`
-            : duration(movie?.duration || 0)}
+          : duration(movie?.duration || 0)}
       </span>
       {series && (
         <span className="movie-meta">

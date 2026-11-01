@@ -50,6 +50,7 @@ type Item struct {
 }
 
 type Filter struct {
+	ViewerID  int64
 	LibraryID int64
 	Query     string
 	Page      int

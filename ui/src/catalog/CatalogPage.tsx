@@ -1,4 +1,3 @@
-import { Select } from '../components/Select';
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ErrorMessage, Icon, Loading, Pagination } from '../components/common';
@@ -29,10 +28,6 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
     `/api/${tv ? 'series' : 'media'}?${apiQuery}`,
     scans.length ? 3000 : 0,
   );
-  const recent = useResource<{ items: Movie[] }>(`/api/playback/continue?type=${kind}`);
-  const recentItems = (recent.data?.items || []).filter(
-    (item) => !library || String(item.library_id) === library,
-  );
   useJobs(kind, result.reload);
   useEffect(() => {
     result.reload();
@@ -49,28 +44,7 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
   }
   return (
     <section id={tv ? 'series-section' : 'movies-section'} aria-label={tv ? '我的剧集' : '我的电影'}>
-      {recentItems.length > 0 && (
-        <section className="continue-section">
-          <h2>继续观看</h2>
-          <div className="movie-grid continue-grid">
-            {recentItems.map((item) => (
-              <MediaCard key={item.id} item={item} resume />
-            ))}
-          </div>
-        </section>
-      )}
       <div className="movie-toolbar">
-        <label className="library-select">
-          <span className="sr-only">选择媒体库</span>
-          <Select value={library} onValueChange={(value) => change('library_id', value)}>
-            <option value="">全部{tv ? '剧集' : ''}媒体库</option>
-            {choices.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-          </Select>
-        </label>
         <label className="search-field">
           <Icon name="search" />
           <input
@@ -83,7 +57,7 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
           />
         </label>
       </div>
-      <ErrorMessage error={result.error || recent.error} />
+      <ErrorMessage error={result.error} />
       {result.loading && !result.data && <Loading />}
       <div className="movie-grid" aria-live="polite" aria-busy={result.loading}>
         {result.data?.items.map((item) => (
@@ -97,7 +71,6 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
             className="button secondary"
             onClick={() => {
               result.reload();
-              recent.reload();
             }}
           >
             刷新列表

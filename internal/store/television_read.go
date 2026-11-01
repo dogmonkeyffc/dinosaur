@@ -63,8 +63,11 @@ func (s *Store) SeriesPage(ctx context.Context, filter media.Filter, userID int6
 	if err := tx.QueryRowContext(ctx, `SELECT count(*)`+seriesFrom+where, args...).Scan(&page.Total); err != nil {
 		return page, err
 	}
-	args = append(args, filter.PageSize, (filter.Page-1)*filter.PageSize)
-	rows, err := tx.QueryContext(ctx, `SELECT `+seriesColumns+seriesFrom+where+` ORDER BY `+seriesTitle+` COLLATE NOCASE,s.id LIMIT ? OFFSET ?`, args...)
+	args = append(args, userID, filter.PageSize, (filter.Page-1)*filter.PageSize)
+	rows, err := tx.QueryContext(ctx, `SELECT `+seriesColumns+seriesFrom+where+` ORDER BY
+ (SELECT max(p.updated_at) FROM tv_episodes e JOIN media_items m ON m.id=e.media_id
+ JOIN playback_progress p ON p.media_id=m.id WHERE e.series_id=s.id AND m.missing=0 AND p.user_id=? AND (p.position>0 OR p.watched=1)) DESC,
+ `+seriesTitle+` COLLATE NOCASE,s.id LIMIT ? OFFSET ?`, args...)
 	if err != nil {
 		return page, err
 	}

@@ -16,6 +16,7 @@ func (s *Server) listMedia(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	filter.ViewerID = current(r).user.ID
 	page, err := s.store.MediaPage(r.Context(), filter)
 	if err != nil {
 		s.internal(w, r, err)

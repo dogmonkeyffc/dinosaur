@@ -1,13 +1,9 @@
 .movie-toolbar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 15px;
   align-items: center;
   margin: 26px 0;
-}
-.library-select {
-  width: clamp(160px, 20vw, 230px);
-  min-width: 0;
 }
 .movie-grid {
   display: grid;
@@ -181,10 +177,6 @@
   .movie-meta {
     font-size: 10px;
     gap: 5px;
-  }
-  .library-select {
-    width: min(46%, 180px);
-    flex-shrink: 0;
   }
   .movie-toolbar {
     gap: 10px;

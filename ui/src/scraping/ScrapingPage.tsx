@@ -9,11 +9,12 @@ import type { Page, ScrapeRecord } from '../lib/types';
 import { StatusBadge } from './StatusBadge';
 import { RecordActions, RecordCandidates } from './RecordActions';
 import { RecordMedia } from './RecordMedia';
+import { useAuth } from '../auth/AuthProvider';
+import { scrapingStates, useScrapingFilters } from './useScrapingFilters';
 
-const states = ['', 'matched', 'unmatched', 'needs_review', 'failed', 'warning'];
 export function ScrapingPage() {
-  const [library, setLibrary] = useState('');
-  const [status, setStatus] = useState('');
+  const { user } = useAuth();
+  const { library, status, setLibrary, setStatus } = useScrapingFilters(user!.id);
   const [query, setQuery] = useState('');
   const search = useDebounced(query);
   const [page, setPage] = useState(1);
@@ -45,7 +46,7 @@ export function ScrapingPage() {
         <label>
           识别状态
           <Select value={status} onValueChange={(value) => filter(setStatus, value)}>
-            {states.map((value) => (
+            {scrapingStates.map((value) => (
               <option key={value} value={value}>
                 {value ? stateNames[value] : '全部状态'}
               </option>

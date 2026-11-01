@@ -74,12 +74,18 @@ func requestPlan(r *http.Request, item media.Item) (playback.Plan, error) {
 		if parseErr != nil {
 			return plan, playback.ErrSubtitle
 		}
-		return playback.WithSubtitle(plan, id, item.Tracks)
+		plan, err = playback.WithSubtitle(plan, id, item.Tracks)
 	}
-	return plan, err
+	if err != nil {
+		return plan, err
+	}
+	return playback.WithQuality(plan, r.URL.Query().Get("quality"))
 }
 func streamURL(id int64, plan playback.Plan, compatible bool) string {
 	query := url.Values{}
+	if plan.Quality != "" && plan.Quality != "auto" {
+		query.Set("quality", plan.Quality)
+	}
 	if plan.Mode == "direct" {
 		query.Set("mode", "original")
 	} else if compatible {

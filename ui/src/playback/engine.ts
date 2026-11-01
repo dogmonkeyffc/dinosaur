@@ -28,6 +28,7 @@ export class PlaybackEngine {
   seekTarget: number | null = null;
   audio: number;
   mode = 'auto';
+  quality = 'auto';
   subtitle = '';
   rate = 1;
   subtitleRevision = 0;
@@ -44,6 +45,7 @@ export class PlaybackEngine {
     beginning: boolean,
   ) {
     this.audio = info.plan.audio;
+    this.quality = info.plan.quality ?? 'auto';
     this.subtitle = info.selected_subtitle == null ? '' : String(info.selected_subtitle);
     const Artplayer = window.Artplayer;
     Artplayer.LOG_VERSION = false;
@@ -163,7 +165,7 @@ export class PlaybackEngine {
     this.art.notice.show = {
       direct: '直接播放 · 原画',
       remux: '兼容封装 · 原画',
-      transcode: '兼容转码 · 最高 720p',
+      transcode: `兼容转码 · ${this.quality === 'original' ? '原分辨率' : `最高 ${this.quality === 'auto' ? '720' : this.quality}p`}`,
     }[this.info.plan.mode];
   }
 

@@ -22,6 +22,7 @@ type Source struct {
 }
 
 type Plan struct {
+	Quality  string  `json:"quality,omitempty"`
 	Subtitle *int    `json:"subtitle,omitempty"`
 	Mode     string  `json:"mode"`
 	Audio    int     `json:"audio"`

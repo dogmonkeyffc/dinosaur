@@ -5,6 +5,7 @@ import type { PlaybackEngine } from './engine';
 import { applySubtitle } from './subtitles';
 
 export interface SourceSelection {
+  quality?: string;
   mode?: string;
   audio?: number;
   subtitle?: string;
@@ -15,11 +16,12 @@ export async function changeSource(engine: PlaybackEngine, selection: SourceSele
   const mode = selection.mode ?? engine.mode;
   const audio = selection.audio ?? engine.audio;
   const subtitle = selection.subtitle ?? engine.subtitle;
+  const quality = selection.quality ?? engine.quality;
   const track = engine.info.subtitles.find((item) => String(item.id) === subtitle);
   engine.sourceRequest?.abort();
   const request = new AbortController();
   engine.sourceRequest = request;
-  const query = new URLSearchParams({ mode });
+  const query = new URLSearchParams({ mode, quality });
   if (audio >= 0) query.set('audio', String(audio));
   if (track?.delivery === 'burn') query.set('subtitle', subtitle);
   try {
@@ -32,6 +34,7 @@ export async function changeSource(engine: PlaybackEngine, selection: SourceSele
     engine.info = info;
     engine.audio = info.plan.audio;
     engine.mode = mode;
+    engine.quality = info.plan.quality ?? quality;
     engine.subtitle = subtitle;
     engine.start(position);
   } catch (error) {

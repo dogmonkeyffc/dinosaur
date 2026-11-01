@@ -47,7 +47,7 @@ export function syncOptions(engine: PlaybackEngine, root = engine.root) {
     ? [root]
     : root.querySelectorAll<HTMLElement>('[data-setting-key]');
   for (const element of controls) {
-    const key = element.dataset.settingKey as 'audio' | 'subtitle' | 'mode' | 'rate';
+    const key = element.dataset.settingKey as 'audio' | 'subtitle' | 'mode' | 'quality' | 'rate';
     const selected = String(engine[key] ?? '');
     element.querySelectorAll<HTMLElement>('.art-selector-item').forEach((item) => {
       const active = item.dataset.value === selected;

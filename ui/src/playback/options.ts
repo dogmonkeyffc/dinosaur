@@ -3,6 +3,8 @@ import { escapeHTML, type ArtInstance } from './artplayer';
 import { closeSetting, settingKeyboard, syncOptions, toggleSetting } from './option-menu';
 
 const icons = {
+  quality:
+    '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 9v6m4-6v6M7 12h4m4-3h2a3 3 0 0 1 0 6h-2V9Z"/>',
   audio: '<path d="M9 5 4 9H2v6h2l5 4V5Z"/><path d="M13 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',
   subtitle: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 12h4m4 0h4M6 16h7m3 0h2"/>',
   mode: '<path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/>',
@@ -49,6 +51,15 @@ export function settingsControls(engine: PlaybackEngine) {
     control(engine, 'mode', '播放方式', 30, [
       { value: 'auto', html: '自动选择' },
       { value: 'compatible', html: '兼容模式' },
+    ]),
+    control(engine, 'quality', '分辨率', 35, [
+      { value: 'auto', html: '自动' },
+      { value: 'original', html: '原分辨率' },
+      ...[1080, 720, 480]
+        .filter(
+          (height) => !info.item.height || info.item.height >= height || info.item.width >= (height * 16) / 9,
+        )
+        .map((height) => ({ value: String(height), html: `${height}p` })),
     ]),
     control(
       engine,

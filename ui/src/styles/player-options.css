@@ -1,9 +1,15 @@
-#player-art .art-bottom {
+#player-art .art-video-player:not(.art-fullscreen):not(.art-fullscreen-web) .art-bottom,
+#player-art .art-video-player:has(.is-menu-open, :focus-visible) .art-bottom {
   opacity: 1;
 }
-#player-art .art-bottom .art-controls,
-#player-art .art-bottom .art-progress {
+#player-art .art-video-player:not(.art-fullscreen):not(.art-fullscreen-web) .art-bottom .art-controls,
+#player-art .art-video-player:not(.art-fullscreen):not(.art-fullscreen-web) .art-bottom .art-progress,
+#player-art .art-video-player:has(.is-menu-open, :focus-visible) .art-bottom .art-controls,
+#player-art .art-video-player:has(.is-menu-open, :focus-visible) .art-bottom .art-progress {
   transform: translateY(0);
+}
+#player-art .art-video-player:has(.is-menu-open, :focus-visible) {
+  cursor: auto;
 }
 #player-art .art-controls-right {
   align-items: center;

@@ -46,12 +46,16 @@
   inset: 0 0 auto;
   padding: 18px 20px 40px;
   background: linear-gradient(#000b, transparent);
-  opacity: 1;
-  visibility: visible;
+  opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.2s;
+  transition:
+    opacity 0.2s,
+    visibility 0.2s;
 }
-#player-art .art-control-show .art-layer-navigation {
+#player-art .art-control-show .art-layer-navigation,
+#player-art .art-video-player:not(.art-fullscreen):not(.art-fullscreen-web) .art-layer-navigation,
+#player-art .art-video-player:has(.is-menu-open, :focus-visible) .art-layer-navigation {
   opacity: 1;
   visibility: visible;
 }

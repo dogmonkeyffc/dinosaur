@@ -3,6 +3,18 @@ import { clearSubtitles, refreshSubtitle } from './subtitles';
 
 export function bindEvents(engine: PlaybackEngine) {
   const { video, art, callbacks } = engine;
+  let touch = false;
+  art.events.proxy(engine.root, 'pointerdown', (event) => {
+    touch = (event as PointerEvent).pointerType !== 'mouse';
+  });
+  art.events.proxy(engine.root, 'click', () => {
+    // Touch clicks can leave Artplayer's synthetic mouse hover on the toolbar.
+    if (touch) art.controls.isHover = false;
+  });
+  art.events.proxy(document, 'fullscreenchange', () => {
+    // Fullscreen changes the toolbar bounds, invalidating the old hover state.
+    art.controls.isHover = false;
+  });
   const bind = (event: string, handler: () => void) => art.events.proxy(video, event, handler);
   bind('timeupdate', () => {
     if (engine.ready && !engine.loading) engine.savedPosition = engine.position();

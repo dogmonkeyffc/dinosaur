@@ -4,6 +4,7 @@ export interface ArtInstance {
   poster: string;
   playbackRate: number;
   notice: { show: string };
+  controls: { isHover: boolean };
   events: { proxy: (target: EventTarget, event: string, handler: (event: Event) => void) => void };
   destroy: () => void;
 }

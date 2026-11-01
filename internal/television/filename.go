@@ -16,9 +16,12 @@ var seasonFolder = regexp.MustCompile(`(?i)^(?:season[ ._\-]*[0-9]+|s[0-9]+|spec
 
 // ParseEpisode uses a show directory as identity, falling back to the filename
 // for flat libraries. Season zero is reserved for specials. Ambiguous filenames
-// without an explicit season and episode are left for the owner to rename.
+// with Chinese episode markers default to season one when no season is named.
 func ParseEpisode(path string) (EpisodeName, bool) {
 	stem := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
+	if !episodeMark.MatchString(stem) {
+		stem = chineseEpisodeStem(stem, filepath.Dir(path))
+	}
 	indexes := episodeMark.FindStringSubmatchIndex(stem)
 	if indexes == nil {
 		return EpisodeName{}, false
@@ -60,7 +63,7 @@ func ParseEpisode(path string) (EpisodeName, bool) {
 		result.Key = "title:" + strings.ToLower(result.Series) + fmt.Sprintf(":%d", result.Year)
 	}
 	result.Title, _ = media.ParseFilename("Episode." + strings.Trim(tail, " ._-[]()") + ".mp4")
-	result.Title = strings.TrimSpace(strings.TrimPrefix(result.Title, "Episode"))
+	result.Title = strings.Trim(strings.TrimPrefix(result.Title, "Episode"), " ._-[]()")
 	if strings.Trim(tail, " ._-[]()") == "" || result.Title == ".mp4" {
 		result.Title = ""
 	}

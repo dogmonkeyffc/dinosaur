@@ -8,6 +8,7 @@ import { scrapeMessage, stateNames, time } from '../lib/format';
 import type { Page, ScrapeRecord } from '../lib/types';
 import { StatusBadge } from './StatusBadge';
 import { RecordActions, RecordCandidates } from './RecordActions';
+import { RecordMedia } from './RecordMedia';
 
 const states = ['', 'matched', 'unmatched', 'needs_review', 'failed', 'warning'];
 export function ScrapingPage() {
@@ -79,8 +80,7 @@ export function ScrapingPage() {
             {resource.data?.items.map((item) => (
               <tr key={item.series_id ? `tv:${item.series_id}` : `movie:${item.media_id}`}>
                 <td>
-                  <strong>{item.title}</strong>
-                  <small>{item.filename}</small>
+                  <RecordMedia item={item} />
                 </td>
                 <td>{item.library_name}</td>
                 <td>

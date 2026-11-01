@@ -9,7 +9,8 @@ const metadataRecordSources = `WITH sources AS (
  COALESCE(md.original_title,'') AS original_title,COALESCE(md.aliases,'') AS aliases,
  COALESCE(md.language,'') AS language,COALESCE(md.status,'') AS raw_status,
  COALESCE(md.message,'') AS message,COALESCE(md.updated_at,0) AS updated_at,
- COALESCE(md.candidates_json,'[]') AS candidates_json,COALESCE(md.source,'') AS source,COALESCE(md.source_url,'') AS source_url,COALESCE(md.revision,0) AS revision
+ COALESCE(md.candidates_json,'[]') AS candidates_json,COALESCE(md.source,'') AS source,COALESCE(md.source_url,'') AS source_url,COALESCE(md.revision,0) AS revision,
+ COALESCE(NULLIF(md.poster_key,''),m.poster_key) AS poster_key
  ` + mediaFrom + ` WHERE m.missing=0 AND l.type='movie'
  UNION ALL
  SELECT 0,s.id,s.id,'tv',s.library_id,l.name,` + seriesTitle + `,s.title,
@@ -22,7 +23,9 @@ const metadataRecordSources = `WITH sources AS (
  COALESCE(json_extract(s.metadata_json,'$.status'),''),
  COALESCE(json_extract(s.metadata_json,'$.message'),''),
  COALESCE(json_extract(s.metadata_json,'$.updated_at'),0),
- COALESCE(json_extract(s.metadata_json,'$.candidates'),'[]'),COALESCE(json_extract(s.metadata_json,'$.source'),''),COALESCE(json_extract(s.metadata_json,'$.source_url'),''),s.metadata_version
+ COALESCE(json_extract(s.metadata_json,'$.candidates'),'[]'),COALESCE(json_extract(s.metadata_json,'$.source'),''),COALESCE(json_extract(s.metadata_json,'$.source_url'),''),s.metadata_version,
+ COALESCE(NULLIF(s.poster_key,''),(SELECT m.poster_key FROM tv_episodes e JOIN media_items m ON m.id=e.media_id
+ WHERE e.series_id=s.id AND m.missing=0 AND m.poster_key<>'' ORDER BY e.season_number,e.episode_number,m.id LIMIT 1),'')
  ` + seriesFrom + ` WHERE l.type='tv' AND ` + seriesVisible + `)
  `
 

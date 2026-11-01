@@ -59,6 +59,17 @@ func (s *Server) metadataRecords(w http.ResponseWriter, r *http.Request) {
 	if s.scrapeError(w, r, err) {
 		return
 	}
+	for i := range page.Items {
+		item := &page.Items[i]
+		if !validPosterKey(item.PosterKey) {
+			continue
+		}
+		kind, id := "media", item.MediaID
+		if item.SeriesID > 0 {
+			kind, id = "series", item.SeriesID
+		}
+		item.PosterURL = "/api/" + kind + "/" + strconv.FormatInt(id, 10) + "/poster?v=" + item.PosterKey
+	}
 	writeJSON(w, 200, page)
 }
 

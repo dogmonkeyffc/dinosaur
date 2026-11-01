@@ -66,7 +66,7 @@ func (s *Store) MetadataRecords(ctx context.Context, filter metadata.ReportFilte
 	}
 	args = append(args, filter.PageSize, (filter.Page-1)*filter.PageSize)
 	rows, err = tx.QueryContext(ctx, metadataRecordSources+`SELECT r.media_id,r.series_id,r.library_id,r.library_name,r.title,r.filename,
- r.tmdb_id,r.language,`+recordStatus+`,r.message,r.updated_at,r.candidates_json,r.bangumi_id,r.source,r.source_url,r.revision
+ r.tmdb_id,r.language,`+recordStatus+`,r.message,r.updated_at,r.candidates_json,r.bangumi_id,r.source,r.source_url,r.revision,r.poster_key
  FROM sources r`+where+` ORDER BY r.media_type,r.sort_id LIMIT ? OFFSET ?`, args...)
 	if err != nil {
 		return page, err
@@ -74,7 +74,7 @@ func (s *Store) MetadataRecords(ctx context.Context, filter metadata.ReportFilte
 	for rows.Next() {
 		var item metadata.Record
 		var candidates string
-		if err := rows.Scan(&item.MediaID, &item.SeriesID, &item.LibraryID, &item.LibraryName, &item.Title, &item.Filename, &item.TMDBID, &item.Language, &item.Status, &item.Message, &item.UpdatedAt, &candidates, &item.BangumiID, &item.Source, &item.SourceURL, &item.Version); err != nil {
+		if err := rows.Scan(&item.MediaID, &item.SeriesID, &item.LibraryID, &item.LibraryName, &item.Title, &item.Filename, &item.TMDBID, &item.Language, &item.Status, &item.Message, &item.UpdatedAt, &candidates, &item.BangumiID, &item.Source, &item.SourceURL, &item.Version, &item.PosterKey); err != nil {
 			rows.Close()
 			return page, err
 		}

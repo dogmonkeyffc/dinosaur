@@ -116,6 +116,7 @@ export interface Job {
   ended_at: number;
 }
 export interface ScrapeRecord {
+  poster_url?: string;
   media_id: number;
   series_id?: number;
   library_name: string;

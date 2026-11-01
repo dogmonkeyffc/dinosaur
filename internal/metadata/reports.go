@@ -2,6 +2,8 @@ package metadata
 
 // Record is an administrator's view of current identification results.
 type Record struct {
+	PosterKey    string      `json:"-"`
+	PosterURL    string      `json:"poster_url,omitempty"`
 	Source       string      `json:"source,omitempty"`
 	SourceURL    string      `json:"source_url,omitempty"`
 	Version      int64       `json:"version"`

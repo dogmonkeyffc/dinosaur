@@ -4,16 +4,10 @@ import { useAuth } from '../auth/AuthProvider';
 import { Brand, ErrorMessage, Icon } from '../components/common';
 import { useAction, useResource } from '../lib/hooks';
 import { useLibraries } from '../libraries/LibraryProvider';
+import { libraryPath } from './navigation';
 
 const mobileQuery = '(max-width:720px), (max-width:1000px) and (max-height:500px) and (pointer:coarse)';
-const navigationGroups = [
-  {
-    label: '观看',
-    entries: [
-      ['/movies', '我的电影', 'film'],
-      ['/series', '我的剧集', 'tv'],
-    ],
-  },
+const managementGroups = [
   {
     label: '媒体管理',
     entries: [
@@ -30,14 +24,13 @@ const navigationGroups = [
     ],
   },
 ];
-const entries = navigationGroups.flatMap((group) => group.entries);
 
 export function Shell() {
   const { user, logout } = useAuth();
   const { libraries } = useLibraries();
   const location = useLocation();
   const [menu, setMenu] = useState(false);
-  const [playingKind, setPlayingKind] = useState('movie');
+  const [activeLibrary, setActiveLibrary] = useState<number | null>(null);
   const sidebar = useRef<HTMLElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   const content = useRef<HTMLElement>(null);
@@ -45,19 +38,29 @@ export function Shell() {
   const health = useResource<{ status: string }>('/health/ready', 30000);
   const playing = location.pathname.startsWith('/watch/');
   const detail = /^\/(movies|series)\/\d+$/.test(location.pathname);
-  const selected = playing
-    ? playingKind === 'tv'
-      ? '/series'
-      : '/movies'
-    : detail
-      ? '/' + location.pathname.split('/')[1]
-      : location.pathname;
+  const navigationGroups = [
+    {
+      label: '媒体库',
+      entries: libraries.map((library) => [
+        libraryPath(library),
+        library.name,
+        library.type === 'movie' ? 'film' : 'tv',
+      ]),
+    },
+    ...managementGroups,
+  ].filter((group) => group.entries.length > 0);
+  const entries = navigationGroups.flatMap((group) => group.entries);
+  const libraryID =
+    playing || detail ? activeLibrary : Number(new URLSearchParams(location.search).get('library_id'));
+  const library = libraries.find((item) => item.id === libraryID);
+  const catalog = location.pathname === '/movies' || location.pathname === '/series';
+  const selected = library && (playing || detail || catalog) ? libraryPath(library) : location.pathname;
+  const pageTitle = entries.find(([path]) => path === selected)?.[1] || '媒体空间';
   useEffect(() => {
     setMenu(false);
     content.current?.scrollTo(0, 0);
-    const title = entries.find(([path]) => path === selected)?.[1] || '媒体空间';
-    if (!playing && !detail) document.title = `${title} · Dinosaur`;
-  }, [location.pathname, selected]);
+    if (!playing && !detail) document.title = `${pageTitle} · Dinosaur`;
+  }, [location.pathname, selected, pageTitle]);
   useEffect(() => {
     const media = window.matchMedia(mobileQuery);
     const resize = () => setMenu(false);
@@ -160,7 +163,7 @@ export function Shell() {
       >
         <main ref={content} id="content-main" className="main-content">
           <ErrorMessage error={action.error} />
-          <Outlet context={{ setPlayingKind }} />
+          <Outlet context={{ setActiveLibrary }} />
         </main>
       </div>
     </div>

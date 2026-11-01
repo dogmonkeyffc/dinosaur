@@ -30,6 +30,9 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
     scans.length ? 3000 : 0,
   );
   const recent = useResource<{ items: Movie[] }>(`/api/playback/continue?type=${kind}`);
+  const recentItems = (recent.data?.items || []).filter(
+    (item) => !library || String(item.library_id) === library,
+  );
   useJobs(kind, result.reload);
   useEffect(() => {
     result.reload();
@@ -46,11 +49,11 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
   }
   return (
     <section id={tv ? 'series-section' : 'movies-section'} aria-label={tv ? '我的剧集' : '我的电影'}>
-      {(recent.data?.items.length || 0) > 0 && (
+      {recentItems.length > 0 && (
         <section className="continue-section">
           <h2>继续观看</h2>
           <div className="movie-grid continue-grid">
-            {recent.data!.items.map((item) => (
+            {recentItems.map((item) => (
               <MediaCard key={item.id} item={item} resume />
             ))}
           </div>

@@ -1,4 +1,5 @@
 import { Select } from '../components/Select';
+import { useActiveLibrary } from '../layout/useActiveLibrary';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ErrorMessage, Loading } from '../components/common';
@@ -12,6 +13,7 @@ export function MovieDetailPage() {
   const { id } = useParams();
   const { data, loading, error, reload } = useResource<{ item: Movie }>(`/api/media/${id}`);
   const item = data?.item;
+  useActiveLibrary(item?.library_id);
   useEffect(() => {
     if (item) document.title = `${item.title} · Dinosaur`;
   }, [item]);
@@ -57,6 +59,7 @@ export function SeriesDetailPage() {
   const { data, loading, error, reload } = useResource<SeriesDetail>(`/api/series/${id}`);
   const [season, setSeason] = useState<number | null>(null);
   const item = data?.series;
+  useActiveLibrary(item?.library_id);
   useEffect(() => {
     if (!data) return;
     document.title = `${data.series.title} · Dinosaur`;

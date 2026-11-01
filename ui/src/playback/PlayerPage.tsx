@@ -1,28 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useOutletContext, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ErrorMessage } from '../components/common';
 import { useToast } from '../components/Toast';
 import { useResource } from '../lib/hooks';
 import { message } from '../lib/errors';
 import type { PlaybackInfo } from '../lib/types';
 import { PlaybackEngine } from './engine';
+import { useActiveLibrary } from '../layout/useActiveLibrary';
 
 export function PlayerPage() {
   const { id } = useParams();
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const notify = useToast();
-  const { setPlayingKind } = useOutletContext<{ setPlayingKind: (kind: string) => void }>();
   const root = useRef<HTMLDivElement>(null);
   const engine = useRef<PlaybackEngine | null>(null);
   const [status, setStatus] = useState('正在准备…');
   const [error, setError] = useState('');
   const resource = useResource<PlaybackInfo>(`/api/playback/${id}?subtitle=auto`);
   const info = resource.data;
+  useActiveLibrary(info?.item.library_id);
   const beginning = params.get('beginning') === '1';
   useEffect(() => {
     if (!info || !root.current) return;
-    setPlayingKind(info.item.series_id ? 'tv' : 'movie');
     document.title = `${info.item.series_id ? info.item.series_title + ' · ' : ''}${info.item.title} · Dinosaur`;
     setError('');
     try {
@@ -34,7 +34,12 @@ export function PlayerPage() {
           error: setError,
           notify,
           back: () =>
-            navigate(info.item.series_id ? `/series/${info.item.series_id}` : '/movies', { replace: true }),
+            navigate(
+              info.item.series_id
+                ? `/series/${info.item.series_id}`
+                : `/movies?library_id=${info.item.library_id}`,
+              { replace: true },
+            ),
           next: (next) => navigate(`/watch/${next}?beginning=1`, { replace: true, state: { kind: 'tv' } }),
         },
         beginning,
@@ -47,7 +52,7 @@ export function PlayerPage() {
     } catch (reason) {
       setError(message(reason));
     }
-  }, [info, beginning, navigate, notify, setPlayingKind]);
+  }, [info, beginning, navigate, notify]);
   return (
     <section id="player-section" className="player-page" aria-label="媒体播放器">
       <div className="player-stage">

@@ -6,15 +6,31 @@ import { useAction, useResource } from '../lib/hooks';
 import { useLibraries } from '../libraries/LibraryProvider';
 
 const mobileQuery = '(max-width:720px), (max-width:1000px) and (max-height:500px) and (pointer:coarse)';
-const entries = [
-  ['/movies', '我的电影', 'film'],
-  ['/series', '我的剧集', 'tv'],
-  ['/settings', '媒体库设置', 'folder'],
-  ['/settings/scraping', '刮削管理', 'film', 'admin'],
-  ['/settings/metadata', '元数据设置', 'info', 'admin'],
-  ['/settings/system', '系统设置', 'disk', 'admin'],
-  ['/settings/account', '账户安全', 'lock'],
+const navigationGroups = [
+  {
+    label: '观看',
+    entries: [
+      ['/movies', '我的电影', 'film'],
+      ['/series', '我的剧集', 'tv'],
+    ],
+  },
+  {
+    label: '媒体管理',
+    entries: [
+      ['/settings', '媒体库设置', 'folder'],
+      ['/settings/scraping', '刮削管理', 'film', 'admin'],
+      ['/settings/metadata', '元数据设置', 'info', 'admin'],
+    ],
+  },
+  {
+    label: '系统与账户',
+    entries: [
+      ['/settings/system', '系统设置', 'disk', 'admin'],
+      ['/settings/account', '账户安全', 'lock'],
+    ],
+  },
 ];
+const entries = navigationGroups.flatMap((group) => group.entries);
 
 export function Shell() {
   const { user, logout } = useAuth();
@@ -90,23 +106,27 @@ export function Shell() {
           <span>{menu ? '收起' : '菜单'}</span>
         </button>
         <nav id="workspace-navigation" aria-label="媒体空间">
-          {entries
-            .filter(([, , , role]) => !role || user?.role === role)
-            .map(([path, label, icon]) => (
-              <Link
-                key={path}
-                to={path}
-                aria-label={label}
-                title={label}
-                onClick={close}
-                className={`nav-item${selected === path ? ' active' : ''}`}
-                aria-current={selected === path ? 'page' : undefined}
-              >
-                <Icon name={icon} />
-                {label}
-                {path === '/settings' && <span className="nav-count">{libraries.length}</span>}
-              </Link>
-            ))}
+          {navigationGroups.map((group) => (
+            <div key={group.label} className="nav-group" role="group" aria-label={group.label}>
+              {group.entries
+                .filter(([, , , role]) => !role || user?.role === role)
+                .map(([path, label, icon]) => (
+                  <Link
+                    key={path}
+                    to={path}
+                    aria-label={label}
+                    title={label}
+                    onClick={close}
+                    className={`nav-item${selected === path ? ' active' : ''}`}
+                    aria-current={selected === path ? 'page' : undefined}
+                  >
+                    <Icon name={icon} />
+                    {label}
+                    {path === '/settings' && <span className="nav-count">{libraries.length}</span>}
+                  </Link>
+                ))}
+            </div>
+          ))}
         </nav>
         <div className="sidebar-bottom">
           <div className="server-health">

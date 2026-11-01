@@ -61,8 +61,8 @@
   .sidebar nav {
     display: none;
     grid-column: 1 / -1;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
     margin-top: 12px;
     padding: 12px 0;
     border-top: 1px solid #344839;
@@ -70,6 +70,17 @@
 
   .sidebar.menu-open nav {
     display: grid;
+  }
+
+  .sidebar .nav-group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .sidebar .nav-group + .nav-group {
+    margin-top: 10px;
+    padding-top: 10px;
   }
 
   .sidebar .nav-item {

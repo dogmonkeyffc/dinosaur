@@ -34,12 +34,19 @@ export function Shell() {
   const [activeLibrary, setActiveLibrary] = useState<number | null>(null);
   const sidebar = useRef<HTMLElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
-  const content = useRef<HTMLElement>(null);
   const action = useAction();
   const health = useResource<{ status: string }>('/health/ready', 30000);
   const playing = location.pathname.startsWith('/watch/');
   const detail = /^\/(movies|series)\/\d+$/.test(location.pathname);
   const navigationGroups = [
+    {
+      label: '浏览',
+      entries: [
+        ['/', '看片室', 'film'],
+        ['/movies', '全部电影', 'film'],
+        ['/series', '全部剧集', 'tv'],
+      ],
+    },
     {
       label: '媒体库',
       entries: libraries.map((library) => [
@@ -59,7 +66,7 @@ export function Shell() {
   const pageTitle = entries.find(([path]) => path === selected)?.[1] || '媒体空间';
   useEffect(() => {
     setMenu(false);
-    content.current?.scrollTo(0, 0);
+    window.scrollTo(0, 0);
     if (!playing && !detail) document.title = `${pageTitle} · Dinosaur`;
   }, [location.pathname, selected, pageTitle]);
   useEffect(() => {
@@ -93,7 +100,10 @@ export function Shell() {
     if (menu) toggle.current?.focus();
   }
   return (
-    <div id="app" className="app-shell">
+    <div id="app" className={`app-shell${playing ? ' is-theater' : ''}`}>
+      <a className="skip-link" href="#content-main">
+        跳到主要内容
+      </a>
       <aside ref={sidebar} className={`sidebar${menu ? ' menu-open' : ''}`}>
         <Brand />
         <Button
@@ -113,6 +123,9 @@ export function Shell() {
         <nav id="workspace-navigation" aria-label="媒体空间">
           {navigationGroups.map((group) => (
             <div key={group.label} className="nav-group" role="group" aria-label={group.label}>
+              <span className="nav-label" aria-hidden="true">
+                {group.label}
+              </span>
               {group.entries
                 .filter(([, , , role]) => !role || user?.role === role)
                 .map(([path, label, icon]) => (
@@ -164,7 +177,7 @@ export function Shell() {
         id="content"
         className={`workspace content${playing ? ' is-playing' : detail ? ' is-detail' : ''}`}
       >
-        <main ref={content} id="content-main" className="main-content">
+        <main id="content-main" className="main-content" tabIndex={-1}>
           <ErrorMessage error={action.error} />
           <Suspense fallback={<Loading />}>
             <Outlet context={{ setActiveLibrary }} />

@@ -8,7 +8,7 @@
   min-width: 130px;
   flex: 1;
   gap: 8px;
-  font-size: 12px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 .scrape-admin-filters .form-control,
@@ -24,20 +24,21 @@
 .scrape-table-wrap {
   max-width: 100%;
   overflow-x: auto;
+  container-type: inline-size;
   border: 1px solid var(--line);
   border-radius: 10px;
-  background: #fff;
+  background: var(--surface);
 }
 .scrape-table {
   width: 100%;
   table-layout: fixed;
-  min-width: 1100px;
+  min-width: 0;
   border-collapse: collapse;
   text-align: left;
-  font-size: 12px;
+  font-size: 0.875rem;
 }
 .scrape-table th {
-  background: #f0f4ec;
+  background: var(--surface-raised);
   color: var(--muted);
   font-weight: 500;
 }
@@ -46,6 +47,7 @@
   padding: 16px;
   border-bottom: 1px solid var(--line);
   vertical-align: top;
+  overflow-wrap: anywhere;
 }
 .scrape-table td:first-child {
   max-width: 270px;
@@ -64,7 +66,7 @@
   height: 72px;
   overflow: hidden;
   border-radius: 5px;
-  background: #ecf1e8;
+  background: var(--surface-raised);
   color: var(--muted);
 }
 .scrape-media-poster {
@@ -91,8 +93,8 @@
 .scrape-row-note {
   max-width: 250px;
   margin: 8px 0 0;
-  font-size: 11px;
-  color: #8c683c;
+  font-size: 0.875rem;
+  color: var(--muted);
   line-height: 1.8;
 }
 .scrape-row-actions {
@@ -105,7 +107,7 @@
 .scrape-admin-empty {
   padding: 20px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.875rem;
   line-height: 1.8;
 }
 @media (max-width: 720px) {
@@ -133,7 +135,7 @@
   width: 11%;
 }
 .scrape-table th {
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 .scrape-table .candidate-preview {
   min-width: 0;
@@ -147,4 +149,54 @@
 .scrape-table .metadata-candidate .button {
   white-space: normal;
   overflow-wrap: anywhere;
+}
+
+.scrape-cell-label {
+  display: none;
+}
+
+@container (max-width: 60rem) {
+  .scrape-table,
+  .scrape-table tbody {
+    display: block;
+  }
+
+  .scrape-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .scrape-table tbody tr {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: 0.8rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .scrape-table tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .scrape-table td {
+    display: block;
+    min-width: 0;
+    padding: 0;
+    border-bottom: 0;
+  }
+
+  .scrape-table td:first-child {
+    grid-column: 1 / -1;
+    max-width: none;
+  }
+
+  .scrape-cell-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--muted);
+    font-weight: 650;
+  }
 }

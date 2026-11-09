@@ -1,5 +1,6 @@
 import { createDOMRenderer, FluentProvider, RendererProvider } from '@fluentui/react-components';
-import { dinosaurTheme } from './components/theme';
+import { useSyncExternalStore, type ReactNode } from 'react';
+import { darkTheme, lightTheme } from './components/theme';
 import { styleNonce } from './lib/styleNonce';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
@@ -15,7 +16,6 @@ import './styles/scrape-admin.css';
 import './styles/movie-metadata.css';
 import './styles/movies.css';
 import './styles/movie-detail.css';
-import './styles/detail-layout.css';
 import './styles/player.css';
 import './styles/watch-progress.css';
 import './styles/layout.css';
@@ -24,13 +24,29 @@ import './styles/player-options.css';
 import './styles/mobile-layout.css';
 import './styles/agent-keys.css';
 
+const systemAppearance = window.matchMedia('(prefers-color-scheme: dark)');
+
+function subscribeAppearance(update: () => void) {
+  systemAppearance.addEventListener('change', update);
+  return () => systemAppearance.removeEventListener('change', update);
+}
+
+function Appearance({ children }: { children: ReactNode }) {
+  const dark = useSyncExternalStore(subscribeAppearance, () => systemAppearance.matches);
+  return (
+    <FluentProvider theme={dark ? darkTheme : lightTheme} className="dinosaur-ui">
+      {children}
+    </FluentProvider>
+  );
+}
+
 const renderer = createDOMRenderer(document, {
   styleElementAttributes: styleNonce ? { nonce: styleNonce } : undefined,
 });
 
 createRoot(document.getElementById('root')!).render(
   <RendererProvider renderer={renderer}>
-    <FluentProvider theme={dinosaurTheme} className="dinosaur-ui">
+    <Appearance>
       <BrowserRouter>
         <ToastProvider>
           <AuthProvider>
@@ -38,6 +54,6 @@ createRoot(document.getElementById('root')!).render(
           </AuthProvider>
         </ToastProvider>
       </BrowserRouter>
-    </FluentProvider>
+    </Appearance>
   </RendererProvider>,
 );

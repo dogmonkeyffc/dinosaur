@@ -43,7 +43,7 @@ export function MetadataPage() {
   }
   return (
     <section id="metadata-section">
-      <Heading title="元数据设置" />
+      <Heading title="元数据设置" description="设置识别来源和资料语言，用于补全海报与简介。" />
       <p className="metadata-source-order">
         TMDB → Bangumi
         <InfoTip label="刮削来源顺序">

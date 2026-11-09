@@ -41,7 +41,6 @@ export function MediaCard({ item }: { item: Movie | Series }) {
         {badge && <span className="movie-metadata-badge">{badge}</span>}
         {movie && <span className="movie-quality">{resolution(movie)}</span>}
         {movie?.watched && <span className="movie-watched">已看</span>}
-        <span className="movie-artwork-caption">{item.library_name}</span>
         {movie && movie.position > 0 && movie.duration > 0 && !movie.watched && (
           <progress
             className="movie-watch-progress"
@@ -52,6 +51,7 @@ export function MediaCard({ item }: { item: Movie | Series }) {
         )}
       </span>
       <span className="movie-title">{title}</span>
+      <span className="movie-meta">{item.library_name}</span>
       <span className="movie-meta">
         {item.year ? `${item.year} · ` : ''}
         {series

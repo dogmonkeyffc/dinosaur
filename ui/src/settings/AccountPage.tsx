@@ -29,7 +29,7 @@ export function AccountPage() {
   }
   return (
     <section id="account-section">
-      <Heading title="账户安全" />
+      <Heading title="账户安全" description="管理密码、登录设备和访问密钥。" />
       <MobileLogin />
       <Devices />
       {auth.user?.role === 'admin' && <AgentKeys />}

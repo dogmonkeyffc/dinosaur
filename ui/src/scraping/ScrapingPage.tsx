@@ -10,7 +10,7 @@ import {
 import { SourceReference } from '../metadata/SourceReference';
 import { Select } from '../components/Select';
 import { useState } from 'react';
-import { ErrorMessage, Loading, Pagination } from '../components/common';
+import { ErrorMessage, Heading, Loading, Pagination } from '../components/common';
 import { useLibraries } from '../libraries/LibraryProvider';
 import { useDebounced, useResource } from '../lib/hooks';
 import { scrapeMessage, stateNames, time } from '../lib/format';
@@ -39,6 +39,7 @@ export function ScrapingPage() {
   }
   return (
     <section id="scraping-section" aria-label="刮削管理">
+      <Heading title="刮削管理" description="检查媒体识别结果，处理失败的任务和待确认匹配。" />
       <ErrorMessage error={resource.error} />
       <form className="scrape-admin-filters" onSubmit={(event) => event.preventDefault()}>
         <label>
@@ -76,35 +77,66 @@ export function ScrapingPage() {
       </form>
       {resource.loading && !resource.data && <Loading />}
       <div className="scrape-table-wrap" role="region" aria-label="媒体识别结果" tabIndex={0}>
-        <Table className="scrape-table">
-          <TableHeader>
-            <TableRow>
-              <TableHeaderCell>媒体 / 文件</TableHeaderCell>
-              <TableHeaderCell>媒体库</TableHeaderCell>
-              <TableHeaderCell>状态 / 提示</TableHeaderCell>
-              <TableHeaderCell>资料来源 / 语言</TableHeaderCell>
-              <TableHeaderCell>更新时间</TableHeaderCell>
-              <TableHeaderCell>操作</TableHeaderCell>
+        <Table className="scrape-table" role="table">
+          <TableHeader role="rowgroup">
+            <TableRow role="row">
+              <TableHeaderCell role="columnheader" scope="col">
+                媒体 / 文件
+              </TableHeaderCell>
+              <TableHeaderCell role="columnheader" scope="col">
+                媒体库
+              </TableHeaderCell>
+              <TableHeaderCell role="columnheader" scope="col">
+                状态 / 提示
+              </TableHeaderCell>
+              <TableHeaderCell role="columnheader" scope="col">
+                资料来源 / 语言
+              </TableHeaderCell>
+              <TableHeaderCell role="columnheader" scope="col">
+                更新时间
+              </TableHeaderCell>
+              <TableHeaderCell role="columnheader" scope="col">
+                操作
+              </TableHeaderCell>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody role="rowgroup">
             {resource.data?.items.map((item) => (
-              <TableRow key={item.series_id ? `tv:${item.series_id}` : `movie:${item.media_id}`}>
-                <TableCell>
+              <TableRow role="row" key={item.series_id ? `tv:${item.series_id}` : `movie:${item.media_id}`}>
+                <TableCell role="cell">
                   <RecordMedia item={item} />
                 </TableCell>
-                <TableCell>{item.library_name}</TableCell>
-                <TableCell>
+                <TableCell role="cell">
+                  <span className="scrape-cell-label" aria-hidden="true">
+                    媒体库
+                  </span>
+                  {item.library_name}
+                </TableCell>
+                <TableCell role="cell">
+                  <span className="scrape-cell-label" aria-hidden="true">
+                    状态
+                  </span>
                   <StatusBadge status={item.status} />
                   <p className="scrape-row-note">{scrapeMessage(item.message)}</p>
                   <RecordCandidates item={item} reload={resource.reload} />
                 </TableCell>
-                <TableCell>
+                <TableCell role="cell">
+                  <span className="scrape-cell-label" aria-hidden="true">
+                    资料来源
+                  </span>
                   <SourceReference item={item} kind={item.series_id ? 'tv' : 'movie'} />
                   <small>{item.language}</small>
                 </TableCell>
-                <TableCell>{time(item.updated_at)}</TableCell>
-                <TableCell>
+                <TableCell role="cell">
+                  <span className="scrape-cell-label" aria-hidden="true">
+                    更新时间
+                  </span>
+                  {time(item.updated_at)}
+                </TableCell>
+                <TableCell role="cell">
+                  <span className="scrape-cell-label" aria-hidden="true">
+                    操作
+                  </span>
                   <RecordActions item={item} reload={resource.reload} />
                 </TableCell>
               </TableRow>

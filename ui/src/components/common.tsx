@@ -10,6 +10,7 @@ import {
   Spinner,
   useRestoreFocusSource,
 } from '@fluentui/react-components';
+import { Link } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import sprite from '../assets/icons.svg?url';
 
@@ -23,23 +24,32 @@ export function Icon({ name }: { name: string }) {
 
 export function Brand() {
   return (
-    <a className="brand" href="/">
+    <Link className="brand" to="/">
       <span className="brand-mark">
         <Icon name="logo" />
       </span>
-      <span>
-        dinosaur<span className="brand-period">.</span>
-      </span>
-    </a>
+      <span>Dinosaur</span>
+    </Link>
   );
 }
 
-export function Heading({ title, children }: { title: ReactNode; children?: ReactNode }) {
+export function Heading({
+  title,
+  description,
+  children,
+}: {
+  title: ReactNode;
+  description?: string;
+  children?: ReactNode;
+}) {
   return (
-    <div className="page-heading">
-      <h1>{title}</h1>
+    <header className="page-heading">
+      <div>
+        <h1>{title}</h1>
+        {description && <p>{description}</p>}
+      </div>
       {children}
-    </div>
+    </header>
   );
 }
 

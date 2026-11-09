@@ -4,7 +4,7 @@
   height: 100%;
   min-height: 0;
   background: #000;
-  color: #e2edda;
+  color: #f2f6fc;
 }
 .player-page .player-stage {
   position: absolute;
@@ -24,7 +24,7 @@
   right: 20px;
   padding: 12px 16px;
   border-radius: 8px;
-  background: #18251fee;
+  background: #172536f5;
   z-index: 30;
 }
 .player-error-overlay:has([hidden]) {
@@ -34,7 +34,7 @@
   margin: 0 0 8px;
 }
 .dinosaur-ui .player-error-overlay .text-button {
-  color: #c2df9e;
+  color: #b9d7ff;
 }
 #player-art .art-layer-navigation {
   position: absolute;
@@ -68,18 +68,18 @@
 #player-art .player-back {
   pointer-events: auto;
   flex-shrink: 0;
-  color: #e2edda;
+  color: #f2f6fc;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   background: transparent;
   border: 0;
   padding: 0;
   cursor: pointer;
 }
 #player-art .player-back:hover {
-  color: #c2df9e;
+  color: #b9d7ff;
   background: #ffffff12;
   border-radius: 50%;
 }
@@ -91,4 +91,27 @@
   #player-art .art-layer-navigation span {
     font-size: 12px;
   }
+}
+
+.player-fallback-nav {
+  position: absolute;
+  z-index: 31;
+  top: 1rem;
+  left: 1rem;
+}
+
+.player-fallback-nav .icon {
+  transform: rotate(180deg);
+}
+
+.player-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.player-loading .loading-message {
+  color: #f2f6fc;
 }

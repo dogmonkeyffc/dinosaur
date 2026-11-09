@@ -7,6 +7,7 @@ import { Brand } from './components/common';
 import { Shell } from './layout/Shell';
 import { LibraryProvider } from './libraries/LibraryProvider';
 import { LibrariesPage } from './libraries/LibrariesPage';
+import { HomePage } from './catalog/HomePage';
 import { CatalogPage } from './catalog/CatalogPage';
 import { MovieDetailPage, SeriesDetailPage } from './catalog/DetailPages';
 
@@ -44,6 +45,7 @@ export function App() {
     <LibraryProvider key={auth.user!.id}>
       <Routes>
         <Route element={<Shell />}>
+          <Route index element={<HomePage />} />
           <Route path="/settings" element={<LibrariesPage />} />
           <Route path="/settings/account" element={<AccountPage />} />
           <Route
@@ -75,7 +77,7 @@ export function App() {
           <Route path="/movies/:id" element={<MovieDetailPage />} />
           <Route path="/series/:id" element={<SeriesDetailPage />} />
           <Route path="/watch/:id" element={<PlayerPage />} />
-          <Route path="*" element={<Navigate to="/settings" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
     </LibraryProvider>

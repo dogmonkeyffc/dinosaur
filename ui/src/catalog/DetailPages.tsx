@@ -3,7 +3,7 @@ import { ButtonLink } from '../components/ButtonLink';
 import { Select } from '../components/Select';
 import { useActiveLibrary } from '../layout/useActiveLibrary';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { ErrorMessage, Loading } from '../components/common';
 import { useResource } from '../lib/hooks';
 import { duration, resolution } from '../lib/format';
@@ -57,6 +57,7 @@ export function MovieDetailPage() {
 }
 
 export function SeriesDetailPage() {
+  const location = useLocation();
   const { id } = useParams();
   const { data, loading, error, reload } = useResource<SeriesDetail>(`/api/series/${id}`);
   const [season, setSeason] = useState<number | null>(null);
@@ -93,7 +94,11 @@ export function SeriesDetailPage() {
             </p>
             {data.resume && (
               <div className="movie-play-actions">
-                <ButtonLink appearance="primary" to={`/watch/${data.resume.id}`} state={{ kind: 'tv' }}>
+                <ButtonLink
+                  appearance="primary"
+                  to={`/watch/${data.resume.id}`}
+                  state={{ kind: 'tv', from: location.pathname, backState: location.state }}
+                >
                   {data.resume.position > 0 && !data.resume.watched ? '继续观看' : '播放'} ·{' '}
                   {data.resume.title}
                 </ButtonLink>
@@ -108,8 +113,8 @@ export function SeriesDetailPage() {
               reload={reload}
             />
             {data.folders?.length > 0 && (
-              <div className="series-folders">
-                <h2>所在文件夹</h2>
+              <details className="series-folders">
+                <summary>所在文件夹</summary>
                 <ul>
                   {data.folders.map((folder) => (
                     <li key={folder}>
@@ -118,9 +123,10 @@ export function SeriesDetailPage() {
                     </li>
                   ))}
                 </ul>
-              </div>
+              </details>
             )}
             <div className="series-seasons">
+              <h2>剧集列表</h2>
               <label>
                 选择季度
                 <Select value={season ?? ''} onValueChange={(value) => setSeason(Number(value))}>

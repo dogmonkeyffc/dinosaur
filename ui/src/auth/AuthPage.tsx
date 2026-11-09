@@ -35,10 +35,22 @@ export function AuthPage() {
   }
   return (
     <main id="auth-screen" className="auth-screen">
+      <div className="auth-intro">
+        <Brand />
+        <p className="auth-kicker">私人媒体库</p>
+        <p className="auth-title">
+          你的家庭
+          <br />
+          放映室
+        </p>
+        <p>电影、剧集和观看进度，都在你的服务器上。</p>
+      </div>
       <Card className="auth-panel">
         <div className="auth-form-wrap">
-          <Brand />
           <h1>{setup ? '创建管理员' : '登录'}</h1>
+          <p className="muted">
+            {setup ? '为这台媒体服务器创建第一个账户。' : '使用你的 Dinosaur 账户进入看片室。'}
+          </p>
           {notice && <p role="status">{notice}</p>}
           <form id="auth-form" onSubmit={submit}>
             {setup && (

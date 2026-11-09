@@ -1,7 +1,7 @@
 import { Button } from '@fluentui/react-components';
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { ErrorMessage } from '../components/common';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { ErrorMessage, Icon, Loading } from '../components/common';
 import { useToast } from '../components/Toast';
 import { useResource } from '../lib/hooks';
 import { message } from '../lib/errors';
@@ -13,6 +13,7 @@ export function PlayerPage() {
   const { id } = useParams();
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const { from, backState } = useLocation().state || {};
   const notify = useToast();
   const root = useRef<HTMLDivElement>(null);
   const engine = useRef<PlaybackEngine | null>(null);
@@ -22,6 +23,14 @@ export function PlayerPage() {
   const info = resource.data;
   useActiveLibrary(info?.item.library_id);
   const beginning = params.get('beginning') === '1';
+  const goBack = useCallback(() => {
+    const path = info?.item.series_id
+      ? `/series/${info.item.series_id}`
+      : info
+        ? `/movies?library_id=${info.item.library_id}`
+        : '/';
+    navigate(from || path, { replace: true, state: backState });
+  }, [backState, from, info, navigate]);
   useEffect(() => {
     if (!info || !root.current) return;
     document.title = `${info.item.series_id ? info.item.series_title + ' · ' : ''}${info.item.title} · Dinosaur`;
@@ -34,14 +43,9 @@ export function PlayerPage() {
           status: setStatus,
           error: setError,
           notify,
-          back: () =>
-            navigate(
-              info.item.series_id
-                ? `/series/${info.item.series_id}`
-                : `/movies?library_id=${info.item.library_id}`,
-              { replace: true },
-            ),
-          next: (next) => navigate(`/watch/${next}?beginning=1`, { replace: true, state: { kind: 'tv' } }),
+          back: goBack,
+          next: (next) =>
+            navigate(`/watch/${next}?beginning=1`, { replace: true, state: { kind: 'tv', from, backState } }),
         },
         beginning,
       );
@@ -53,12 +57,24 @@ export function PlayerPage() {
     } catch (reason) {
       setError(message(reason));
     }
-  }, [info, beginning, navigate, notify]);
+  }, [info, beginning, backState, from, goBack, navigate, notify]);
   return (
     <section id="player-section" className="player-page" aria-label="媒体播放器">
       <div className="player-stage">
         <div ref={root} id="player-art" className="artplayer-host" />
       </div>
+      {(!info || (error && !engine.current)) && (
+        <div className="player-fallback-nav">
+          <Button icon={<Icon name="arrow" />} onClick={goBack}>
+            退出播放
+          </Button>
+        </div>
+      )}
+      {resource.loading && !info && (
+        <div className="player-loading">
+          <Loading />
+        </div>
+      )}
       <span className="player-accessible" role="status">
         {status}
       </span>
@@ -72,7 +88,7 @@ export function PlayerPage() {
               engine.current ? engine.current.changeSource({ mode: 'compatible' }) : resource.reload()
             }
           >
-            重试兼容模式
+            {engine.current ? '重试兼容模式' : '重新载入'}
           </Button>
         </div>
       )}

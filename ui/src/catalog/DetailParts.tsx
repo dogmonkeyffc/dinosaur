@@ -59,14 +59,17 @@ export function WatchedButton({ item, reload }: { item: Movie; reload: () => voi
   );
 }
 export function PlayActions({ item, reload }: { item: Movie; reload: () => void }) {
+  const location = useLocation();
+  const from = location.pathname;
+  const backState = location.state;
   const resume = item.position > 0 && !item.watched;
   return (
     <div className="movie-play-actions">
-      <ButtonLink appearance="primary" to={`/watch/${item.id}`} state={{ kind: item.type }}>
+      <ButtonLink appearance="primary" to={`/watch/${item.id}`} state={{ kind: item.type, from, backState }}>
         {resume ? `继续观看 · ${clock(item.position)}` : '播放电影'}
       </ButtonLink>
       {resume && (
-        <ButtonLink to={`/watch/${item.id}?beginning=1`} state={{ kind: item.type }}>
+        <ButtonLink to={`/watch/${item.id}?beginning=1`} state={{ kind: item.type, from, backState }}>
           从头播放
         </ButtonLink>
       )}
@@ -120,6 +123,9 @@ export function TechnicalInfo({ item }: { item: Movie }) {
   );
 }
 export function EpisodeCard({ item, reload }: { item: Movie; reload: () => void }) {
+  const location = useLocation();
+  const from = location.pathname;
+  const backState = location.state;
   const resume = item.position > 0 && !item.watched;
   return (
     <article className="series-episode">
@@ -136,11 +142,15 @@ export function EpisodeCard({ item, reload }: { item: Movie; reload: () => void 
         {item.probe_error && <p className="field-help">视频信息读取失败</p>}
       </div>
       <div className="series-episode-actions">
-        <ButtonLink to={`/watch/${item.id}`} state={{ kind: 'tv' }}>
+        <ButtonLink to={`/watch/${item.id}`} state={{ kind: 'tv', from, backState }}>
           {resume ? '继续观看' : '播放'}
         </ButtonLink>
         {resume && (
-          <Link className="text-button" to={`/watch/${item.id}?beginning=1`} state={{ kind: 'tv' }}>
+          <Link
+            className="text-button"
+            to={`/watch/${item.id}?beginning=1`}
+            state={{ kind: 'tv', from, backState }}
+          >
             从头播放
           </Link>
         )}

@@ -16,7 +16,7 @@
 }
 .agent-key-created input {
   font-family: ui-monospace, monospace;
-  font-size: 12px;
+  font-size: 0.875rem;
 }
 .agent-key-created .metadata-actions {
   margin-top: 10px;

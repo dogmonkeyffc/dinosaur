@@ -1,20 +1,9 @@
-.series-detail-page {
-  width: 100%;
-  min-height: 100%;
-}
-#series-detail .detail-layout {
-  max-width: 1400px;
-  margin-inline: auto;
-}
-.series-back .icon {
-  transform: rotate(180deg);
-}
 .series-folders {
   margin-top: 24px;
 }
 .series-folders h2 {
   margin-bottom: 10px;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .series-folders ul {
   display: grid;
@@ -30,7 +19,7 @@
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
-  font-size: 12px;
+  font-size: 0.875rem;
 }
 .series-folders code {
   overflow-wrap: anywhere;
@@ -69,10 +58,10 @@
   margin-bottom: 8px;
 }
 .series-episode p {
-  font-size: 12px;
+  font-size: 0.875rem;
 }
 .series-episode summary {
-  font-size: 11px;
+  font-size: 0.875rem;
   color: var(--muted);
   cursor: pointer;
 }
@@ -83,7 +72,7 @@
   width: 100%;
   height: 4px;
   margin-bottom: 12px;
-  accent-color: var(--green);
+  accent-color: var(--accent);
 }
 .series-episode-actions {
   display: flex;
@@ -107,9 +96,6 @@
   min-width: 0;
 }
 @media (max-width: 720px) {
-  #series-detail .detail-layout {
-    padding: 20px 16px 32px;
-  }
   .series-episode {
     flex-direction: column;
     padding: 14px;
@@ -119,4 +105,17 @@
     flex-wrap: wrap;
     align-items: center;
   }
+}
+
+.series-folders summary {
+  cursor: pointer;
+  color: var(--accent);
+}
+
+.series-seasons .series-episode {
+  background: var(--bg);
+}
+
+.series-episode-actions .button {
+  white-space: normal;
 }

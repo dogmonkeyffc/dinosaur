@@ -1,14 +1,16 @@
 .account-card {
   padding: 29px;
-  background: white;
+  background: var(--colorNeutralBackground1);
   border: 1px solid var(--colorNeutralStroke2);
   border-radius: 10px;
   max-width: 590px;
   margin-bottom: 55px;
 }
 
-.account-card > p {
-  font-size: 12px;
+.device-card {
+  width: 100%;
+  max-width: 52rem;
+  border-radius: 0.9rem;
 }
 
 .account-card form {
@@ -17,7 +19,7 @@
 
 .account-card form > .button {
   margin-top: 24px;
-  font-size: 12px;
+  font-size: 0.875rem;
 }
 
 .fui-DialogSurface.modal {
@@ -30,11 +32,11 @@
 }
 
 .modal label {
-  font-size: 12px;
+  font-size: 0.875rem;
 }
 
 .modal input {
-  font-size: 13px;
+  font-size: 0.875rem;
 }
 
 .modal-actions {
@@ -47,7 +49,7 @@
 }
 
 .modal-actions .button {
-  font-size: 12px;
+  font-size: 0.875rem;
   min-height: 40px;
 }
 
@@ -59,7 +61,7 @@
 }
 
 .type-fieldset legend {
-  font-size: 12px;
+  font-size: 0.875rem;
   font-weight: 550;
   margin-bottom: 10px;
 }
@@ -78,7 +80,7 @@
 }
 
 .loading-message {
-  font-size: 12px;
+  font-size: 0.875rem;
   color: var(--muted);
   padding: 35px;
 }

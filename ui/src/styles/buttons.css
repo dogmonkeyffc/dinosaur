@@ -1,8 +1,9 @@
 .dinosaur-ui .button,
 .modal .button {
-  min-height: 40px;
+  min-height: 2.625rem;
   gap: 8px;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .button .icon {
@@ -20,9 +21,9 @@
 }
 
 .dinosaur-ui .icon-button {
-  width: 34px;
-  min-width: 34px;
-  height: 34px;
+  width: 2.5rem;
+  min-width: 2.5rem;
+  height: 2.5rem;
   padding: 0;
 }
 

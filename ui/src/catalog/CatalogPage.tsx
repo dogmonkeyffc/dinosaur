@@ -1,7 +1,7 @@
 import { Button, Input } from '@fluentui/react-components';
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ErrorMessage, Icon, Loading, Pagination } from '../components/common';
+import { ErrorMessage, Heading, Icon, Loading, Pagination } from '../components/common';
 import { useLibraries } from '../libraries/LibraryProvider';
 import { useDebounced, useResource } from '../lib/hooks';
 import { activeJob } from '../lib/format';
@@ -18,6 +18,7 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
   const query = params.get('q') || '';
   const search = useDebounced(query);
   const choices = libraries.filter((item) => item.type === kind);
+  const title = choices.find((item) => String(item.id) === library)?.name || (tv ? '全部剧集' : '全部电影');
   const scans = choices.filter((item) => activeJob(item.scan?.status));
   const scanSignature = choices
     .map((item) => `${item.id}:${item.scan?.status}:${item.scan?.processed}`)
@@ -44,17 +45,21 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
     setParams(next, { replace: name === 'q' });
   }
   return (
-    <section id={tv ? 'series-section' : 'movies-section'} aria-label={tv ? '我的剧集' : '我的电影'}>
+    <section id={tv ? 'series-section' : 'movies-section'} aria-label={title}>
+      <Heading
+        title={title}
+        description={result.data ? `${result.data.total} ${tv ? '部剧集' : '部电影'}` : undefined}
+      />
       <div className="movie-toolbar">
         <label className="search-field">
-          <Icon name="search" />
           <Input
             className="form-control"
             type="search"
+            contentBefore={<Icon name="search" />}
             maxLength={128}
             value={query}
             onChange={(event) => change('q', event.target.value)}
-            placeholder={`搜索你的${tv ? '剧集' : '电影'}`}
+            placeholder={`在「${title}」中搜索`}
             aria-label={tv ? '搜索剧集' : '搜索电影'}
           />
         </label>
@@ -69,13 +74,9 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
       {!result.loading && !result.error && !result.data?.items.length && (
         <div className="empty-state">
           <h2>{query || library ? '没有找到匹配的内容' : '暂无媒体'}</h2>
-          <Button
-            className="button secondary"
-            onClick={() => {
-              result.reload();
-            }}
-          >
-            刷新列表
+          <p>{query ? '试试片名、别名或更短的关键词。' : '媒体扫描完成后，影片会出现在这里。'}</p>
+          <Button onClick={() => (query ? change('q', '') : result.reload())}>
+            {query ? '清除搜索' : '刷新列表'}
           </Button>
         </div>
       )}

@@ -1,27 +1,51 @@
-import { createLightTheme, type BrandVariants } from '@fluentui/react-components';
+import { createDarkTheme, createLightTheme, type BrandVariants } from '@fluentui/react-components';
 
 const brand: BrandVariants = {
-  10: '#08140d',
-  20: '#14261b',
-  30: '#1d3826',
-  40: '#254831',
-  50: '#2d563c',
-  60: '#346448',
-  70: '#3c7253',
-  80: '#44815f',
-  90: '#518f6c',
-  100: '#639d7a',
-  110: '#77ac8a',
-  120: '#8dbb9b',
-  130: '#a4caad',
-  140: '#bcdbbf',
-  150: '#d4e9d3',
-  160: '#edf6eb',
+  10: '#090f1a',
+  20: '#101d31',
+  30: '#172a46',
+  40: '#20395d',
+  50: '#294977',
+  60: '#30558f',
+  70: '#3966a9',
+  80: '#4778bf',
+  90: '#5a8bd2',
+  100: '#719ee0',
+  110: '#8db3eb',
+  120: '#a6c7f5',
+  130: '#bed8fa',
+  140: '#d3e5fc',
+  150: '#e3efff',
+  160: '#f2f7ff',
 };
 
-export const dinosaurTheme = {
+const typography = {
+  fontFamilyBase: "system-ui, 'Noto Sans SC', 'Microsoft YaHei', sans-serif",
+};
+
+export const lightTheme = {
   ...createLightTheme(brand),
-  fontFamilyBase: "'Segoe UI', 'Noto Sans SC', 'Microsoft YaHei', sans-serif",
+  ...typography,
+  colorNeutralBackground1: '#ffffff',
+  colorNeutralBackground2: '#edf1f6',
+  colorNeutralBackground3: '#f5f7fa',
+  colorNeutralForeground1: '#172536',
+  colorNeutralForeground3: '#4d5d70',
+  colorBrandForeground1: '#30558f',
+  colorBrandBackground: brand[60],
+  colorBrandBackgroundHover: brand[50],
+  colorBrandBackgroundPressed: brand[40],
+};
+
+export const darkTheme = {
+  ...createDarkTheme(brand),
+  ...typography,
+  colorNeutralBackground1: '#1a2634',
+  colorNeutralBackground2: '#202e3e',
+  colorNeutralBackground3: '#101923',
+  colorNeutralForeground1: '#f2f6fc',
+  colorNeutralForeground3: '#b2c1d2',
+  colorBrandForeground1: '#a6c7f5',
   colorBrandBackground: brand[60],
   colorBrandBackgroundHover: brand[50],
   colorBrandBackgroundPressed: brand[40],

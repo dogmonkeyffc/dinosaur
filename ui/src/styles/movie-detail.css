@@ -1,52 +1,48 @@
-.movie-detail-page,
-#movie-detail {
-  width: 100%;
-  min-height: 100%;
-}
 .detail-page-header {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 20px 40px;
-  border-bottom: 1px solid var(--line);
-  font-size: 13px;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
   color: var(--muted);
 }
+
 .detail-back .icon {
   transform: rotate(180deg);
 }
+
 .detail-layout {
   display: grid;
-  grid-template-columns: minmax(180px, 280px) minmax(0, 1fr);
-  gap: 44px;
-  padding: 40px;
+  grid-template-columns: minmax(0, 16rem) minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(1.25rem, 4vw, 3rem);
+  padding: clamp(1rem, 3vw, 2.25rem);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
 }
-.detail-artwork {
-  min-width: 0;
-  align-self: start;
-  position: sticky;
-  top: 30px;
-}
+
 .detail-poster-frame {
   position: relative;
-  width: 100%;
   aspect-ratio: 2 / 3;
   overflow: hidden;
-  border-radius: 10px;
-  background: #e3eade;
-  box-shadow: 0 12px 30px #172b1a14;
+  border-radius: 0.875rem;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow8);
 }
+
 .detail-poster-placeholder {
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
-  color: #8fa286;
+  color: var(--muted);
 }
+
 .detail-poster-placeholder .icon {
-  width: 60px;
-  height: 60px;
+  width: 3rem;
+  height: 3rem;
 }
+
 .detail-poster {
   position: relative;
   display: block;
@@ -54,25 +50,25 @@
   height: 100%;
   object-fit: cover;
 }
+
 .detail-copy {
   min-width: 0;
+  max-width: 54rem;
 }
-#movie-detail-title {
-  font-size: clamp(26px, 3vw, 40px);
-  line-height: 1.4;
-  margin: 12px 0 16px;
-  overflow-wrap: anywhere;
+
+.detail-copy h1 {
+  margin: 0.55rem 0 0.75rem;
 }
+
 .detail-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.9375rem;
 }
+
 .detail-copy .movie-play-actions {
-  margin: 24px 0;
+  margin: 1rem 0 1.5rem;
 }
+
 .movie-technical {
   border-top: 1px solid var(--line);
   margin-top: 26px;
@@ -80,8 +76,8 @@
 }
 .movie-technical summary {
   cursor: pointer;
-  color: var(--green);
-  font-size: 13px;
+  color: var(--accent);
+  font-size: 0.875rem;
 }
 .movie-facts {
   display: grid;
@@ -91,18 +87,18 @@
   margin: 0;
 }
 .movie-facts dt {
-  font-size: 11px;
+  font-size: 0.875rem;
   color: var(--muted);
   margin-bottom: 10px;
 }
 .movie-facts dd {
-  font-size: 13px;
+  font-size: 0.875rem;
   margin: 0;
   color: var(--ink);
   overflow-wrap: anywhere;
 }
 #movie-detail h3 {
-  font-size: 13px;
+  font-size: 0.875rem;
   margin: 20px 0 14px;
   font-weight: 550;
 }
@@ -114,13 +110,13 @@
 .movie-tracks li {
   display: flex;
   gap: 15px;
-  font-size: 12px;
+  font-size: 0.875rem;
   line-height: 1.8;
   padding: 8px 0;
   border-bottom: 1px solid var(--line);
 }
 .movie-tracks strong {
-  color: var(--green);
+  color: var(--accent);
   font-weight: 500;
   flex-shrink: 0;
 }
@@ -131,43 +127,32 @@
   min-width: 0;
 }
 .movie-file {
-  font-size: 12px;
+  font-size: 0.875rem;
   line-height: 1.9;
 }
-.detail-loading {
-  margin: 40px;
-}
-.detail-retry {
-  margin: 0 40px;
-}
-@media (max-width: 1000px) {
+@media (max-width: 54rem) {
   .detail-layout {
-    grid-template-columns: 210px minmax(0, 1fr);
-    gap: 28px;
-    padding: 28px;
+    grid-template-columns: minmax(0, 10rem) minmax(0, 1fr);
   }
 }
-@media (max-width: 720px) {
-  .detail-page-header {
-    padding: 16px;
-  }
+
+@media (max-width: 37rem) {
   .detail-layout {
     grid-template-columns: minmax(0, 1fr);
-    gap: 26px;
-    padding: 24px 16px;
   }
+
   .detail-artwork {
-    position: static;
-    width: min(180px, 100%);
-    justify-self: center;
+    width: min(8rem, 100%);
   }
+
   .movie-facts {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 7rem), 1fr));
   }
-  .detail-loading {
-    margin: 24px 16px;
-  }
-  .detail-retry {
-    margin: 0 16px;
-  }
+}
+
+.detail-copy .movie-metadata-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
 }

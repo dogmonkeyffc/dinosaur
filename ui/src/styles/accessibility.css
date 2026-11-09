@@ -1,18 +1,17 @@
-@media (max-width: 720px) {
-  .card-actions .icon-button {
-    width: 36px;
-    height: 36px;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
+    scroll-behavior: auto !important;
   }
-  .card-path {
-    font-size: 12px;
-  }
-  .info-banner p {
-    font-size: 11px;
-  }
-  .empty-state p {
-    font-size: 12px;
-  }
-  .section-footnote {
-    font-size: 10px;
+}
+
+@media (forced-colors: active) {
+  .nav-item.active,
+  .filter-tabs .filter-tab.active {
+    outline: 1px solid Highlight;
+    color: Highlight;
   }
 }

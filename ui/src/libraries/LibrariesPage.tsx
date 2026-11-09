@@ -26,7 +26,7 @@ export function LibrariesPage() {
   );
   return (
     <section id="libraries-section">
-      <Heading title="媒体库">
+      <Heading title="媒体库" description="管理扫描目录，并查看每个媒体库的可用状态。">
         {admin && (
           <Button
             appearance="primary"
@@ -59,10 +59,10 @@ export function LibrariesPage() {
           ))}
         </div>
         <label className="search-field">
-          <Icon name="search" />
           <Input
             className="form-control"
             type="search"
+            contentBefore={<Icon name="search" />}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="搜索媒体库"

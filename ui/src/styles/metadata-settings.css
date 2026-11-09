@@ -3,7 +3,7 @@
   padding: 26px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: #fff;
+  background: var(--surface);
 }
 .metadata-card h2 {
   margin: 0 0 12px;
@@ -22,7 +22,7 @@
 .metadata-card label {
   display: block;
   margin: 18px 0;
-  font-size: 13px;
+  font-size: 0.875rem;
 }
 .metadata-card .form-control {
   margin-top: 8px;
@@ -38,12 +38,12 @@
   margin-top: 8px;
 }
 #tmdb-state {
-  color: #4c7045;
-  font-size: 13px;
+  color: var(--accent);
+  font-size: 0.875rem;
 }
 #tmdb-message {
-  color: #4c7045;
-  font-size: 13px;
+  color: var(--accent);
+  font-size: 0.875rem;
 }
 @media (max-width: 720px) {
   .metadata-card {
@@ -60,6 +60,6 @@
   align-items: center;
   gap: 8px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.875rem;
   margin-bottom: 24px;
 }

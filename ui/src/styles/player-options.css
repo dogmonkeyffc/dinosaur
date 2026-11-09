@@ -36,7 +36,7 @@
 }
 #player-art .player-setting-icon:focus-visible,
 #player-art .art-selector-item:focus-visible {
-  outline: 2px solid #c2df9e;
+  outline: 2px solid #b9d7ff;
   outline-offset: -3px;
   border-radius: 4px;
 }
@@ -46,7 +46,7 @@
   pointer-events: none;
   align-items: stretch;
   bottom: calc(var(--art-control-height) + 8px);
-  background: #152219f5;
+  background: #172536f5;
   box-shadow: 0 8px 24px #0008;
   overflow-x: hidden;
 }

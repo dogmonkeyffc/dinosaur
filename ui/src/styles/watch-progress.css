@@ -21,19 +21,8 @@
   background: #ffffff30;
 }
 .movie-watch-progress::-webkit-progress-value {
-  background: #c1e69b;
+  background: #a6cbff;
 }
 .movie-watch-progress::-moz-progress-bar {
-  background: #c1e69b;
-}
-.movie-watched {
-  position: absolute;
-  top: 11px;
-  left: 10px;
-  padding: 4px 6px;
-  border-radius: 4px;
-  color: #d8f0c5;
-  background: #335d39dd;
-  font-size: 9px;
-  z-index: 1;
+  background: #a6cbff;
 }

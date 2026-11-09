@@ -31,7 +31,7 @@
 
 .mobile-login-qr span,
 .device-list span {
-  font-size: 12px;
+  font-size: 0.875rem;
   color: var(--muted);
 }
 
@@ -47,7 +47,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 16px 0;
-  border-bottom: 1px solid #e3e8dd;
+  border-bottom: 1px solid var(--line);
 }
 
 .device-list li:last-child {

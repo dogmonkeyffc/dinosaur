@@ -22,9 +22,8 @@ export function Accounts({
       {close && <Button onPress={close}>返回</Button>}
       {accounts.map((account) => (
         <View style={styles.card} key={account.key}>
-          <Text style={styles.subtitle}>{account.user.username}</Text>
-          <Text style={styles.muted}>
-            {account.server.name} · {account.server.url}
+          <Text style={styles.subtitle}>
+            {account.user.username} · {account.server.url}
           </Text>
           <View style={styles.row}>
             <Button primary disabled={busy} onPress={() => select(account)}>

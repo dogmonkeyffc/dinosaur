@@ -47,10 +47,7 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
   }
   return (
     <section id={tv ? 'series-section' : 'movies-section'} aria-label={title}>
-      <Heading
-        title={title}
-        description={result.data ? `${result.data.total} ${tv ? '部剧集' : '部电影'}` : undefined}
-      />
+      <Heading title={title} />
       <div className="movie-toolbar">
         <label className="search-field">
           <FormInput
@@ -75,7 +72,7 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
       {!result.loading && !result.error && !result.data?.items.length && (
         <div className="empty-state">
           <h2>{query || library ? '没有找到匹配的内容' : '暂无媒体'}</h2>
-          <p>{query ? '试试片名、别名或更短的关键词。' : '媒体扫描完成后，影片会出现在这里。'}</p>
+
           <Button onClick={() => (query ? change('q', '') : result.reload())}>
             {query ? '清除搜索' : '刷新列表'}
           </Button>

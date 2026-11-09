@@ -73,8 +73,6 @@ export function Pairing({
   const remaining = pairing ? Math.max(0, Math.ceil(pairing.expires_at - now / 1000)) : 0;
   return (
     <Screen title="登录电视" tv>
-      <Text style={styles.subtitle}>{server.name}</Text>
-      <Text style={styles.muted}>{server.url}</Text>
       <View style={[styles.card, { alignItems: 'center', padding: 36 }]}>
         <Text style={styles.text}>手机 App → 登录电视</Text>
         <Text selectable style={{ color: '#c2df9e', fontSize: 76, fontWeight: '700', letterSpacing: 14 }}>

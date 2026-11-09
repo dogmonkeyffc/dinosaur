@@ -1,6 +1,5 @@
 import { FormInput } from '../components/FormInput';
 import { Button, FormControlLabel, Radio, RadioGroup } from '@mui/material';
-import { InfoTip } from '../components/InfoTip';
 import { useState, type FormEvent } from 'react';
 import { api } from '../lib/api';
 import { useAction } from '../lib/hooks';
@@ -51,13 +50,9 @@ export function LibraryDialog({ item, close }: { item?: Library; close: () => vo
           </RadioGroup>
         </fieldset>
         <label htmlFor="library-path">
-          <span className="field-label">
-            <span id="library-path-label">媒体目录</span>
-            <InfoTip label="媒体目录要求">填写服务器上的绝对路径，目录需已存在且可读取。</InfoTip>
-          </span>
+          媒体目录
           <FormInput
             className="form-control path-input"
-            aria-labelledby="library-path-label"
             id="library-path"
             name="path"
             required

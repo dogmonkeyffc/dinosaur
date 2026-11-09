@@ -32,6 +32,7 @@ export function Details({
             client={client}
             item={item}
             width={180}
+            showTitle={false}
             press={() => {
               if (movie) play(movie.id);
               else if (series?.resume) play(series.resume.id);

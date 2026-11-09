@@ -2,7 +2,6 @@ import { FormInput } from '../components/FormInput';
 import { Button } from '@mui/material';
 import { Select } from '../components/Select';
 import { SourceReference } from './SourceReference';
-import { InfoTip } from '../components/InfoTip';
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '../auth/AuthProvider';
 import { ErrorMessage } from '../components/common';
@@ -84,7 +83,6 @@ export function MetadataEditor({
   }
   return (
     <>
-      {info?.original_title && <p className="movie-original-title">{info.original_title}</p>}
       {info?.overview && <p className="movie-overview">{info.overview}</p>}
       <p className="movie-metadata-status">
         {matched
@@ -122,15 +120,12 @@ export function MetadataEditor({
             <summary>匹配 / 更正{kind === 'tv' ? '剧集' : '电影'}</summary>
             <form onSubmit={find}>
               <label htmlFor={`metadata-query-${kind}-${id}`}>
-                <span className="field-label">
-                  <span id={`metadata-query-label-${kind}-${id}`}>{kind === 'tv' ? '剧名' : '电影名'}</span>
-                  <InfoTip label="候选搜索名称">留空使用本地名称。</InfoTip>
-                </span>
+                {kind === 'tv' ? '剧名' : '电影名'}
                 <FormInput
                   className="form-control"
-                  aria-labelledby={`metadata-query-label-${kind}-${id}`}
                   id={`metadata-query-${kind}-${id}`}
                   name="query"
+                  placeholder="本地名称"
                   maxLength={128}
                 />
               </label>
@@ -164,19 +159,9 @@ export function MetadataEditor({
                 </Select>
               </label>
               <label htmlFor={`metadata-provider-${kind}-${id}`}>
-                <span className="field-label">
-                  <span id={`metadata-provider-label-${kind}-${id}`}>
-                    {source === 'bangumi' ? 'Bangumi ID' : 'TMDB ID'}
-                  </span>
-                  <InfoTip label="条目 ID 位置">
-                    {source === 'bangumi'
-                      ? 'Bangumi 条目网址 subject/ 后的数字 ID。'
-                      : 'TMDB 电影或剧集详情页网址中的数字 ID。'}
-                  </InfoTip>
-                </span>
+                {source === 'bangumi' ? 'Bangumi ID' : 'TMDB ID'}
                 <FormInput
                   className="form-control"
-                  aria-labelledby={`metadata-provider-label-${kind}-${id}`}
                   id={`metadata-provider-${kind}-${id}`}
                   name="provider_id"
                   type="number"

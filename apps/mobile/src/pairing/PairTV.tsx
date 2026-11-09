@@ -23,24 +23,20 @@ export function PairTV({
         <Button onPress={close}>返回</Button>
         <Button onPress={switchAccount}>切换账号</Button>
       </View>
-      <View style={styles.card}>
-        <Text style={styles.subtitle}>登录账号：{account.user.username}</Text>
-        <Text style={styles.muted}>
-          {account.server.name} · {account.server.url}
-        </Text>
-      </View>
       {done ? (
         <View style={styles.card}>
-          <Text style={styles.subtitle}>已授权 {pairing?.name}</Text>
-          <Text style={styles.text}>电视将以 {account.user.username} 登录</Text>
+          <Text style={styles.subtitle}>
+            已授权 {pairing?.name} 使用 {account.user.username} 登录
+          </Text>
           <Button primary onPress={close}>
             完成
           </Button>
         </View>
       ) : pairing ? (
         <View style={styles.card}>
-          <Text style={styles.subtitle}>{pairing.name}</Text>
-          <Text style={styles.text}>使用 {account.user.username} 登录此电视？</Text>
+          <Text style={styles.subtitle}>
+            使用 {account.user.username} 登录 {pairing.name}？
+          </Text>
           <Button
             primary
             disabled={task.busy}
@@ -65,6 +61,9 @@ export function PairTV({
         </View>
       ) : (
         <View style={styles.card}>
+          <Text style={styles.text}>
+            {account.user.username} · {account.server.url}
+          </Text>
           <Input
             accessibilityLabel="电视六位配对码"
             placeholder="输入电视上的六位配对码"

@@ -1,6 +1,5 @@
 import { FormInput } from '../components/FormInput';
 import { Button, Card } from '@mui/material';
-import { InfoTip } from '../components/InfoTip';
 import { Select } from '../components/Select';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
@@ -44,13 +43,7 @@ export function MetadataPage() {
   }
   return (
     <section id="metadata-section">
-      <Heading title="元数据设置" description="设置识别来源和资料语言，用于补全海报与简介。" />
-      <p className="metadata-source-order">
-        TMDB → Bangumi
-        <InfoTip label="刮削来源顺序">
-          TMDB 优先；未找到明确匹配或服务不可用时尝试 Bangumi。公开条目查询无需填写 Bangumi 凭据。
-        </InfoTip>
-      </p>
+      <Heading title="元数据设置" />
       <Card className="metadata-card">
         <h2>TMDB</h2>
         {resource.loading && !resource.data ? (
@@ -68,17 +61,11 @@ export function MetadataPage() {
               </Select>
             </label>
             <label htmlFor="tmdb-credential">
-              <span className="field-label">
-                <span id="tmdb-credential-label">凭据</span>
-                {resource.data?.configured && (
-                  <InfoTip label="凭据保存方式">留空保留现有凭据；填写新值后保存以替换。</InfoTip>
-                )}
-              </span>
+              凭据
               <FormInput
                 className="form-control"
                 id="tmdb-credential"
                 type="password"
-                aria-labelledby="tmdb-credential-label"
                 value={credential}
                 onChange={(event) => setCredential(event.target.value)}
                 maxLength={4096}

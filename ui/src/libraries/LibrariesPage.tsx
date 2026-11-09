@@ -26,7 +26,7 @@ export function LibrariesPage() {
   );
   return (
     <section id="libraries-section">
-      <Heading title="媒体库" description="管理扫描目录，并查看每个媒体库的可用状态。">
+      <Heading title="媒体库">
         {admin && (
           <Button
             variant="contained"

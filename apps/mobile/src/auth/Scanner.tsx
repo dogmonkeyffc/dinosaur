@@ -69,7 +69,6 @@ export function Scanner({
       <Button onPress={close}>返回</Button>
       {scan ? (
         <View style={styles.card}>
-          <Text style={styles.subtitle}>登录到此服务器</Text>
           <Text selectable style={styles.text}>
             {scan.server}
           </Text>

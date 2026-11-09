@@ -150,10 +150,6 @@
   margin-bottom: 1.5rem;
 }
 
-.page-heading p {
-  margin-bottom: 0;
-}
-
 .skip-link {
   position: fixed;
   z-index: 10;

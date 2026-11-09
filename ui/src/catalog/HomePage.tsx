@@ -44,7 +44,7 @@ export function HomePage() {
   const hasMedia = Boolean(movies.data?.total || series.data?.total);
   return (
     <section className="home-page">
-      <Heading title="看片室" description="浏览你的电影和剧集，接着上次的进度观看。" />
+      <Heading title="看片室" />
       <ErrorMessage error={error} />
       {error && (
         <Button
@@ -61,9 +61,6 @@ export function HomePage() {
       {featured && (
         <Paper component="section" className="resume-reel" aria-label="继续观看电影">
           <div className="resume-copy">
-            <span className="resume-label">
-              <Icon name="film" /> 继续观看电影
-            </span>
             <h2>{featured.title}</h2>
             <p>
               已观看 {clock(featured.position)}
@@ -89,11 +86,6 @@ export function HomePage() {
         <div className="empty-state">
           <Icon name="film" />
           <h2>片架还是空的</h2>
-          <p>
-            {libraries.libraries.length
-              ? '媒体扫描完成后，影片会出现在这里。'
-              : '添加一个媒体库后，就可以浏览其中的影片。'}
-          </p>
           {user?.role === 'admin' && (
             <ButtonLink to="/settings" variant="contained">
               打开媒体库设置

@@ -9,14 +9,11 @@ export function Servers({ select, error }: { select: (server: ConnectedServer) =
   const [address, setAddress] = useState('');
   const task = useTask();
   return (
-    <Screen title="Dinosaur TV" tv>
-      <Text style={styles.subtitle}>选择服务器</Text>
+    <Screen title="选择服务器" tv>
       {discovery.servers.map((server, index) => (
         <View key={server.id} style={styles.card}>
-          <Text style={styles.subtitle}>{server.name}</Text>
-          <Text style={styles.muted}>{server.url}</Text>
           <Button primary preferred={index === 0} onPress={() => select(server)}>
-            连接服务器
+            {server.name} · {server.url}
           </Button>
         </View>
       ))}
@@ -29,7 +26,6 @@ export function Servers({ select, error }: { select: (server: ConnectedServer) =
         </Button>
       </View>
       <View style={styles.card}>
-        <Text style={styles.subtitle}>手动连接</Text>
         <Input
           accessibilityLabel="服务器地址"
           placeholder="http://192.168.1.100:8096"

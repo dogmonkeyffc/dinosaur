@@ -68,9 +68,6 @@ export function Home({
     );
   return (
     <Screen title="Dinosaur">
-      <Text style={styles.muted}>
-        {account.user.username} · {account.server.name}
-      </Text>
       <View style={styles.row}>
         <Button onPress={accounts}>切换账号</Button>
         <Button primary onPress={pair}>

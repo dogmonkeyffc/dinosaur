@@ -72,7 +72,6 @@ export function MediaCard({ item }: { item: Movie | Series }) {
           )}
         </span>
         <span className="movie-title">{title}</span>
-        <span className="movie-meta">{item.library_name}</span>
         <span className="movie-meta">
           {item.year ? `${item.year} · ` : ''}
           {series

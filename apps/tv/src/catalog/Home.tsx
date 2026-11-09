@@ -69,9 +69,6 @@ export function Home({ account, logout }: { account: Account; logout: () => void
       }}
     >
       <View style={styles.row}>
-        <Text style={styles.text}>
-          {account.user.username} · {account.server.name}
-        </Text>
         <Button onPress={logout}>退出登录</Button>
       </View>
       {list.recent.length > 0 && (

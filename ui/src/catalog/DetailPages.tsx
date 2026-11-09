@@ -33,7 +33,6 @@ export function MovieDetailPage() {
         <Paper className="detail-layout">
           <Artwork url={item.poster_url} title={item.title} />
           <article className="detail-copy">
-            <span className="small-label">{item.library_name}</span>
             <h1>{item.title}</h1>
             <p className="detail-meta">
               {item.year || '年份未知'} · {duration(item.duration)} · {resolution(item)}
@@ -86,7 +85,6 @@ export function SeriesDetailPage() {
         <Paper className="detail-layout">
           <Artwork url={item.poster_url} title={item.title} series />
           <article className="detail-copy">
-            <span className="small-label">{item.library_name}</span>
             <h1>{item.title}</h1>
             <p className="detail-meta">
               {item.year || '年份未知'} · {item.season_count} 季 · {item.episode_count} 个文件 · 已看{' '}

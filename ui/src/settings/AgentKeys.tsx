@@ -3,7 +3,6 @@ import { Button, Card } from '@mui/material';
 import { useState, type FormEvent } from 'react';
 import { Select } from '../components/Select';
 import { ErrorMessage, Loading } from '../components/common';
-import { InfoTip } from '../components/InfoTip';
 import { useToast } from '../components/Toast';
 import { api } from '../lib/api';
 import { useAction, useResource } from '../lib/hooks';
@@ -44,12 +43,7 @@ export function AgentKeys() {
   }
   return (
     <Card className="account-card agent-keys" aria-label="Agent API Key">
-      <div className="device-card-heading">
-        <h2>Agent API Key</h2>
-        <InfoTip label="Agent API 用途">
-          读取待识别媒体、提交 JSON 或 NFO 资料及上传海报；不开放播放、账户管理或文件删除权限。
-        </InfoTip>
-      </div>
+      <h2>Agent API Key</h2>
       <a className="text-button" href="/api/admin/agent-keys/docs" target="_blank" rel="noopener noreferrer">
         接口文档
       </a>

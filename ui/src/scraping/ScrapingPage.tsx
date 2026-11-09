@@ -33,7 +33,7 @@ export function ScrapingPage() {
   }
   return (
     <section id="scraping-section" aria-label="刮削管理">
-      <Heading title="刮削管理" description="检查媒体识别结果，处理失败的任务和待确认匹配。" />
+      <Heading title="刮削管理" />
       <ErrorMessage error={resource.error} />
       <form className="scrape-admin-filters" onSubmit={(event) => event.preventDefault()}>
         <label>

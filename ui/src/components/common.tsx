@@ -32,27 +32,12 @@ export function Brand() {
   );
 }
 
-export function Heading({
-  title,
-  description,
-  children,
-}: {
-  title: ReactNode;
-  description?: string;
-  children?: ReactNode;
-}) {
+export function Heading({ title, children }: { title: ReactNode; children?: ReactNode }) {
   return (
     <header className="page-heading">
-      <div>
-        <Typography variant="h4" component="h1">
-          {title}
-        </Typography>
-        {description && (
-          <Typography color="text.secondary" sx={{ mt: 1 }}>
-            {description}
-          </Typography>
-        )}
-      </div>
+      <Typography variant="h4" component="h1">
+        {title}
+      </Typography>
       {children}
     </header>
   );

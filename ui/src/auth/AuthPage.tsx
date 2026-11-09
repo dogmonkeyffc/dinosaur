@@ -1,6 +1,5 @@
 import { FormInput } from '../components/FormInput';
 import { Button, Card } from '@mui/material';
-import { InfoTip } from '../components/InfoTip';
 import { useState, type FormEvent } from 'react';
 import { useAuth } from './AuthProvider';
 import { api } from '../lib/api';
@@ -40,26 +39,18 @@ export function AuthPage() {
         <div className="auth-form-wrap">
           <Brand />
           <h1>{setup ? '创建管理员' : '登录'}</h1>
-          <p className="muted">
-            {setup ? '为这台媒体服务器创建第一个账户。' : '使用你的 Dinosaur 账户进入看片室。'}
-          </p>
           {notice && <p role="status">{notice}</p>}
           <form id="auth-form" onSubmit={submit}>
             {setup && (
               <label htmlFor="setup-token">
-                <span className="field-label">
-                  <span id="setup-token-label">初始化令牌</span>
-                  <InfoTip label="初始化令牌位置">
-                    默认位于 ~/.cache/dinosaur/setup-token；自定义路径见服务启动日志。
-                  </InfoTip>
-                </span>
+                初始化令牌
                 <FormInput
                   className="form-control"
-                  aria-labelledby="setup-token-label"
                   id="setup-token"
                   name="token"
                   type="password"
                   autoComplete="off"
+                  placeholder="~/.cache/dinosaur/setup-token"
                   required
                 />
               </label>

@@ -10,12 +10,14 @@ export function Poster({
   width,
   press,
   preferred,
+  showTitle = true,
 }: {
   item: Movie | Series;
   client: Client;
   width: number;
   press: () => void;
   preferred?: boolean;
+  showTitle?: boolean;
 }) {
   const [focused, setFocused] = useState(false);
   // RN TV 0.85 forwards Android image headers only when source is an array.
@@ -55,9 +57,11 @@ export function Poster({
           <Text style={{ color: colors.accent, fontSize: 40 }}>D.</Text>
         </View>
       )}
-      <Text numberOfLines={2} style={{ color: colors.text, fontSize: 16, lineHeight: 22 }}>
-        {item.title}
-      </Text>
+      {showTitle && (
+        <Text numberOfLines={2} style={{ color: colors.text, fontSize: 16, lineHeight: 22 }}>
+          {item.title}
+        </Text>
+      )}
     </Pressable>
   );
 }

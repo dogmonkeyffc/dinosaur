@@ -20,7 +20,6 @@ export function DetailHeader({ series = false }: { series?: boolean }) {
       >
         <Icon name="arrow" />
       </IconButton>
-      <span>{series ? '剧集详情' : '电影详情'}</span>
     </header>
   );
 }

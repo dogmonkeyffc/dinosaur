@@ -1,3 +1,4 @@
+import { Button } from '@fluentui/react-components';
 import { useEffect, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../auth/AuthProvider';
@@ -25,7 +26,7 @@ export function MobileLogin() {
     <section className="account-card device-card">
       <div className="device-card-heading">
         <h2>手机扫码登录</h2>
-        <button
+        <Button
           className="button secondary"
           disabled={action.busy}
           onClick={() =>
@@ -37,7 +38,7 @@ export function MobileLogin() {
           }
         >
           {ticket ? '刷新二维码' : '生成二维码'}
-        </button>
+        </Button>
       </div>
       <span>登录账号：{user?.username}</span>
       {ticket && seconds > 0 && (

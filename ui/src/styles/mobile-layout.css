@@ -1,4 +1,4 @@
-.mobile-menu-toggle {
+.sidebar .mobile-menu-toggle {
   display: none;
 }
 
@@ -38,7 +38,7 @@
     display: none;
   }
 
-  .mobile-menu-toggle {
+  .sidebar .mobile-menu-toggle {
     display: flex;
     align-items: center;
     justify-content: center;

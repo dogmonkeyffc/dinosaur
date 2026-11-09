@@ -1,3 +1,4 @@
+import { Button, Card, Input, useRestoreFocusTarget } from '@fluentui/react-components';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
@@ -13,6 +14,7 @@ export function LibrariesPage() {
   const { libraries, loading, error, scan, reload } = useLibraries();
   const admin = user?.role === 'admin';
   const action = useAction();
+  const restoreFocus = useRestoreFocusTarget();
   const [filter, setFilter] = useState('all');
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<Library | null | undefined>();
@@ -26,10 +28,15 @@ export function LibrariesPage() {
     <section id="libraries-section">
       <Heading title="媒体库">
         {admin && (
-          <button className="button primary" onClick={() => setEditing(null)}>
+          <Button
+            appearance="primary"
+            className="button primary"
+            {...restoreFocus}
+            onClick={() => setEditing(null)}
+          >
             <Icon name="plus" />
             添加媒体库
-          </button>
+          </Button>
         )}
       </Heading>
       <div className="list-toolbar">
@@ -39,7 +46,8 @@ export function LibrariesPage() {
             ['movie', '电影'],
             ['tv', '电视剧'],
           ].map(([value, label]) => (
-            <button
+            <Button
+              appearance="subtle"
               key={value}
               className={`filter-tab${filter === value ? ' active' : ''}`}
               aria-pressed={filter === value}
@@ -47,12 +55,13 @@ export function LibrariesPage() {
             >
               {label}
               {value === 'all' && <span>{libraries.length}</span>}
-            </button>
+            </Button>
           ))}
         </div>
         <label className="search-field">
           <Icon name="search" />
-          <input
+          <Input
+            className="form-control"
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -63,16 +72,16 @@ export function LibrariesPage() {
       </div>
       <ErrorMessage error={error || action.error} />
       {error && (
-        <button className="text-button" onClick={reload}>
+        <Button appearance="subtle" className="text-button" onClick={reload}>
           重新读取
-        </button>
+        </Button>
       )}
       {loading && !libraries.length && <Loading />}
       <div className="library-grid" aria-live="polite">
         {items.map((item) => {
           const scanning = activeJob(item.scan?.status);
           return (
-            <article key={item.id} className="library-card">
+            <Card key={item.id} className="library-card">
               <div className="card-top">
                 <span className={`library-type-icon ${item.type === 'tv' ? 'tv' : ''}`}>
                   <Icon name={item.type === 'tv' ? 'tv' : 'film'} />
@@ -92,22 +101,26 @@ export function LibrariesPage() {
                 </span>
                 {admin && (
                   <div className="card-actions">
-                    <button
+                    <Button
+                      appearance="subtle"
                       className="icon-button"
                       disabled={scanning}
+                      {...restoreFocus}
                       onClick={() => setEditing(item)}
                       aria-label={`编辑 ${item.name}`}
                     >
                       <Icon name="edit" />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      appearance="subtle"
                       className="icon-button"
                       disabled={scanning}
+                      {...restoreFocus}
                       onClick={() => setDeleting(item)}
                       aria-label={`移除 ${item.name}`}
                     >
                       <Icon name="trash" />
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -119,17 +132,18 @@ export function LibrariesPage() {
                   {item.type === 'tv' ? '查看剧集' : '查看电影'} <span>{item.media_count || 0}</span>
                 </Link>
                 {admin && (
-                  <button
+                  <Button
+                    appearance="subtle"
                     className="text-button"
                     disabled={scanning || action.busy}
                     onClick={() => action.run(() => scan([item]))}
                   >
                     {scanning ? '正在扫描…' : '重新扫描'}
-                  </button>
+                  </Button>
                 )}
               </div>
               {admin && item.scan && <p className="scan-summary">{scanDescription(item.scan)}</p>}
-            </article>
+            </Card>
           );
         })}
       </div>
@@ -137,9 +151,9 @@ export function LibrariesPage() {
         <div className="empty-state">
           <h2>{libraries.length ? '没有找到匹配的媒体库' : '暂无媒体库'}</h2>
           {admin && !libraries.length && (
-            <button className="button secondary" onClick={() => setEditing(null)}>
+            <Button className="button secondary" {...restoreFocus} onClick={() => setEditing(null)}>
               添加媒体库
-            </button>
+            </Button>
           )}
         </div>
       )}

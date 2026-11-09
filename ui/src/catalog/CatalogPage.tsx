@@ -1,3 +1,4 @@
+import { Button, Input } from '@fluentui/react-components';
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ErrorMessage, Icon, Loading, Pagination } from '../components/common';
@@ -47,7 +48,8 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
       <div className="movie-toolbar">
         <label className="search-field">
           <Icon name="search" />
-          <input
+          <Input
+            className="form-control"
             type="search"
             maxLength={128}
             value={query}
@@ -67,20 +69,20 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
       {!result.loading && !result.error && !result.data?.items.length && (
         <div className="empty-state">
           <h2>{query || library ? '没有找到匹配的内容' : '暂无媒体'}</h2>
-          <button
+          <Button
             className="button secondary"
             onClick={() => {
               result.reload();
             }}
           >
             刷新列表
-          </button>
+          </Button>
         </div>
       )}
       {result.error && (
-        <button className="button secondary" onClick={result.reload}>
+        <Button className="button secondary" onClick={result.reload}>
           重新加载
-        </button>
+        </Button>
       )}
       <Pagination
         page={page}

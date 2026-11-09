@@ -1,9 +1,10 @@
+import { Button, Input, Radio, RadioGroup } from '@fluentui/react-components';
 import { InfoTip } from '../components/InfoTip';
 import { useState, type FormEvent } from 'react';
 import { api } from '../lib/api';
 import { useAction } from '../lib/hooks';
 import type { Library, MediaKind } from '../lib/types';
-import { ErrorMessage, Icon, Modal } from '../components/common';
+import { ErrorMessage, Modal } from '../components/common';
 import { useLibraries } from './LibraryProvider';
 
 export function LibraryDialog({ item, close }: { item?: Library; close: () => void }) {
@@ -28,38 +29,36 @@ export function LibraryDialog({ item, close }: { item?: Library; close: () => vo
       <form id="library-form" onSubmit={submit}>
         <label>
           媒体库名称
-          <input name="name" required maxLength={80} defaultValue={item?.name || ''} />
+          <Input
+            className="form-control"
+            name="name"
+            required
+            maxLength={80}
+            defaultValue={item?.name || ''}
+          />
         </label>
         <fieldset className="type-fieldset">
           <legend>内容类型</legend>
-          <div className="type-options">
-            {(['movie', 'tv'] as const).map((value) => (
-              <label key={value} className="type-option">
-                <input
-                  type="radio"
-                  name="type"
-                  value={value}
-                  checked={type === value}
-                  onChange={() => setType(value)}
-                />
-                <Icon name={value === 'tv' ? 'tv' : 'film'} />
-                <span>
-                  <strong>{value === 'tv' ? '电视剧' : '电影'}</strong>
-                </span>
-              </label>
-            ))}
-          </div>
+          <RadioGroup
+            name="type"
+            value={type}
+            layout="horizontal"
+            onChange={(_, data) => setType(data.value === 'tv' ? 'tv' : 'movie')}
+          >
+            <Radio value="movie" label="电影" />
+            <Radio value="tv" label="电视剧" />
+          </RadioGroup>
         </fieldset>
         <label htmlFor="library-path">
           <span className="field-label">
             <span id="library-path-label">媒体目录</span>
             <InfoTip label="媒体目录要求">填写服务器上的绝对路径，目录需已存在且可读取。</InfoTip>
           </span>
-          <input
+          <Input
+            className="form-control path-input"
             aria-labelledby="library-path-label"
             id="library-path"
             name="path"
-            className="path-input"
             required
             maxLength={4096}
             defaultValue={item?.root_path || ''}
@@ -68,12 +67,12 @@ export function LibraryDialog({ item, close }: { item?: Library; close: () => vo
         </label>
         <ErrorMessage error={action.error} />
         <div className="modal-actions">
-          <button className="button secondary" type="button" onClick={close}>
+          <Button className="button secondary" type="button" onClick={close}>
             取消
-          </button>
-          <button className="button primary" disabled={action.busy}>
+          </Button>
+          <Button appearance="primary" className="button primary" disabled={action.busy} type="submit">
             保存媒体库
-          </button>
+          </Button>
         </div>
       </form>
     </Modal>
@@ -88,10 +87,10 @@ export function DeleteLibrary({ item, close }: { item: Library; close: () => voi
       <p className="muted">将移除「{item.name}」的配置，原目录和所有媒体文件都会保留。</p>
       <ErrorMessage error={action.error} />
       <div className="modal-actions">
-        <button className="button secondary" onClick={close}>
+        <Button className="button secondary" onClick={close}>
           取消
-        </button>
-        <button
+        </Button>
+        <Button
           className="button danger"
           disabled={action.busy}
           onClick={() =>
@@ -103,7 +102,7 @@ export function DeleteLibrary({ item, close }: { item: Library; close: () => voi
           }
         >
           确认移除
-        </button>
+        </Button>
       </div>
     </Modal>
   );

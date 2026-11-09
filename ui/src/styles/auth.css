@@ -22,28 +22,7 @@
   font-weight: 600;
   letter-spacing: -0.5px;
 }
-.password-field {
-  display: flex;
-  position: relative;
-}
-.password-field input {
-  padding-right: 60px;
-}
-.show-password {
-  position: absolute;
-  right: 8px;
-  top: 8px;
-  padding: 6px 7px;
-  border: 0;
-  background: transparent;
-  color: #87947d;
-  font-size: 11px;
-  border-radius: 4px;
-}
-.show-password:hover {
-  background: #f0f3ea;
-}
-.auth-submit {
+.auth-form-wrap .auth-submit {
   width: 100%;
   margin-top: 28px;
   justify-content: space-between;

@@ -1,3 +1,12 @@
+import {
+  Input,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+} from '@fluentui/react-components';
 import { SourceReference } from '../metadata/SourceReference';
 import { Select } from '../components/Select';
 import { useState } from 'react';
@@ -55,7 +64,8 @@ export function ScrapingPage() {
         </label>
         <label>
           搜索媒体
-          <input
+          <Input
+            className="form-control"
             type="search"
             maxLength={128}
             value={query}
@@ -66,41 +76,41 @@ export function ScrapingPage() {
       </form>
       {resource.loading && !resource.data && <Loading />}
       <div className="scrape-table-wrap" role="region" aria-label="媒体识别结果" tabIndex={0}>
-        <table className="scrape-table">
-          <thead>
-            <tr>
-              <th>媒体 / 文件</th>
-              <th>媒体库</th>
-              <th>状态 / 提示</th>
-              <th>资料来源 / 语言</th>
-              <th>更新时间</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table className="scrape-table">
+          <TableHeader>
+            <TableRow>
+              <TableHeaderCell>媒体 / 文件</TableHeaderCell>
+              <TableHeaderCell>媒体库</TableHeaderCell>
+              <TableHeaderCell>状态 / 提示</TableHeaderCell>
+              <TableHeaderCell>资料来源 / 语言</TableHeaderCell>
+              <TableHeaderCell>更新时间</TableHeaderCell>
+              <TableHeaderCell>操作</TableHeaderCell>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {resource.data?.items.map((item) => (
-              <tr key={item.series_id ? `tv:${item.series_id}` : `movie:${item.media_id}`}>
-                <td>
+              <TableRow key={item.series_id ? `tv:${item.series_id}` : `movie:${item.media_id}`}>
+                <TableCell>
                   <RecordMedia item={item} />
-                </td>
-                <td>{item.library_name}</td>
-                <td>
+                </TableCell>
+                <TableCell>{item.library_name}</TableCell>
+                <TableCell>
                   <StatusBadge status={item.status} />
                   <p className="scrape-row-note">{scrapeMessage(item.message)}</p>
                   <RecordCandidates item={item} reload={resource.reload} />
-                </td>
-                <td>
+                </TableCell>
+                <TableCell>
                   <SourceReference item={item} kind={item.series_id ? 'tv' : 'movie'} />
                   <small>{item.language}</small>
-                </td>
-                <td>{time(item.updated_at)}</td>
-                <td>
+                </TableCell>
+                <TableCell>{time(item.updated_at)}</TableCell>
+                <TableCell>
                   <RecordActions item={item} reload={resource.reload} />
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
       {!resource.loading && resource.data && !resource.data.total && (
         <p className="scrape-admin-empty">没有符合筛选条件的媒体。</p>

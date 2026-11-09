@@ -1,3 +1,6 @@
+import { createDOMRenderer, FluentProvider, RendererProvider } from '@fluentui/react-components';
+import { dinosaurTheme } from './components/theme';
+import { styleNonce } from './lib/styleNonce';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthProvider';
@@ -21,12 +24,20 @@ import './styles/player-options.css';
 import './styles/mobile-layout.css';
 import './styles/agent-keys.css';
 
+const renderer = createDOMRenderer(document, {
+  styleElementAttributes: styleNonce ? { nonce: styleNonce } : undefined,
+});
+
 createRoot(document.getElementById('root')!).render(
-  <BrowserRouter>
-    <ToastProvider>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </ToastProvider>
-  </BrowserRouter>,
+  <RendererProvider renderer={renderer}>
+    <FluentProvider theme={dinosaurTheme} className="dinosaur-ui">
+      <BrowserRouter>
+        <ToastProvider>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </ToastProvider>
+      </BrowserRouter>
+    </FluentProvider>
+  </RendererProvider>,
 );

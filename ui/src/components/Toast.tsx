@@ -1,22 +1,29 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { Toast, Toaster, ToastTitle, useToastController } from '@fluentui/react-components';
+import { createContext, useCallback, useContext, useId, type ReactNode } from 'react';
 
 const Context = createContext<(message: string) => void>(() => {});
 export const useToast = () => useContext(Context);
+
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const [notice, setNotice] = useState('');
-  useEffect(() => {
-    if (!notice) return;
-    const timer = window.setTimeout(() => setNotice(''), 5000);
-    return () => clearTimeout(timer);
-  }, [notice]);
+  const toasterId = useId();
+  const { dispatchToast } = useToastController(toasterId);
+  const notify = useCallback(
+    (message: string) =>
+      dispatchToast(
+        <Toast>
+          <ToastTitle>{message}</ToastTitle>
+        </Toast>,
+        {
+          timeout: 5000,
+          intent: 'info',
+        },
+      ),
+    [dispatchToast, toasterId],
+  );
   return (
-    <Context.Provider value={setNotice}>
+    <Context.Provider value={notify}>
       {children}
-      {notice && (
-        <div className="toast" role="status">
-          {notice}
-        </div>
-      )}
+      <Toaster toasterId={toasterId} position="bottom" limit={1} />
     </Context.Provider>
   );
 }

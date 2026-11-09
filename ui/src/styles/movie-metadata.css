@@ -33,13 +33,8 @@
   min-width: 0;
   font-size: 12px;
 }
-.movie-matching input {
-  display: block;
-  width: 100%;
+.movie-matching .form-control {
   margin-top: 7px;
-  padding: 10px;
-  border: 1px solid var(--line);
-  border-radius: 7px;
 }
 .metadata-candidate {
   display: flex;

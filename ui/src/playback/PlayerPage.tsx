@@ -1,3 +1,4 @@
+import { Button } from '@fluentui/react-components';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ErrorMessage } from '../components/common';
@@ -64,14 +65,15 @@ export function PlayerPage() {
       {(error || resource.error) && (
         <div className="player-error-overlay">
           <ErrorMessage error={error || resource.error} />
-          <button
+          <Button
+            appearance="subtle"
             className="text-button"
             onClick={() =>
               engine.current ? engine.current.changeSource({ mode: 'compatible' }) : resource.reload()
             }
           >
             重试兼容模式
-          </button>
+          </Button>
         </div>
       )}
     </section>

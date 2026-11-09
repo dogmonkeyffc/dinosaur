@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { Avatar, Button } from '@fluentui/react-components';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
-import { Brand, ErrorMessage, Icon } from '../components/common';
+import { Brand, ErrorMessage, Icon, Loading } from '../components/common';
 import { useAction, useResource } from '../lib/hooks';
 import { useLibraries } from '../libraries/LibraryProvider';
 import { libraryPath } from './navigation';
@@ -95,7 +96,8 @@ export function Shell() {
     <div id="app" className="app-shell">
       <aside ref={sidebar} className={`sidebar${menu ? ' menu-open' : ''}`}>
         <Brand />
-        <button
+        <Button
+          appearance="subtle"
           ref={toggle}
           id="mobile-menu-toggle"
           className="mobile-menu-toggle"
@@ -107,7 +109,7 @@ export function Shell() {
         >
           <Icon name={menu ? 'close' : 'menu'} />
           <span>{menu ? '收起' : '菜单'}</span>
-        </button>
+        </Button>
         <nav id="workspace-navigation" aria-label="媒体空间">
           {navigationGroups.map((group) => (
             <div key={group.label} className="nav-group" role="group" aria-label={group.label}>
@@ -140,12 +142,13 @@ export function Shell() {
           </div>
         </div>
         <div id="sidebar-account" className="sidebar-account user-area" role="group" aria-label="当前用户">
-          <span className="avatar">{user?.username.slice(0, 1).toUpperCase()}</span>
+          <Avatar name={user?.username} size={32} color="brand" aria-hidden="true" />
           <div className="user-details">
             <strong>{user?.username}</strong>
             <span>{user?.role === 'admin' ? '管理员' : '普通用户'}</span>
           </div>
-          <button
+          <Button
+            appearance="subtle"
             id="logout"
             className="icon-button logout-button"
             aria-label="退出登录"
@@ -154,7 +157,7 @@ export function Shell() {
             onClick={() => action.run(logout)}
           >
             <Icon name="logout" />
-          </button>
+          </Button>
         </div>
       </aside>
       <div
@@ -163,7 +166,9 @@ export function Shell() {
       >
         <main ref={content} id="content-main" className="main-content">
           <ErrorMessage error={action.error} />
-          <Outlet context={{ setActiveLibrary }} />
+          <Suspense fallback={<Loading />}>
+            <Outlet context={{ setActiveLibrary }} />
+          </Suspense>
         </main>
       </div>
     </div>

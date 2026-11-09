@@ -1,3 +1,4 @@
+import { Button, Card } from '@fluentui/react-components';
 import { ErrorMessage, Heading, Loading } from '../components/common';
 import { bytes } from '../lib/format';
 import { useResource } from '../lib/hooks';
@@ -17,9 +18,9 @@ export function SystemPage() {
       <Heading title="系统设置" />
       <div className="disk-section-heading">
         <h2>磁盘空间</h2>
-        <button id="disk-refresh" className="button secondary" disabled={loading} onClick={reload}>
+        <Button id="disk-refresh" className="button secondary" disabled={loading} onClick={reload}>
           {loading ? '读取中…' : '刷新'}
-        </button>
+        </Button>
       </div>
       <ErrorMessage error={error} />
       {loading && !data && <Loading />}
@@ -39,7 +40,7 @@ export function SystemPage() {
             const capacity = disk.used_bytes + disk.available_bytes;
             const percent = capacity ? Math.min(100, (disk.used_bytes / capacity) * 100) : 0;
             return (
-              <article key={disk.mount_point} className="disk-card">
+              <Card key={disk.mount_point} className="disk-card">
                 <div className="disk-heading">
                   <h3 title={disk.mount_point}>
                     {disk.mount_point === '/' ? '系统分区 /' : disk.mount_point}
@@ -62,7 +63,7 @@ export function SystemPage() {
                     <dd>{bytes(disk.available_bytes)}</dd>
                   </div>
                 </dl>
-              </article>
+              </Card>
             );
           })}
       </div>

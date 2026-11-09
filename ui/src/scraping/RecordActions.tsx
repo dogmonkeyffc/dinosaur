@@ -1,3 +1,4 @@
+import { Button } from '@fluentui/react-components';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAction, useResource } from '../lib/hooks';
@@ -21,7 +22,8 @@ export function RecordActions({ item, reload }: { item: ScrapeRecord; reload: ()
         {managed ? '查看详情' : '详情 / 匹配更正'}
       </Link>
       {!managed && (
-        <button
+        <Button
+          appearance="subtle"
           className="text-button"
           disabled={action.busy}
           onClick={() =>
@@ -38,7 +40,7 @@ export function RecordActions({ item, reload }: { item: ScrapeRecord; reload: ()
           }
         >
           {item.tmdb_id > 0 || !!item.bangumi_id ? '刷新资料' : '重试识别'}
-        </button>
+        </Button>
       )}
       <ErrorMessage error={action.error} />
     </div>
@@ -62,9 +64,9 @@ export function RecordCandidates({ item, reload }: { item: ScrapeRecord; reload:
       {match.notice && <p role="status">{match.notice}</p>}
       <CandidateList candidates={candidates} disabled={match.busy} select={match.select} />
       {resource.error && (
-        <button className="text-button" onClick={resource.reload}>
+        <Button appearance="subtle" className="text-button" onClick={resource.reload}>
           重新加载候选
-        </button>
+        </Button>
       )}
     </section>
   );

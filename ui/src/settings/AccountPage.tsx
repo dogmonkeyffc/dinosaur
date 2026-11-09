@@ -1,3 +1,4 @@
+import { Button, Card, Input } from '@fluentui/react-components';
 import type { FormEvent } from 'react';
 import { useAuth } from '../auth/AuthProvider';
 import { ErrorMessage, Heading } from '../components/common';
@@ -32,12 +33,13 @@ export function AccountPage() {
       <MobileLogin />
       <Devices />
       {auth.user?.role === 'admin' && <AgentKeys />}
-      <div className="account-card">
+      <Card className="account-card">
         <h2>修改密码</h2>
         <form id="password-form" onSubmit={submit}>
           <label>
             当前密码
-            <input
+            <Input
+              className="form-control"
               name="current_password"
               type="password"
               autoComplete="current-password"
@@ -47,7 +49,8 @@ export function AccountPage() {
           </label>
           <label>
             新密码（至少 12 字节）
-            <input
+            <Input
+              className="form-control"
               name="new_password"
               type="password"
               autoComplete="new-password"
@@ -57,7 +60,8 @@ export function AccountPage() {
           </label>
           <label>
             确认新密码
-            <input
+            <Input
+              className="form-control"
               name="confirm_password"
               type="password"
               autoComplete="new-password"
@@ -66,11 +70,11 @@ export function AccountPage() {
             />
           </label>
           <ErrorMessage error={action.error} />
-          <button className="button primary" disabled={action.busy}>
+          <Button appearance="primary" className="button primary" disabled={action.busy} type="submit">
             更新密码
-          </button>
+          </Button>
         </form>
-      </div>
+      </Card>
     </section>
   );
 }

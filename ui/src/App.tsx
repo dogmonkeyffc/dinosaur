@@ -1,5 +1,6 @@
+import { Button } from '@fluentui/react-components';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import type { ReactNode } from 'react';
+import { lazy, type ReactNode } from 'react';
 import { useAuth } from './auth/AuthProvider';
 import { AuthPage } from './auth/AuthPage';
 import { Brand } from './components/common';
@@ -8,12 +9,18 @@ import { LibraryProvider } from './libraries/LibraryProvider';
 import { LibrariesPage } from './libraries/LibrariesPage';
 import { CatalogPage } from './catalog/CatalogPage';
 import { MovieDetailPage, SeriesDetailPage } from './catalog/DetailPages';
-import { SystemPage } from './settings/SystemPage';
-import { AccountPage } from './settings/AccountPage';
-import { MetadataPage } from './settings/MetadataPage';
-import { ScrapingPage } from './scraping/ScrapingPage';
-import { PlayerPage } from './playback/PlayerPage';
 
+const AccountPage = lazy(() =>
+  import('./settings/AccountPage').then((page) => ({ default: page.AccountPage })),
+);
+const SystemPage = lazy(() => import('./settings/SystemPage').then((page) => ({ default: page.SystemPage })));
+const MetadataPage = lazy(() =>
+  import('./settings/MetadataPage').then((page) => ({ default: page.MetadataPage })),
+);
+const ScrapingPage = lazy(() =>
+  import('./scraping/ScrapingPage').then((page) => ({ default: page.ScrapingPage })),
+);
+const PlayerPage = lazy(() => import('./playback/PlayerPage').then((page) => ({ default: page.PlayerPage })));
 function Admin({ children }: { children: ReactNode }) {
   return useAuth().user?.role === 'admin' ? children : <Navigate to="/settings" replace />;
 }
@@ -26,9 +33,9 @@ export function App() {
         <Brand />
         <p>{auth.error || '正在连接你的媒体空间…'}</p>
         {auth.error && (
-          <button className="button secondary" onClick={auth.boot}>
+          <Button className="button secondary" onClick={auth.boot}>
             重新连接
-          </button>
+          </Button>
         )}
       </div>
     );

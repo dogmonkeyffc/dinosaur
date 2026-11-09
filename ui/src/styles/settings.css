@@ -92,7 +92,8 @@
   gap: 21px;
 }
 
-.filter-tab {
+.filter-tabs .filter-tab {
+  min-width: 0;
   font-size: 12px;
   color: #8b9584;
   border: 0;
@@ -137,16 +138,19 @@
 
 .search-field .icon {
   position: absolute;
-  top: 11px;
+  z-index: 1;
+  pointer-events: none;
+  top: 9px;
   left: 11px;
   width: 15px;
   height: 15px;
   color: #a5ac9e;
 }
 
+.search-field .form-control {
+  font-size: 12px;
+}
+
 .search-field input {
-  font-size: 11px;
-  background: #fcfdf9;
-  padding: 10px 12px 10px 34px;
-  border-color: #e3e8dd;
+  padding-left: 32px;
 }

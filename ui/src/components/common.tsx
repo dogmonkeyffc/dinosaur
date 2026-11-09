@@ -1,4 +1,16 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import {
+  Button,
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogSurface,
+  DialogTitle,
+  MessageBar,
+  MessageBarBody,
+  Spinner,
+  useRestoreFocusSource,
+} from '@fluentui/react-components';
+import type { ReactNode } from 'react';
 import sprite from '../assets/icons.svg?url';
 
 export function Icon({ name }: { name: string }) {
@@ -33,18 +45,14 @@ export function Heading({ title, children }: { title: ReactNode; children?: Reac
 
 export function ErrorMessage({ error, id }: { error?: string; id?: string }) {
   return error ? (
-    <p id={id} className="form-error" role="alert">
-      {error}
-    </p>
+    <MessageBar id={id} className="form-error" intent="error">
+      <MessageBarBody>{error}</MessageBarBody>
+    </MessageBar>
   ) : null;
 }
 
 export function Loading() {
-  return (
-    <p className="loading-message" role="status">
-      正在读取…
-    </p>
-  );
+  return <Spinner className="loading-message" size="small" label="正在读取…" />;
 }
 
 export function Pagination({
@@ -61,35 +69,40 @@ export function Pagination({
   if (total <= size) return null;
   return (
     <div className="movie-pagination">
-      <button className="button secondary" disabled={page <= 1} onClick={() => onChange(page - 1)}>
+      <Button className="button secondary" disabled={page <= 1} onClick={() => onChange(page - 1)}>
         上一页
-      </button>
+      </Button>
       <span>
         共 {total} 条 · {page} / {Math.ceil(total / size)}
       </span>
-      <button className="button secondary" disabled={page * size >= total} onClick={() => onChange(page + 1)}>
+      <Button className="button secondary" disabled={page * size >= total} onClick={() => onChange(page + 1)}>
         下一页
-      </button>
+      </Button>
     </div>
   );
 }
 
 export function Modal({ title, children, close }: { title: string; children: ReactNode; close: () => void }) {
-  const dialog = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const element = dialog.current!;
-    element.showModal();
-    return () => element.close();
-  }, []);
+  const restoreFocus = useRestoreFocusSource();
   return (
-    <dialog ref={dialog} className="modal" aria-label={title} onCancel={close}>
-      <div className="modal-heading">
-        <h2>{title}</h2>
-        <button className="icon-button" type="button" onClick={close} aria-label="关闭">
-          <Icon name="close" />
-        </button>
-      </div>
-      {children}
-    </dialog>
+    <Dialog
+      open
+      onOpenChange={(_, data) => {
+        if (!data.open) close();
+      }}
+    >
+      <DialogSurface className="modal">
+        <DialogBody {...restoreFocus}>
+          <DialogTitle
+            action={
+              <Button appearance="subtle" aria-label="关闭" onClick={close} icon={<Icon name="close" />} />
+            }
+          >
+            {title}
+          </DialogTitle>
+          <DialogContent>{children}</DialogContent>
+        </DialogBody>
+      </DialogSurface>
+    </Dialog>
   );
 }

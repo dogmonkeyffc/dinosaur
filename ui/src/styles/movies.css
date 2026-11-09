@@ -136,14 +136,14 @@
   margin-top: 16px;
   gap: 10px;
 }
-.text-button {
+.dinosaur-ui .text-button {
   border: 0;
   background: transparent;
   padding: 5px 0;
   color: var(--green);
   font-size: 11px;
 }
-.text-button:hover:not(:disabled) {
+.dinosaur-ui .text-button:hover:not(:disabled) {
   text-decoration: underline;
 }
 .text-button > span {

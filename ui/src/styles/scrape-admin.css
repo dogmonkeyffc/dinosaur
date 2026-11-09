@@ -11,22 +11,13 @@
   font-size: 12px;
   color: var(--muted);
 }
-.scrape-admin-filters input {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  margin-top: 0;
-  min-height: 42px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  background: #fff;
-  font: inherit;
-  line-height: 20px;
-  color: var(--ink);
+.scrape-admin-filters .form-control,
+.scrape-admin-filters .select-control {
+  min-height: 36px;
 }
 @media (pointer: coarse) {
-  .scrape-admin-filters input {
+  .scrape-admin-filters .form-control,
+  .scrape-admin-filters .select-control {
     min-height: 44px;
   }
 }
@@ -103,24 +94,6 @@
   font-size: 11px;
   color: #8c683c;
   line-height: 1.8;
-}
-.scrape-state {
-  display: inline-block;
-  padding: 4px 7px;
-  border-radius: 5px;
-  background: #ecf1e8;
-  color: #4a6741;
-  white-space: nowrap;
-}
-.scrape-state-failed,
-.scrape-state-interrupted {
-  color: #a44637;
-  background: #fbece7;
-}
-.scrape-state-needs_review,
-.scrape-state-not_processed {
-  color: #8c683c;
-  background: #faf0db;
 }
 .scrape-row-actions {
   display: flex;

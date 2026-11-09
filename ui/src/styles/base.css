@@ -64,31 +64,24 @@ a:focus-visible {
   outline-offset: 4px;
 }
 
-input:focus {
-  outline: none;
-  border-color: #6b9478;
-  box-shadow: 0 0 0 3px #658b7114;
-}
-
-input::placeholder {
-  color: #a0a79f;
-}
-
-input {
-  width: 100%;
-  border: 1px solid #dce2da;
-  border-radius: 8px;
-  background: #fff;
+.dinosaur-ui {
+  --bg: var(--colorNeutralBackground3);
+  --surface: var(--colorNeutralBackground1);
+  --ink: var(--colorNeutralForeground1);
+  --muted: var(--colorNeutralForeground3);
+  --line: var(--colorNeutralStroke2);
+  --green: var(--colorBrandForeground1);
+  --green-dark: var(--colorBrandForeground2);
+  --danger: var(--colorStatusDangerForeground1);
+  min-height: 100dvh;
+  background: var(--bg);
   color: var(--ink);
-  padding: 12px 13px;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
 }
 
-input[type='radio'] {
-  width: auto;
-  accent-color: var(--green);
+.form-control,
+.select-control {
+  width: 100%;
+  min-width: 0;
 }
 
 [hidden] {

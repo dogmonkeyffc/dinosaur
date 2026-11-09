@@ -1,3 +1,5 @@
+import { Button } from '@fluentui/react-components';
+import { ButtonLink } from '../components/ButtonLink';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ErrorMessage, Icon } from '../components/common';
 import { useAction } from '../lib/hooks';
@@ -11,13 +13,14 @@ export function DetailHeader({ series = false }: { series?: boolean }) {
   const location = useLocation();
   return (
     <header className="detail-page-header">
-      <button
+      <Button
+        appearance="subtle"
         className="icon-button detail-back"
         aria-label="返回上一页"
         onClick={() => navigate(location.state?.from || (series ? '/series' : '/movies'))}
       >
         <Icon name="arrow" />
-      </button>
+      </Button>
       <span>{series ? '剧集详情' : '电影详情'}</span>
     </header>
   );
@@ -38,7 +41,8 @@ export function WatchedButton({ item, reload }: { item: Movie; reload: () => voi
   const action = useAction();
   return (
     <>
-      <button
+      <Button
+        appearance="subtle"
         className="text-button"
         disabled={action.busy}
         onClick={() =>
@@ -49,7 +53,7 @@ export function WatchedButton({ item, reload }: { item: Movie; reload: () => voi
         }
       >
         {item.watched ? '标记为未看' : '标记为已看'}
-      </button>
+      </Button>
       <ErrorMessage error={action.error} />
     </>
   );
@@ -58,13 +62,13 @@ export function PlayActions({ item, reload }: { item: Movie; reload: () => void 
   const resume = item.position > 0 && !item.watched;
   return (
     <div className="movie-play-actions">
-      <Link className="button primary" to={`/watch/${item.id}`} state={{ kind: item.type }}>
+      <ButtonLink appearance="primary" to={`/watch/${item.id}`} state={{ kind: item.type }}>
         {resume ? `继续观看 · ${clock(item.position)}` : '播放电影'}
-      </Link>
+      </ButtonLink>
       {resume && (
-        <Link className="button secondary" to={`/watch/${item.id}?beginning=1`} state={{ kind: item.type }}>
+        <ButtonLink to={`/watch/${item.id}?beginning=1`} state={{ kind: item.type }}>
           从头播放
-        </Link>
+        </ButtonLink>
       )}
       <WatchedButton item={item} reload={reload} />
     </div>
@@ -132,9 +136,9 @@ export function EpisodeCard({ item, reload }: { item: Movie; reload: () => void 
         {item.probe_error && <p className="field-help">视频信息读取失败</p>}
       </div>
       <div className="series-episode-actions">
-        <Link className="button secondary" to={`/watch/${item.id}`} state={{ kind: 'tv' }}>
+        <ButtonLink to={`/watch/${item.id}`} state={{ kind: 'tv' }}>
           {resume ? '继续观看' : '播放'}
-        </Link>
+        </ButtonLink>
         {resume && (
           <Link className="text-button" to={`/watch/${item.id}?beginning=1`} state={{ kind: 'tv' }}>
             从头播放

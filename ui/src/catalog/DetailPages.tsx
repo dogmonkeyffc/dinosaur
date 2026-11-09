@@ -1,7 +1,9 @@
+import { Button } from '@fluentui/react-components';
+import { ButtonLink } from '../components/ButtonLink';
 import { Select } from '../components/Select';
 import { useActiveLibrary } from '../layout/useActiveLibrary';
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { ErrorMessage, Loading } from '../components/common';
 import { useResource } from '../lib/hooks';
 import { duration, resolution } from '../lib/format';
@@ -23,9 +25,9 @@ export function MovieDetailPage() {
       {loading && !item && <Loading />}
       <ErrorMessage error={error} />
       {error && (
-        <button className="button secondary detail-retry" onClick={reload}>
+        <Button className="button secondary detail-retry" onClick={reload}>
           重新加载
-        </button>
+        </Button>
       )}
       {item && (
         <div className="detail-layout">
@@ -75,9 +77,9 @@ export function SeriesDetailPage() {
       {loading && !item && <Loading />}
       <ErrorMessage error={error} />
       {error && (
-        <button className="button secondary detail-retry" onClick={reload}>
+        <Button className="button secondary detail-retry" onClick={reload}>
           重新加载
-        </button>
+        </Button>
       )}
       {item && data && (
         <div className="detail-layout">
@@ -91,10 +93,10 @@ export function SeriesDetailPage() {
             </p>
             {data.resume && (
               <div className="movie-play-actions">
-                <Link className="button primary" to={`/watch/${data.resume.id}`} state={{ kind: 'tv' }}>
+                <ButtonLink appearance="primary" to={`/watch/${data.resume.id}`} state={{ kind: 'tv' }}>
                   {data.resume.position > 0 && !data.resume.watched ? '继续观看' : '播放'} ·{' '}
                   {data.resume.title}
-                </Link>
+                </ButtonLink>
               </div>
             )}
             <MetadataEditor

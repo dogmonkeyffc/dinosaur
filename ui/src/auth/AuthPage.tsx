@@ -1,3 +1,4 @@
+import { Button, Card, Input } from '@fluentui/react-components';
 import { InfoTip } from '../components/InfoTip';
 import { useState, type FormEvent } from 'react';
 import { useAuth } from './AuthProvider';
@@ -34,7 +35,7 @@ export function AuthPage() {
   }
   return (
     <main id="auth-screen" className="auth-screen">
-      <section className="auth-panel">
+      <Card className="auth-panel">
         <div className="auth-form-wrap">
           <Brand />
           <h1>{setup ? '创建管理员' : '登录'}</h1>
@@ -48,7 +49,8 @@ export function AuthPage() {
                     默认位于 ~/.cache/dinosaur/setup-token；自定义路径见服务启动日志。
                   </InfoTip>
                 </span>
-                <input
+                <Input
+                  className="form-control"
                   aria-labelledby="setup-token-label"
                   id="setup-token"
                   name="token"
@@ -60,7 +62,8 @@ export function AuthPage() {
             )}
             <label>
               用户名
-              <input
+              <Input
+                className="form-control"
                 id="username"
                 name="username"
                 autoComplete="username"
@@ -71,40 +74,54 @@ export function AuthPage() {
             </label>
             <label>
               <span id="password-label">{setup ? '密码（至少 12 字节）' : '密码'}</span>
-              <span className="password-field">
-                <input
-                  aria-labelledby="password-label"
-                  id="password"
-                  name="password"
-                  type={visible ? 'text' : 'password'}
-                  autoComplete={setup ? 'new-password' : 'current-password'}
-                  required
-                  maxLength={1024}
-                />
-                <button
-                  type="button"
-                  className="show-password"
-                  onClick={() => setVisible(!visible)}
-                  aria-label={visible ? '隐藏密码' : '显示密码'}
-                >
-                  {visible ? '隐藏' : '显示'}
-                </button>
-              </span>
+              <Input
+                className="form-control"
+                aria-labelledby="password-label"
+                id="password"
+                name="password"
+                type={visible ? 'text' : 'password'}
+                autoComplete={setup ? 'new-password' : 'current-password'}
+                required
+                maxLength={1024}
+                contentAfter={
+                  <Button
+                    appearance="subtle"
+                    type="button"
+                    size="small"
+                    onClick={() => setVisible(!visible)}
+                    aria-label={visible ? '隐藏密码' : '显示密码'}
+                  >
+                    {visible ? '隐藏' : '显示'}
+                  </Button>
+                }
+              />
             </label>
             {setup && (
               <label>
                 确认密码
-                <input name="confirm" type="password" autoComplete="new-password" required maxLength={1024} />
+                <Input
+                  className="form-control"
+                  name="confirm"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  maxLength={1024}
+                />
               </label>
             )}
             <ErrorMessage error={action.error} />
-            <button className="button primary auth-submit" type="submit" disabled={action.busy}>
+            <Button
+              appearance="primary"
+              className="button primary auth-submit"
+              type="submit"
+              disabled={action.busy}
+            >
               <span>{action.busy ? '请稍候…' : setup ? '创建管理员' : '登录'}</span>
               <Icon name="arrow" />
-            </button>
+            </Button>
           </form>
         </div>
-      </section>
+      </Card>
     </main>
   );
 }

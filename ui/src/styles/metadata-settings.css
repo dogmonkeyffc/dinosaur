@@ -24,18 +24,8 @@
   margin: 18px 0;
   font-size: 13px;
 }
-.metadata-card input {
-  display: block;
-  box-sizing: border-box;
-  width: 100%;
-  min-width: 0;
+.metadata-card .form-control {
   margin-top: 8px;
-  padding: 11px;
-  border: 1px solid #dce5d4;
-  border-radius: 7px;
-  background: #fff;
-  color: var(--ink);
-  font: inherit;
 }
 .metadata-actions {
   display: flex;

@@ -1,3 +1,4 @@
+import { Button } from '@fluentui/react-components';
 import { ErrorMessage, Loading } from '../components/common';
 import { useAction, useResource } from '../lib/hooks';
 import { api } from '../lib/api';
@@ -16,9 +17,9 @@ export function Devices() {
     <section className="account-card device-card">
       <div className="device-card-heading">
         <h2>已登录设备</h2>
-        <button className="text-button" onClick={resource.reload}>
+        <Button appearance="subtle" className="text-button" onClick={resource.reload}>
           刷新
-        </button>
+        </Button>
       </div>
       {resource.loading && !resource.data && <Loading />}
       <ErrorMessage error={resource.error || action.error} />
@@ -32,7 +33,8 @@ export function Devices() {
               </strong>
               <span>{new Date(device.expires_at * 1000).toLocaleString()} 到期</span>
             </div>
-            <button
+            <Button
+              appearance="subtle"
               className="text-button"
               disabled={action.busy}
               onClick={() =>
@@ -43,7 +45,7 @@ export function Devices() {
               }
             >
               退出设备
-            </button>
+            </Button>
           </li>
         ))}
       </ul>

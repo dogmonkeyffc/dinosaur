@@ -1,3 +1,4 @@
+import { Button, Card, Input } from '@fluentui/react-components';
 import { useState, type FormEvent } from 'react';
 import { Select } from '../components/Select';
 import { ErrorMessage, Loading } from '../components/common';
@@ -41,7 +42,7 @@ export function AgentKeys() {
     });
   }
   return (
-    <section className="account-card agent-keys" aria-label="Agent API Key">
+    <Card className="account-card agent-keys" aria-label="Agent API Key">
       <div className="device-card-heading">
         <h2>Agent API Key</h2>
         <InfoTip label="Agent API 用途">
@@ -54,7 +55,13 @@ export function AgentKeys() {
       <form onSubmit={create}>
         <label>
           名称
-          <input name="name" maxLength={80} required placeholder="例如：媒体识别 Agent" />
+          <Input
+            className="form-control"
+            name="name"
+            maxLength={80}
+            required
+            placeholder="例如：媒体识别 Agent"
+          />
         </label>
         <label>
           媒体库
@@ -84,15 +91,16 @@ export function AgentKeys() {
             </Select>
           </label>
         </div>
-        <button className="button primary" disabled={action.busy}>
+        <Button appearance="primary" className="button primary" disabled={action.busy} type="submit">
           创建 Key
-        </button>
+        </Button>
       </form>
       {created && (
         <div className="agent-key-created">
           <label>
             API Key（仅显示一次）
-            <input
+            <Input
+              className="form-control"
               value={created.token}
               readOnly
               autoComplete="off"
@@ -101,7 +109,8 @@ export function AgentKeys() {
             />
           </label>
           <div className="metadata-actions">
-            <button
+            <Button
+              appearance="subtle"
               className="text-button"
               onClick={() =>
                 action.run(async () => {
@@ -115,10 +124,10 @@ export function AgentKeys() {
               }
             >
               复制
-            </button>
-            <button className="text-button" onClick={() => setCreated(null)}>
+            </Button>
+            <Button appearance="subtle" className="text-button" onClick={() => setCreated(null)}>
               收起
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -139,7 +148,8 @@ export function AgentKeys() {
                 {key.prefix} · {new Date(key.expires_at * 1000).toLocaleDateString()} 到期
               </span>
             </div>
-            <button
+            <Button
+              appearance="subtle"
               className="text-button"
               disabled={action.busy}
               onClick={() =>
@@ -151,10 +161,10 @@ export function AgentKeys() {
               }
             >
               撤销
-            </button>
+            </Button>
           </li>
         ))}
       </ul>
-    </section>
+    </Card>
   );
 }

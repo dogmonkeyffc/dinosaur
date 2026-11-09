@@ -150,21 +150,6 @@
   min-width: 0;
 }
 
-.avatar {
-  width: 32px;
-  height: 32px;
-  background: #304936;
-  border: 1px solid #435d42;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  color: #d4e8be;
-  font-weight: 650;
-  text-transform: uppercase;
-}
-
 .user-area div > strong {
   font-size: 11px;
   font-weight: 550;
@@ -182,11 +167,11 @@
   margin-top: 4px;
 }
 
-.logout-button {
+.sidebar .logout-button {
   color: #a3b4a6;
 }
 
-.logout-button:hover {
+.sidebar .logout-button:hover {
   background: #304936;
   color: #d4e8be;
 }

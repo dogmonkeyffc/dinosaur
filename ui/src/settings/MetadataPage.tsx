@@ -1,3 +1,4 @@
+import { Button, Card, Input } from '@fluentui/react-components';
 import { InfoTip } from '../components/InfoTip';
 import { Select } from '../components/Select';
 import { useEffect, useState, type FormEvent } from 'react';
@@ -49,7 +50,7 @@ export function MetadataPage() {
           TMDB 优先；未找到明确匹配或服务不可用时尝试 Bangumi。公开条目查询无需填写 Bangumi 凭据。
         </InfoTip>
       </p>
-      <div className="metadata-card">
+      <Card className="metadata-card">
         <h2>TMDB</h2>
         {resource.loading && !resource.data ? (
           <Loading />
@@ -72,7 +73,8 @@ export function MetadataPage() {
                   <InfoTip label="凭据保存方式">留空保留现有凭据；填写新值后保存以替换。</InfoTip>
                 )}
               </span>
-              <input
+              <Input
+                className="form-control"
                 id="tmdb-credential"
                 type="password"
                 aria-labelledby="tmdb-credential-label"
@@ -94,35 +96,38 @@ export function MetadataPage() {
               </Select>
             </label>
             <div className="metadata-actions">
-              <button className="button primary">保存配置</button>
-              <button className="button secondary" type="button" onClick={() => submit('test')}>
+              <Button appearance="primary" className="button primary" type="submit">
+                保存配置
+              </Button>
+              <Button className="button secondary" type="button" onClick={() => submit('test')}>
                 测试连接
-              </button>
-              <button
+              </Button>
+              <Button
+                appearance="subtle"
                 className="text-button"
                 type="button"
                 disabled={!resource.data?.configured}
                 onClick={() => submit('clear')}
               >
                 移除凭据
-              </button>
+              </Button>
             </div>
           </fieldset>
         </form>
         <p role="status">{notice}</p>
         <ErrorMessage error={resource.error || action.error || jobs.error} />
         {resource.error && (
-          <button className="button secondary" onClick={resource.reload}>
+          <Button className="button secondary" onClick={resource.reload}>
             重新读取配置
-          </button>
+          </Button>
         )}
-        <button
+        <Button
           className="button secondary"
           disabled={jobs.busy || jobs.running}
           onClick={() => jobs.start()}
         >
           刮削所有未识别影片
-        </button>
+        </Button>
         {jobs.latest && (
           <p className="scrape-status" role="status">
             {jobDescription(jobs.latest)}
@@ -139,7 +144,7 @@ export function MetadataPage() {
           </a>
           <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
         </div>
-      </div>
+      </Card>
     </section>
   );
 }

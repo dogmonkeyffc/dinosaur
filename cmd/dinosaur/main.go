@@ -66,8 +66,8 @@ func run(logger *slog.Logger) error {
 	}
 	advertiser := discovery.Start(c, id, logger)
 	defer advertiser.Close()
-	if err := handler.StartScanning(); err != nil {
-		return fmt.Errorf("start media scanner: %w", err)
+	if err := handler.RecoverInterruptedJobs(startup); err != nil {
+		return fmt.Errorf("recover interrupted jobs: %w", err)
 	}
 	srv := &http.Server{Addr: c.Addr, Handler: handler.Handler(), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: c.RequestTimeout, WriteTimeout: c.RequestTimeout + 5*time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 32 * 1024, ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError)}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

@@ -35,24 +35,6 @@ func New(db *store.Store, c config.Config, logger *slog.Logger) *Manager {
 	ctx, cancel := context.WithCancel(context.Background())
 	return &Manager{db: db, config: c, logger: logger, ctx: ctx, cancel: cancel, active: make(map[int64]bool), slots: make(chan struct{}, 2)}
 }
-func (m *Manager) Start() error {
-	if err := m.db.InterruptScans(m.ctx); err != nil {
-		return err
-	}
-	libraries, err := m.db.Libraries(m.ctx)
-	if err != nil {
-		return err
-	}
-	for _, item := range libraries {
-		if item.Type != "movie" && item.Type != "tv" {
-			continue
-		}
-		if _, err := m.Scan(m.ctx, item.ID); err != nil {
-			m.logger.Error("start library scan", "library_id", item.ID, "error", err)
-		}
-	}
-	return nil
-}
 func (m *Manager) Scan(ctx context.Context, id int64) (library.ScanJob, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()

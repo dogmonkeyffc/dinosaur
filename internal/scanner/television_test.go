@@ -14,7 +14,7 @@ import (
 	"dinosaur/internal/store"
 )
 
-func TestTVScanStartupIncrementalAndOutage(t *testing.T) {
+func TestTVScanIncrementalAndOutage(t *testing.T) {
 	ctx := context.Background()
 	db, err := store.Open(ctx, filepath.Join(t.TempDir(), "tv.db"))
 	if err != nil {
@@ -38,7 +38,7 @@ func TestTVScanStartupIncrementalAndOutage(t *testing.T) {
 	}
 	manager := New(db, config.Config{DataDir: t.TempDir()}, slog.New(slog.NewTextHandler(io.Discard, nil)))
 	defer manager.Close()
-	if err := manager.Start(); err != nil {
+	if _, err := manager.Scan(ctx, lib.ID); err != nil {
 		t.Fatal(err)
 	}
 	job := waitJob(t, manager, lib.ID)

@@ -54,11 +54,11 @@ func (s *Server) scanError(w http.ResponseWriter, r *http.Request, err error) bo
 	return true
 }
 
-func (s *Server) StartScanning() error {
-	if err := s.store.InterruptScrapes(context.Background()); err != nil {
+func (s *Server) RecoverInterruptedJobs(ctx context.Context) error {
+	if err := s.store.InterruptScrapes(ctx); err != nil {
 		return err
 	}
-	return s.scanner.Start()
+	return s.store.InterruptScans(ctx)
 }
 func (s *Server) Close() {
 	s.scanner.Close()

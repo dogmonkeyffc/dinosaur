@@ -4,7 +4,7 @@ Agent 在自己的环境中查找资料、判断匹配并下载海报，通过�
 
 ## 获取 Key
 
-管理员在“账户安全 → Agent API Key”创建 Key，选择媒体库、读取/读写权限及有效期。完整 Key 仅在创建时返回一次，数据库仅保存哈希。列表中可以撤销 Key。Key 只能用于 `/api/agent/`，不能播放视频、修改账户、删除媒体或访问服务器文件。
+管理员在“账户安全 → Agent API Key”创建 Key，选择媒体库、读取/读写权限及有效期。完整 Key 仅在创建时返回一次，数据库仅保存哈希。列表中可以撤销 Key。Key 只能用于 `/api/agent/`，不能播放或下载视频、修改账户或删除媒体。
 
 程序管理接口需要原有管理员会话：
 
@@ -25,11 +25,15 @@ Authorization: Bearer dino_agent_完整的Key
 | 请求 | 返回 |
 | --- | --- |
 | `GET /api/agent/help` | 本文档 |
+| `GET /api/agent/libraries` | 授权媒体库的 ID、名称和类型 |
+| `GET /api/agent/libraries/{id}/files` | 列出授权库的真实目录和视频文件，无需先扫描入库 |
 | `GET /api/agent/tasks` | 默认包含未识别、待确认和失败的电影/整剧，分页 |
 | `GET /api/agent/movies/{id}` | 电影的名称、年份、媒体库、路径、技术信息、现有资料与版本 |
 | `GET /api/agent/series/{id}` | 整剧上下文及分集文件列表 |
 | `GET /api/agent/movies/{id}/metadata` | 可直接编辑并回传的 JSON 资料；ETag 为当前版本 |
 | `GET /api/agent/series/{id}/metadata` | 整剧 JSON 资料；ETag 为当前版本 |
+
+目录接口默认列出媒体库根目录，传 `directory`（相对路径）进入子目录。每次最多返回 100 项，按名称排序。若 `next_after` 非空，将它作为下一次请求的 `after` 参数。返回项包含相对 `path` 和 `kind`（`directory` 或 `video`）。隐藏项和符号链接会跳过。可用只读 Key，无需管理员会话。用此接口提前识别资料，已有入库记录仍按任务接口返回的 ID 写入。
 
 任务筛选支持 `library_id`、`q`、`page`、`page_size`（最多 100）。`status` 默认为 `pending`，可用 `all`、`matched`、`unmatched`、`needs_review`、`failed`、`warning`。
 

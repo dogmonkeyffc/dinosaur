@@ -7,13 +7,14 @@ import (
 )
 
 type EpisodeName struct {
-	Key     string
-	Series  string
-	Year    int
-	Season  int
-	Episode int
-	End     int
-	Title   string
+	Collection bool
+	Key        string
+	Series     string
+	Year       int
+	Season     int
+	Episode    int
+	End        int
+	Title      string
 }
 
 type Series struct {

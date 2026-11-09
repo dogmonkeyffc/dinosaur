@@ -110,19 +110,6 @@ export function SeriesDetailPage() {
               info={item.metadata}
               reload={reload}
             />
-            {data.folders?.length > 0 && (
-              <details className="series-folders">
-                <summary>所在文件夹</summary>
-                <ul>
-                  {data.folders.map((folder) => (
-                    <li key={folder}>
-                      <span className="muted">{item.library_name}</span>
-                      <code>{folder === '.' ? '媒体库根目录' : folder}</code>
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            )}
             <div className="series-seasons">
               <h2>剧集列表</h2>
               <label>

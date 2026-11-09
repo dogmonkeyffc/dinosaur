@@ -48,6 +48,10 @@ func ParseEpisode(path string) (EpisodeName, bool) {
 	}
 	name := strings.Trim(stem[:indexes[0]], " ._-[]()")
 	folder := filepath.Dir(path)
+	collection, collectionTitle, collectionYear, grouped := collectionFolder(folder, result.Season)
+	if grouped {
+		folder = collection
+	}
 	if seasonFolder.MatchString(filepath.Base(folder)) {
 		folder = filepath.Dir(folder)
 	}
@@ -59,6 +63,9 @@ func ParseEpisode(path string) (EpisodeName, bool) {
 		return result, false
 	}
 	result.Series, result.Year = media.ParseFilename(name + ".mp4")
+	if grouped {
+		result.Series, result.Year, result.Collection = collectionTitle, collectionYear, true
+	}
 	if result.Key == "" {
 		result.Key = "title:" + strings.ToLower(result.Series) + fmt.Sprintf(":%d", result.Year)
 	}

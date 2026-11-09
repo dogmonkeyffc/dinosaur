@@ -17,6 +17,8 @@ func (s *Server) mountAgent(mux *http.ServeMux) {
 	mux.Handle("POST /api/admin/agent-keys", s.require(true, http.HandlerFunc(s.createAgentKey)))
 	mux.Handle("DELETE /api/admin/agent-keys/{id}", s.require(true, http.HandlerFunc(s.revokeAgentKey)))
 	mux.Handle("GET /api/agent/tasks", s.requireAgent(false, http.HandlerFunc(s.agentTasks)))
+	mux.Handle("GET /api/agent/libraries", s.requireAgent(false, http.HandlerFunc(s.agentLibraries)))
+	mux.Handle("GET /api/agent/libraries/{id}/files", s.requireAgent(false, http.HandlerFunc(s.agentDirectory)))
 	mux.Handle("GET /api/agent/{kind}/{id}", s.requireAgent(false, http.HandlerFunc(s.agentTarget)))
 	mux.Handle("GET /api/agent/{kind}/{id}/metadata", s.requireAgent(false, http.HandlerFunc(s.agentMetadata)))
 	mux.Handle("GET /api/agent/{kind}/{id}/metadata.nfo", s.requireAgent(false, http.HandlerFunc(s.agentNFO)))

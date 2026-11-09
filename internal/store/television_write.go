@@ -16,7 +16,7 @@ func (s *Store) SaveEpisode(ctx context.Context, item media.Item, episode televi
 	defer tx.Rollback()
 	var seriesID int64
 	err = tx.QueryRowContext(ctx, `INSERT INTO tv_series(library_id,source_key,title,year) VALUES (?,?,?,?)
- ON CONFLICT(library_id,source_key) DO UPDATE SET title=excluded.title,year=excluded.year RETURNING id`,
+ ON CONFLICT(library_id,source_key) DO UPDATE SET title=excluded.title,year=COALESCE(NULLIF(excluded.year,0),tv_series.year) RETURNING id`,
 		item.LibraryID, episode.Key, episode.Series, episode.Year).Scan(&seriesID)
 	if err != nil {
 		return err

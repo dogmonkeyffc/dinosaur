@@ -13,6 +13,9 @@ func TestEpisodeFilenameAndSeriesIdentity(t *testing.T) {
 		{"Example.1x04.Name.mp4", "title:example:0", "Example", "S01E04 · Name", 0, 1, 4, 4},
 		{"剧集/特别篇/剧集.S00E01.mkv", "folder:剧集", "剧集", "S00E01", 0, 0, 1, 1},
 		{"Example/Season 1/S01E01-E02.mkv", "folder:Example", "Example", "S01E01–E02", 0, 1, 1, 2},
+		{"无耻家庭.全十一季/无耻家庭.第09季.Shameless.S09.2019/Shameless.S09E01.mkv", "folder:无耻家庭.全十一季", "无耻家庭", "S09E01", 0, 9, 1, 1},
+		{"Example (2020)/Example.S02.2021/Example.S02E01.mkv", "folder:Example (2020)", "Example", "S02E01", 2020, 2, 1, 1},
+		{"Comedy/Other.S01.2020/Other.S01E01.mkv", "folder:Comedy/Other.S01.2020", "Other S01", "S01E01", 2020, 1, 1, 1},
 	}
 	for _, c := range cases {
 		t.Run(c.path, func(t *testing.T) {

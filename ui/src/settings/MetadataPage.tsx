@@ -1,4 +1,5 @@
-import { Button, Card, Input } from '@fluentui/react-components';
+import { FormInput } from '../components/FormInput';
+import { Button, Card } from '@mui/material';
 import { InfoTip } from '../components/InfoTip';
 import { Select } from '../components/Select';
 import { useEffect, useState, type FormEvent } from 'react';
@@ -73,7 +74,7 @@ export function MetadataPage() {
                   <InfoTip label="凭据保存方式">留空保留现有凭据；填写新值后保存以替换。</InfoTip>
                 )}
               </span>
-              <Input
+              <FormInput
                 className="form-control"
                 id="tmdb-credential"
                 type="password"
@@ -96,14 +97,14 @@ export function MetadataPage() {
               </Select>
             </label>
             <div className="metadata-actions">
-              <Button appearance="primary" className="button primary" type="submit">
+              <Button variant="contained" type="submit">
                 保存配置
               </Button>
-              <Button className="button secondary" type="button" onClick={() => submit('test')}>
+              <Button variant="outlined" type="button" onClick={() => submit('test')}>
                 测试连接
               </Button>
               <Button
-                appearance="subtle"
+                variant="text"
                 className="text-button"
                 type="button"
                 disabled={!resource.data?.configured}
@@ -117,15 +118,11 @@ export function MetadataPage() {
         <p role="status">{notice}</p>
         <ErrorMessage error={resource.error || action.error || jobs.error} />
         {resource.error && (
-          <Button className="button secondary" onClick={resource.reload}>
+          <Button variant="outlined" onClick={resource.reload}>
             重新读取配置
           </Button>
         )}
-        <Button
-          className="button secondary"
-          disabled={jobs.busy || jobs.running}
-          onClick={() => jobs.start()}
-        >
+        <Button variant="outlined" disabled={jobs.busy || jobs.running} onClick={() => jobs.start()}>
           刮削所有未识别影片
         </Button>
         {jobs.latest && (

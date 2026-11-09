@@ -1,4 +1,4 @@
-import { Button } from '@fluentui/react-components';
+import { Button } from '@mui/material';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ErrorMessage, Icon, Loading } from '../components/common';
@@ -65,7 +65,7 @@ export function PlayerPage() {
       </div>
       {(!info || (error && !engine.current)) && (
         <div className="player-fallback-nav">
-          <Button icon={<Icon name="arrow" />} onClick={goBack}>
+          <Button startIcon={<Icon name="arrow" />} onClick={goBack}>
             退出播放
           </Button>
         </div>
@@ -82,7 +82,7 @@ export function PlayerPage() {
         <div className="player-error-overlay">
           <ErrorMessage error={error || resource.error} />
           <Button
-            appearance="subtle"
+            variant="text"
             className="text-button"
             onClick={() =>
               engine.current ? engine.current.changeSource({ mode: 'compatible' }) : resource.reload()

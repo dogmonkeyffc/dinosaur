@@ -1,4 +1,4 @@
-import { Button, Card } from '@fluentui/react-components';
+import { Button, Card, LinearProgress } from '@mui/material';
 import { ErrorMessage, Heading, Loading } from '../components/common';
 import { bytes } from '../lib/format';
 import { useResource } from '../lib/hooks';
@@ -18,7 +18,7 @@ export function SystemPage() {
       <Heading title="系统设置" description="检查服务器挂载的磁盘及其可用空间。" />
       <div className="disk-section-heading">
         <h2>磁盘空间</h2>
-        <Button id="disk-refresh" className="button secondary" disabled={loading} onClick={reload}>
+        <Button id="disk-refresh" variant="outlined" disabled={loading} onClick={reload}>
           {loading ? '读取中…' : '刷新'}
         </Button>
       </div>
@@ -47,10 +47,10 @@ export function SystemPage() {
                   </h3>
                   <span>{Math.ceil(percent)}%</span>
                 </div>
-                <progress
+                <LinearProgress
+                  variant="determinate"
                   className="disk-progress"
                   value={percent}
-                  max={100}
                   aria-label={`${disk.mount_point} 已用空间比例`}
                 />
                 <dl className="disk-capacity">

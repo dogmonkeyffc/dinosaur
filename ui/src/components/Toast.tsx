@@ -1,29 +1,25 @@
-import { Toast, Toaster, ToastTitle, useToastController } from '@fluentui/react-components';
-import { createContext, useCallback, useContext, useId, type ReactNode } from 'react';
+import { Snackbar } from '@mui/material';
+import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
 
 const Context = createContext<(message: string) => void>(() => {});
 export const useToast = () => useContext(Context);
 
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const toasterId = useId();
-  const { dispatchToast } = useToastController(toasterId);
-  const notify = useCallback(
-    (message: string) =>
-      dispatchToast(
-        <Toast>
-          <ToastTitle>{message}</ToastTitle>
-        </Toast>,
-        {
-          timeout: 5000,
-          intent: 'info',
-        },
-      ),
-    [dispatchToast, toasterId],
-  );
+  const [notice, setNotice] = useState({ message: '', key: 0 });
+  const notify = useCallback((message: string) => {
+    setNotice((previous) => ({ message, key: previous.key + 1 }));
+  }, []);
   return (
     <Context.Provider value={notify}>
       {children}
-      <Toaster toasterId={toasterId} position="bottom" limit={1} />
+      <Snackbar
+        key={notice.key}
+        open={Boolean(notice.message)}
+        message={notice.message}
+        autoHideDuration={5000}
+        onClose={() => setNotice((previous) => ({ ...previous, message: '' }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
     </Context.Provider>
   );
 }

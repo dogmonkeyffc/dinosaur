@@ -1,17 +1,22 @@
-import { Select as FluentSelect, type SelectProps } from '@fluentui/react-components';
+import { NativeSelect, OutlinedInput } from '@mui/material';
+import type { ComponentProps } from 'react';
 
-type Props = Omit<SelectProps, 'value' | 'onChange'> & {
+type Props = Omit<ComponentProps<'select'>, 'value' | 'onChange'> & {
   value: string | number;
   onValueChange: (value: string) => void;
 };
 
-export function Select({ value, onValueChange, className = '', ...props }: Props) {
+export function Select({ value, onValueChange, children, id, name, className, ...inputProps }: Props) {
   return (
-    <FluentSelect
-      {...props}
-      className={`select-control ${className}`.trim()}
+    <NativeSelect
+      className={className}
       value={String(value)}
-      onChange={(_, data) => onValueChange(data.value)}
-    />
+      onChange={(event) => onValueChange(event.target.value)}
+      input={<OutlinedInput fullWidth size="small" />}
+      variant="outlined"
+      inputProps={{ ...inputProps, id, name }}
+    >
+      {children}
+    </NativeSelect>
   );
 }

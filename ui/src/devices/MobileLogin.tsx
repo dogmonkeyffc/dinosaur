@@ -1,4 +1,4 @@
-import { Button } from '@fluentui/react-components';
+import { Button, Card } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../auth/AuthProvider';
@@ -23,11 +23,11 @@ export function MobileLogin() {
   }, [ticket]);
   const seconds = ticket ? Math.max(0, Math.ceil(ticket.expires_at - now / 1000)) : 0;
   return (
-    <section className="account-card device-card">
+    <Card component="section" className="account-card device-card">
       <div className="device-card-heading">
         <h2>手机扫码登录</h2>
         <Button
-          className="button secondary"
+          variant="outlined"
           disabled={action.busy}
           onClick={() =>
             action.run(async () => {
@@ -55,6 +55,6 @@ export function MobileLogin() {
       )}
       {ticket && !seconds && <p role="status">二维码已过期</p>}
       <ErrorMessage error={action.error} />
-    </section>
+    </Card>
   );
 }

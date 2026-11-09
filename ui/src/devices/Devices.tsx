@@ -1,4 +1,4 @@
-import { Button } from '@fluentui/react-components';
+import { Button, Card } from '@mui/material';
 import { ErrorMessage, Loading } from '../components/common';
 import { useAction, useResource } from '../lib/hooks';
 import { api } from '../lib/api';
@@ -14,10 +14,10 @@ export function Devices() {
   const resource = useResource<{ devices: Device[] }>('/api/devices', 10000);
   const action = useAction();
   return (
-    <section className="account-card device-card">
+    <Card component="section" className="account-card device-card">
       <div className="device-card-heading">
         <h2>已登录设备</h2>
-        <Button appearance="subtle" className="text-button" onClick={resource.reload}>
+        <Button variant="text" className="text-button" onClick={resource.reload}>
           刷新
         </Button>
       </div>
@@ -34,7 +34,7 @@ export function Devices() {
               <span>{new Date(device.expires_at * 1000).toLocaleString()} 到期</span>
             </div>
             <Button
-              appearance="subtle"
+              variant="text"
               className="text-button"
               disabled={action.busy}
               onClick={() =>
@@ -50,6 +50,6 @@ export function Devices() {
         ))}
       </ul>
       {resource.data && !resource.data.devices.length && <p className="muted">暂无 App 登录设备</p>}
-    </section>
+    </Card>
   );
 }

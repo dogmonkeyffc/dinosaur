@@ -1,15 +1,14 @@
 import {
+  Alert,
   Button,
+  CircularProgress,
   Dialog,
-  DialogBody,
   DialogContent,
-  DialogSurface,
   DialogTitle,
-  MessageBar,
-  MessageBarBody,
-  Spinner,
-  useRestoreFocusSource,
-} from '@fluentui/react-components';
+  IconButton,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { Link } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import sprite from '../assets/icons.svg?url';
@@ -45,8 +44,14 @@ export function Heading({
   return (
     <header className="page-heading">
       <div>
-        <h1>{title}</h1>
-        {description && <p>{description}</p>}
+        <Typography variant="h4" component="h1">
+          {title}
+        </Typography>
+        {description && (
+          <Typography color="text.secondary" sx={{ mt: 1 }}>
+            {description}
+          </Typography>
+        )}
       </div>
       {children}
     </header>
@@ -55,14 +60,25 @@ export function Heading({
 
 export function ErrorMessage({ error, id }: { error?: string; id?: string }) {
   return error ? (
-    <MessageBar id={id} className="form-error" intent="error">
-      <MessageBarBody>{error}</MessageBarBody>
-    </MessageBar>
+    <Alert id={id} className="form-error" severity="error">
+      {error}
+    </Alert>
   ) : null;
 }
 
 export function Loading() {
-  return <Spinner className="loading-message" size="small" label="正在读取…" />;
+  return (
+    <Stack
+      className="loading-message"
+      role="status"
+      direction="row"
+      spacing={1}
+      sx={{ alignItems: 'center' }}
+    >
+      <CircularProgress size={20} aria-hidden="true" />
+      <span>正在读取…</span>
+    </Stack>
+  );
 }
 
 export function Pagination({
@@ -79,13 +95,13 @@ export function Pagination({
   if (total <= size) return null;
   return (
     <div className="movie-pagination">
-      <Button className="button secondary" disabled={page <= 1} onClick={() => onChange(page - 1)}>
+      <Button variant="outlined" disabled={page <= 1} onClick={() => onChange(page - 1)}>
         上一页
       </Button>
       <span>
         共 {total} 条 · {page} / {Math.ceil(total / size)}
       </span>
-      <Button className="button secondary" disabled={page * size >= total} onClick={() => onChange(page + 1)}>
+      <Button variant="outlined" disabled={page * size >= total} onClick={() => onChange(page + 1)}>
         下一页
       </Button>
     </div>
@@ -93,26 +109,17 @@ export function Pagination({
 }
 
 export function Modal({ title, children, close }: { title: string; children: ReactNode; close: () => void }) {
-  const restoreFocus = useRestoreFocusSource();
   return (
-    <Dialog
-      open
-      onOpenChange={(_, data) => {
-        if (!data.open) close();
-      }}
-    >
-      <DialogSurface className="modal">
-        <DialogBody {...restoreFocus}>
-          <DialogTitle
-            action={
-              <Button appearance="subtle" aria-label="关闭" onClick={close} icon={<Icon name="close" />} />
-            }
-          >
-            {title}
-          </DialogTitle>
-          <DialogContent>{children}</DialogContent>
-        </DialogBody>
-      </DialogSurface>
+    <Dialog open fullWidth maxWidth="sm" onClose={close} aria-label={title}>
+      <DialogTitle>
+        <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+          {title}
+          <IconButton aria-label="关闭" onClick={close}>
+            <Icon name="close" />
+          </IconButton>
+        </Stack>
+      </DialogTitle>
+      <DialogContent>{children}</DialogContent>
     </Dialog>
   );
 }

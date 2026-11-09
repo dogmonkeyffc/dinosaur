@@ -1,4 +1,5 @@
-import { Button, Card, Input } from '@fluentui/react-components';
+import { FormInput } from '../components/FormInput';
+import { Button, Card } from '@mui/material';
 import { useState, type FormEvent } from 'react';
 import { Select } from '../components/Select';
 import { ErrorMessage, Loading } from '../components/common';
@@ -55,7 +56,7 @@ export function AgentKeys() {
       <form onSubmit={create}>
         <label>
           名称
-          <Input
+          <FormInput
             className="form-control"
             name="name"
             maxLength={80}
@@ -91,7 +92,7 @@ export function AgentKeys() {
             </Select>
           </label>
         </div>
-        <Button appearance="primary" className="button primary" disabled={action.busy} type="submit">
+        <Button variant="contained" disabled={action.busy} type="submit">
           创建 Key
         </Button>
       </form>
@@ -99,7 +100,7 @@ export function AgentKeys() {
         <div className="agent-key-created">
           <label>
             API Key（仅显示一次）
-            <Input
+            <FormInput
               className="form-control"
               value={created.token}
               readOnly
@@ -110,7 +111,7 @@ export function AgentKeys() {
           </label>
           <div className="metadata-actions">
             <Button
-              appearance="subtle"
+              variant="text"
               className="text-button"
               onClick={() =>
                 action.run(async () => {
@@ -125,7 +126,7 @@ export function AgentKeys() {
             >
               复制
             </Button>
-            <Button appearance="subtle" className="text-button" onClick={() => setCreated(null)}>
+            <Button variant="text" className="text-button" onClick={() => setCreated(null)}>
               收起
             </Button>
           </div>
@@ -149,7 +150,7 @@ export function AgentKeys() {
               </span>
             </div>
             <Button
-              appearance="subtle"
+              variant="text"
               className="text-button"
               disabled={action.busy}
               onClick={() =>

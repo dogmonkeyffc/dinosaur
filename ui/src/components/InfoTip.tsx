@@ -1,23 +1,32 @@
-import { Button, Popover, PopoverSurface, PopoverTrigger } from '@fluentui/react-components';
+import { IconButton, Popover, Typography } from '@mui/material';
+import { useId, useState } from 'react';
 import { Icon } from './common';
-import '../styles/info-tip.css';
 
 export function InfoTip({ label, children }: { label: string; children: string }) {
+  const [anchor, setAnchor] = useState<HTMLButtonElement | null>(null);
+  const id = useId();
   return (
-    <Popover positioning="below-start">
-      <PopoverTrigger disableButtonEnhancement>
-        <Button
-          type="button"
-          appearance="subtle"
-          size="small"
-          className="info-tip"
-          aria-label={label}
-          icon={<Icon name="info" />}
-        />
-      </PopoverTrigger>
-      <PopoverSurface className="info-tip-content" aria-label={label}>
-        {children}
-      </PopoverSurface>
-    </Popover>
+    <>
+      <IconButton
+        size="small"
+        aria-label={label}
+        aria-expanded={!!anchor}
+        aria-controls={anchor ? id : undefined}
+        onClick={(event) => setAnchor(event.currentTarget)}
+      >
+        <Icon name="info" />
+      </IconButton>
+      <Popover
+        id={id}
+        open={!!anchor}
+        anchorEl={anchor}
+        onClose={() => setAnchor(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Typography sx={{ p: 2, maxWidth: 320 }} variant="body2">
+          {children}
+        </Typography>
+      </Popover>
+    </>
   );
 }

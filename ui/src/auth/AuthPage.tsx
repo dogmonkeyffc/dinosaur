@@ -1,4 +1,5 @@
-import { Button, Card, Input } from '@fluentui/react-components';
+import { FormInput } from '../components/FormInput';
+import { Button, Card } from '@mui/material';
 import { InfoTip } from '../components/InfoTip';
 import { useState, type FormEvent } from 'react';
 import { useAuth } from './AuthProvider';
@@ -35,18 +36,9 @@ export function AuthPage() {
   }
   return (
     <main id="auth-screen" className="auth-screen">
-      <div className="auth-intro">
-        <Brand />
-        <p className="auth-kicker">私人媒体库</p>
-        <p className="auth-title">
-          你的家庭
-          <br />
-          放映室
-        </p>
-        <p>电影、剧集和观看进度，都在你的服务器上。</p>
-      </div>
       <Card className="auth-panel">
         <div className="auth-form-wrap">
+          <Brand />
           <h1>{setup ? '创建管理员' : '登录'}</h1>
           <p className="muted">
             {setup ? '为这台媒体服务器创建第一个账户。' : '使用你的 Dinosaur 账户进入看片室。'}
@@ -61,7 +53,7 @@ export function AuthPage() {
                     默认位于 ~/.cache/dinosaur/setup-token；自定义路径见服务启动日志。
                   </InfoTip>
                 </span>
-                <Input
+                <FormInput
                   className="form-control"
                   aria-labelledby="setup-token-label"
                   id="setup-token"
@@ -74,7 +66,7 @@ export function AuthPage() {
             )}
             <label>
               用户名
-              <Input
+              <FormInput
                 className="form-control"
                 id="username"
                 name="username"
@@ -86,7 +78,7 @@ export function AuthPage() {
             </label>
             <label>
               <span id="password-label">{setup ? '密码（至少 12 字节）' : '密码'}</span>
-              <Input
+              <FormInput
                 className="form-control"
                 aria-labelledby="password-label"
                 id="password"
@@ -95,9 +87,9 @@ export function AuthPage() {
                 autoComplete={setup ? 'new-password' : 'current-password'}
                 required
                 maxLength={1024}
-                contentAfter={
+                endAdornment={
                   <Button
-                    appearance="subtle"
+                    variant="text"
                     type="button"
                     size="small"
                     onClick={() => setVisible(!visible)}
@@ -111,7 +103,7 @@ export function AuthPage() {
             {setup && (
               <label>
                 确认密码
-                <Input
+                <FormInput
                   className="form-control"
                   name="confirm"
                   type="password"
@@ -123,7 +115,7 @@ export function AuthPage() {
             )}
             <ErrorMessage error={action.error} />
             <Button
-              appearance="primary"
+              variant="contained"
               className="button primary auth-submit"
               type="submit"
               disabled={action.busy}

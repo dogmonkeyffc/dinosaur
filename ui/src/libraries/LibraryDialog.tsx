@@ -1,4 +1,5 @@
-import { Button, Input, Radio, RadioGroup } from '@fluentui/react-components';
+import { FormInput } from '../components/FormInput';
+import { Button, FormControlLabel, Radio, RadioGroup } from '@mui/material';
 import { InfoTip } from '../components/InfoTip';
 import { useState, type FormEvent } from 'react';
 import { api } from '../lib/api';
@@ -29,7 +30,7 @@ export function LibraryDialog({ item, close }: { item?: Library; close: () => vo
       <form id="library-form" onSubmit={submit}>
         <label>
           媒体库名称
-          <Input
+          <FormInput
             className="form-control"
             name="name"
             required
@@ -42,11 +43,11 @@ export function LibraryDialog({ item, close }: { item?: Library; close: () => vo
           <RadioGroup
             name="type"
             value={type}
-            layout="horizontal"
-            onChange={(_, data) => setType(data.value === 'tv' ? 'tv' : 'movie')}
+            row
+            onChange={(_, value) => setType(value === 'tv' ? 'tv' : 'movie')}
           >
-            <Radio value="movie" label="电影" />
-            <Radio value="tv" label="电视剧" />
+            <FormControlLabel value="movie" control={<Radio />} label="电影" />
+            <FormControlLabel value="tv" control={<Radio />} label="电视剧" />
           </RadioGroup>
         </fieldset>
         <label htmlFor="library-path">
@@ -54,7 +55,7 @@ export function LibraryDialog({ item, close }: { item?: Library; close: () => vo
             <span id="library-path-label">媒体目录</span>
             <InfoTip label="媒体目录要求">填写服务器上的绝对路径，目录需已存在且可读取。</InfoTip>
           </span>
-          <Input
+          <FormInput
             className="form-control path-input"
             aria-labelledby="library-path-label"
             id="library-path"
@@ -67,10 +68,10 @@ export function LibraryDialog({ item, close }: { item?: Library; close: () => vo
         </label>
         <ErrorMessage error={action.error} />
         <div className="modal-actions">
-          <Button className="button secondary" type="button" onClick={close}>
+          <Button variant="outlined" type="button" onClick={close}>
             取消
           </Button>
-          <Button appearance="primary" className="button primary" disabled={action.busy} type="submit">
+          <Button variant="contained" disabled={action.busy} type="submit">
             保存媒体库
           </Button>
         </div>
@@ -87,11 +88,12 @@ export function DeleteLibrary({ item, close }: { item: Library; close: () => voi
       <p className="muted">将移除「{item.name}」的配置，原目录和所有媒体文件都会保留。</p>
       <ErrorMessage error={action.error} />
       <div className="modal-actions">
-        <Button className="button secondary" onClick={close}>
+        <Button variant="outlined" onClick={close}>
           取消
         </Button>
         <Button
-          className="button danger"
+          variant="contained"
+          color="error"
           disabled={action.busy}
           onClick={() =>
             action.run(async () => {

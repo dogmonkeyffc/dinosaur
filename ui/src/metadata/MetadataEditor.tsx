@@ -1,4 +1,5 @@
-import { Button, Input } from '@fluentui/react-components';
+import { FormInput } from '../components/FormInput';
+import { Button } from '@mui/material';
 import { Select } from '../components/Select';
 import { SourceReference } from './SourceReference';
 import { InfoTip } from '../components/InfoTip';
@@ -29,11 +30,7 @@ export function CandidateList({
           </strong>
           <span>{item.original_title}</span>
           <p>{item.overview}</p>
-          <Button
-            className="button secondary"
-            disabled={disabled}
-            onClick={() => select(item.id, item.provider)}
-          >
+          <Button variant="outlined" disabled={disabled} onClick={() => select(item.id, item.provider)}>
             {item.provider === 'bangumi' ? 'Bangumi' : 'TMDB'} · {item.id} · 选择
           </Button>
         </article>
@@ -104,7 +101,7 @@ export function MetadataEditor({
         <>
           <div className="metadata-detail-actions">
             <Button
-              appearance="subtle"
+              variant="text"
               className="text-button"
               disabled={jobs.busy || jobs.running}
               onClick={() => start()}
@@ -129,7 +126,7 @@ export function MetadataEditor({
                   <span id={`metadata-query-label-${kind}-${id}`}>{kind === 'tv' ? '剧名' : '电影名'}</span>
                   <InfoTip label="候选搜索名称">留空使用本地名称。</InfoTip>
                 </span>
-                <Input
+                <FormInput
                   className="form-control"
                   aria-labelledby={`metadata-query-label-${kind}-${id}`}
                   id={`metadata-query-${kind}-${id}`}
@@ -139,7 +136,7 @@ export function MetadataEditor({
               </label>
               <label>
                 年份
-                <Input
+                <FormInput
                   className="form-control"
                   name="year"
                   type="number"
@@ -149,7 +146,7 @@ export function MetadataEditor({
                   placeholder="不限"
                 />
               </label>
-              <Button className="button secondary" disabled={search.loading} type="submit">
+              <Button variant="outlined" disabled={search.loading} type="submit">
                 搜索候选
               </Button>
             </form>
@@ -177,7 +174,7 @@ export function MetadataEditor({
                       : 'TMDB 电影或剧集详情页网址中的数字 ID。'}
                   </InfoTip>
                 </span>
-                <Input
+                <FormInput
                   className="form-control"
                   aria-labelledby={`metadata-provider-label-${kind}-${id}`}
                   id={`metadata-provider-${kind}-${id}`}
@@ -188,7 +185,7 @@ export function MetadataEditor({
                   required
                 />
               </label>
-              <Button className="button secondary" disabled={manual.busy} type="submit">
+              <Button variant="outlined" disabled={manual.busy} type="submit">
                 使用此 ID 匹配
               </Button>
             </form>

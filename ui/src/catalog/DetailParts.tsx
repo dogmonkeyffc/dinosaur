@@ -1,4 +1,4 @@
-import { Button } from '@fluentui/react-components';
+import { Button, IconButton, LinearProgress, Paper } from '@mui/material';
 import { ButtonLink } from '../components/ButtonLink';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ErrorMessage, Icon } from '../components/common';
@@ -13,14 +13,13 @@ export function DetailHeader({ series = false }: { series?: boolean }) {
   const location = useLocation();
   return (
     <header className="detail-page-header">
-      <Button
-        appearance="subtle"
-        className="icon-button detail-back"
+      <IconButton
+        className="detail-back"
         aria-label="返回上一页"
         onClick={() => navigate(location.state?.from || (series ? '/series' : '/movies'))}
       >
         <Icon name="arrow" />
-      </Button>
+      </IconButton>
       <span>{series ? '剧集详情' : '电影详情'}</span>
     </header>
   );
@@ -42,7 +41,7 @@ export function WatchedButton({ item, reload }: { item: Movie; reload: () => voi
   return (
     <>
       <Button
-        appearance="subtle"
+        variant="text"
         className="text-button"
         disabled={action.busy}
         onClick={() =>
@@ -65,7 +64,7 @@ export function PlayActions({ item, reload }: { item: Movie; reload: () => void 
   const resume = item.position > 0 && !item.watched;
   return (
     <div className="movie-play-actions">
-      <ButtonLink appearance="primary" to={`/watch/${item.id}`} state={{ kind: item.type, from, backState }}>
+      <ButtonLink variant="contained" to={`/watch/${item.id}`} state={{ kind: item.type, from, backState }}>
         {resume ? `继续观看 · ${clock(item.position)}` : '播放电影'}
       </ButtonLink>
       {resume && (
@@ -128,7 +127,7 @@ export function EpisodeCard({ item, reload }: { item: Movie; reload: () => void 
   const backState = location.state;
   const resume = item.position > 0 && !item.watched;
   return (
-    <article className="series-episode">
+    <Paper component="article" variant="outlined" className="series-episode">
       <div>
         <h2>{item.title}</h2>
         <p className="muted">
@@ -136,7 +135,11 @@ export function EpisodeCard({ item, reload }: { item: Movie; reload: () => void 
           {item.watched ? ' · 已看' : item.position > 0 ? ` · 已看 ${clock(item.position)}` : ''}
         </p>
         {item.position > 0 && item.duration > 0 && (
-          <progress value={item.position} max={item.duration} aria-label="观看进度" />
+          <LinearProgress
+            variant="determinate"
+            value={Math.min(100, (100 * item.position) / item.duration)}
+            aria-label="观看进度"
+          />
         )}
         <TechnicalInfo item={item} />
         {item.probe_error && <p className="field-help">视频信息读取失败</p>}
@@ -156,6 +159,6 @@ export function EpisodeCard({ item, reload }: { item: Movie; reload: () => void 
         )}
         <WatchedButton item={item} reload={reload} />
       </div>
-    </article>
+    </Paper>
   );
 }

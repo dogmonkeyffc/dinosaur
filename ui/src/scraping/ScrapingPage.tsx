@@ -1,12 +1,6 @@
-import {
-  Input,
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHeaderCell,
-  TableCell,
-} from '@fluentui/react-components';
+import './records.css';
+import { FormInput } from '../components/FormInput';
+import { Paper, Table, TableContainer, TableHead, TableBody, TableRow, TableCell } from '@mui/material';
 import { SourceReference } from '../metadata/SourceReference';
 import { Select } from '../components/Select';
 import { useState } from 'react';
@@ -65,7 +59,7 @@ export function ScrapingPage() {
         </label>
         <label>
           搜索媒体
-          <Input
+          <FormInput
             className="form-control"
             type="search"
             maxLength={128}
@@ -76,30 +70,36 @@ export function ScrapingPage() {
         </label>
       </form>
       {resource.loading && !resource.data && <Loading />}
-      <div className="scrape-table-wrap" role="region" aria-label="媒体识别结果" tabIndex={0}>
+      <TableContainer
+        component={Paper}
+        className="scrape-table-wrap"
+        role="region"
+        aria-label="媒体识别结果"
+        tabIndex={0}
+      >
         <Table className="scrape-table" role="table">
-          <TableHeader role="rowgroup">
+          <TableHead role="rowgroup">
             <TableRow role="row">
-              <TableHeaderCell role="columnheader" scope="col">
+              <TableCell role="columnheader" scope="col">
                 媒体 / 文件
-              </TableHeaderCell>
-              <TableHeaderCell role="columnheader" scope="col">
+              </TableCell>
+              <TableCell role="columnheader" scope="col">
                 媒体库
-              </TableHeaderCell>
-              <TableHeaderCell role="columnheader" scope="col">
+              </TableCell>
+              <TableCell role="columnheader" scope="col">
                 状态 / 提示
-              </TableHeaderCell>
-              <TableHeaderCell role="columnheader" scope="col">
+              </TableCell>
+              <TableCell role="columnheader" scope="col">
                 资料来源 / 语言
-              </TableHeaderCell>
-              <TableHeaderCell role="columnheader" scope="col">
+              </TableCell>
+              <TableCell role="columnheader" scope="col">
                 更新时间
-              </TableHeaderCell>
-              <TableHeaderCell role="columnheader" scope="col">
+              </TableCell>
+              <TableCell role="columnheader" scope="col">
                 操作
-              </TableHeaderCell>
+              </TableCell>
             </TableRow>
-          </TableHeader>
+          </TableHead>
           <TableBody role="rowgroup">
             {resource.data?.items.map((item) => (
               <TableRow role="row" key={item.series_id ? `tv:${item.series_id}` : `movie:${item.media_id}`}>
@@ -143,7 +143,7 @@ export function ScrapingPage() {
             ))}
           </TableBody>
         </Table>
-      </div>
+      </TableContainer>
       {!resource.loading && resource.data && !resource.data.total && (
         <p className="scrape-admin-empty">没有符合筛选条件的媒体。</p>
       )}

@@ -1,4 +1,5 @@
-import { Button, Card, Input } from '@fluentui/react-components';
+import { FormInput } from '../components/FormInput';
+import { Button, Card } from '@mui/material';
 import type { FormEvent } from 'react';
 import { useAuth } from '../auth/AuthProvider';
 import { ErrorMessage, Heading } from '../components/common';
@@ -38,7 +39,7 @@ export function AccountPage() {
         <form id="password-form" onSubmit={submit}>
           <label>
             当前密码
-            <Input
+            <FormInput
               className="form-control"
               name="current_password"
               type="password"
@@ -49,7 +50,7 @@ export function AccountPage() {
           </label>
           <label>
             新密码（至少 12 字节）
-            <Input
+            <FormInput
               className="form-control"
               name="new_password"
               type="password"
@@ -60,7 +61,7 @@ export function AccountPage() {
           </label>
           <label>
             确认新密码
-            <Input
+            <FormInput
               className="form-control"
               name="confirm_password"
               type="password"
@@ -70,7 +71,7 @@ export function AccountPage() {
             />
           </label>
           <ErrorMessage error={action.error} />
-          <Button appearance="primary" className="button primary" disabled={action.busy} type="submit">
+          <Button variant="contained" disabled={action.busy} type="submit">
             更新密码
           </Button>
         </form>

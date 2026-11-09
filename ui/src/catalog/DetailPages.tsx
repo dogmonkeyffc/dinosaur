@@ -1,4 +1,4 @@
-import { Button } from '@fluentui/react-components';
+import { Button, Paper } from '@mui/material';
 import { ButtonLink } from '../components/ButtonLink';
 import { Select } from '../components/Select';
 import { useActiveLibrary } from '../layout/useActiveLibrary';
@@ -25,12 +25,12 @@ export function MovieDetailPage() {
       {loading && !item && <Loading />}
       <ErrorMessage error={error} />
       {error && (
-        <Button className="button secondary detail-retry" onClick={reload}>
+        <Button variant="outlined" onClick={reload}>
           重新加载
         </Button>
       )}
       {item && (
-        <div className="detail-layout">
+        <Paper className="detail-layout">
           <Artwork url={item.poster_url} title={item.title} />
           <article className="detail-copy">
             <span className="small-label">{item.library_name}</span>
@@ -50,7 +50,7 @@ export function MovieDetailPage() {
             {item.probe_error && <p className="form-error">视频信息读取失败</p>}
             <TechnicalInfo item={item} />
           </article>
-        </div>
+        </Paper>
       )}
     </section>
   );
@@ -78,12 +78,12 @@ export function SeriesDetailPage() {
       {loading && !item && <Loading />}
       <ErrorMessage error={error} />
       {error && (
-        <Button className="button secondary detail-retry" onClick={reload}>
+        <Button variant="outlined" onClick={reload}>
           重新加载
         </Button>
       )}
       {item && data && (
-        <div className="detail-layout">
+        <Paper className="detail-layout">
           <Artwork url={item.poster_url} title={item.title} series />
           <article className="detail-copy">
             <span className="small-label">{item.library_name}</span>
@@ -95,7 +95,7 @@ export function SeriesDetailPage() {
             {data.resume && (
               <div className="movie-play-actions">
                 <ButtonLink
-                  appearance="primary"
+                  variant="contained"
                   to={`/watch/${data.resume.id}`}
                   state={{ kind: 'tv', from: location.pathname, backState: location.state }}
                 >
@@ -146,7 +146,7 @@ export function SeriesDetailPage() {
               </div>
             </div>
           </article>
-        </div>
+        </Paper>
       )}
     </section>
   );

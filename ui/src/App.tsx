@@ -1,4 +1,4 @@
-import { Button } from '@fluentui/react-components';
+import { Button } from '@mui/material';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { lazy, type ReactNode } from 'react';
 import { useAuth } from './auth/AuthProvider';
@@ -34,7 +34,7 @@ export function App() {
         <Brand />
         <p>{auth.error || '正在连接你的媒体空间…'}</p>
         {auth.error && (
-          <Button className="button secondary" onClick={auth.boot}>
+          <Button variant="outlined" onClick={auth.boot}>
             重新连接
           </Button>
         )}

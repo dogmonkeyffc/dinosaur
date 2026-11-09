@@ -1,4 +1,5 @@
-import { Button, Input } from '@fluentui/react-components';
+import { FormInput } from '../components/FormInput';
+import { Button } from '@mui/material';
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ErrorMessage, Heading, Icon, Loading, Pagination } from '../components/common';
@@ -52,10 +53,10 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
       />
       <div className="movie-toolbar">
         <label className="search-field">
-          <Input
+          <FormInput
             className="form-control"
             type="search"
-            contentBefore={<Icon name="search" />}
+            startAdornment={<Icon name="search" />}
             maxLength={128}
             value={query}
             onChange={(event) => change('q', event.target.value)}
@@ -81,7 +82,7 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
         </div>
       )}
       {result.error && (
-        <Button className="button secondary" onClick={result.reload}>
+        <Button variant="outlined" onClick={result.reload}>
           重新加载
         </Button>
       )}

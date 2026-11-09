@@ -1,67 +1,28 @@
+.boot,
 .auth-screen {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 28rem);
-  align-items: center;
-  gap: clamp(2rem, 7vw, 7rem);
-  width: min(100%, 78rem);
   min-height: 100dvh;
-  margin-inline: auto;
-  padding: clamp(1rem, 6vw, 5rem);
+  display: grid;
+  place-content: center;
+  padding: 1rem;
 }
 
-.auth-intro .brand {
-  margin-bottom: clamp(1.25rem, 6vw, 4.5rem);
+.boot {
+  gap: 1rem;
+  text-align: center;
 }
 
-.auth-kicker {
-  color: var(--accent);
-  font-size: 0.875rem;
-  font-weight: 650;
+.auth-screen {
+  grid-template-columns: minmax(0, 26rem);
 }
 
-.auth-title {
-  margin-block: 0 1rem;
-  font-size: clamp(2.8rem, 6.5vw, 6rem);
-  font-weight: 730;
-  line-height: 1.06;
-  letter-spacing: -0.045em;
+.auth-panel {
+  padding: clamp(1rem, 5vw, 2rem);
 }
 
-.auth-intro > p:last-child {
-  color: var(--muted);
-  margin-bottom: 0;
+.auth-form-wrap .brand {
+  margin-bottom: 1.25rem;
 }
 
-.fui-Card.auth-panel {
-  padding: clamp(1.25rem, 4vw, 2.5rem);
-  border-radius: var(--borderRadiusMedium);
-  background: var(--surface);
-}
-
-.auth-form-wrap h1 {
-  margin-bottom: 0.55rem;
-  font-size: clamp(1.65rem, 4vw, 2.25rem);
-}
-
-.auth-form-wrap .auth-submit {
+.auth-submit {
   width: 100%;
-  margin-top: 1.5rem;
-  justify-content: space-between;
-}
-
-@media (max-width: 45rem) {
-  .auth-screen {
-    grid-template-columns: minmax(0, 1fr);
-    align-content: center;
-    gap: 1.5rem;
-    width: min(100%, 32rem);
-  }
-
-  .auth-title {
-    font-size: clamp(2.3rem, 9vw, 3.5rem);
-  }
-
-  .auth-title br {
-    display: none;
-  }
 }

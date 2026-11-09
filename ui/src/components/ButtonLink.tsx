@@ -1,13 +1,11 @@
-import { Button, type ButtonProps } from '@fluentui/react-components';
-import { useHref, useLinkClickHandler, type LinkProps } from 'react-router-dom';
+import { Button, type ButtonProps } from '@mui/material';
+import { Link, type LinkProps } from 'react-router-dom';
 
-type Props = Pick<LinkProps, 'to' | 'state' | 'children'> & Pick<ButtonProps, 'appearance'>;
+type Props = Pick<LinkProps, 'to' | 'state' | 'children'> & Pick<ButtonProps, 'variant'>;
 
-export function ButtonLink({ to, state, children, appearance }: Props) {
-  const href = useHref(to);
-  const follow = useLinkClickHandler<HTMLAnchorElement>(to, { state });
+export function ButtonLink({ to, state, children, variant = 'outlined' }: Props) {
   return (
-    <Button as="a" href={href} onClick={follow} appearance={appearance} className="button">
+    <Button component={Link} to={to} state={state} variant={variant}>
       {children}
     </Button>
   );

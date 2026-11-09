@@ -1,4 +1,4 @@
-import { Avatar, Button } from '@fluentui/react-components';
+import { Avatar, Button, IconButton, ListItemButton, Paper } from '@mui/material';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
@@ -104,10 +104,10 @@ export function Shell() {
       <a className="skip-link" href="#content-main">
         跳到主要内容
       </a>
-      <aside ref={sidebar} className={`sidebar${menu ? ' menu-open' : ''}`}>
+      <Paper component="aside" square ref={sidebar} className={`sidebar${menu ? ' menu-open' : ''}`}>
         <Brand />
         <Button
-          appearance="subtle"
+          variant="text"
           ref={toggle}
           id="mobile-menu-toggle"
           className="mobile-menu-toggle"
@@ -129,19 +129,21 @@ export function Shell() {
               {group.entries
                 .filter(([, , , role]) => !role || user?.role === role)
                 .map(([path, label, icon]) => (
-                  <Link
+                  <ListItemButton
+                    component={Link}
                     key={path}
                     to={path}
                     aria-label={label}
                     title={label}
                     onClick={close}
-                    className={`nav-item${selected === path ? ' active' : ''}`}
+                    className="nav-item"
+                    selected={selected === path}
                     aria-current={selected === path ? 'page' : undefined}
                   >
                     <Icon name={icon} />
                     {label}
                     {path === '/settings' && <span className="nav-count">{libraries.length}</span>}
-                  </Link>
+                  </ListItemButton>
                 ))}
             </div>
           ))}
@@ -155,13 +157,14 @@ export function Shell() {
           </div>
         </div>
         <div id="sidebar-account" className="sidebar-account user-area" role="group" aria-label="当前用户">
-          <Avatar name={user?.username} size={32} color="brand" aria-hidden="true" />
+          <Avatar sx={{ width: 32, height: 32 }} aria-hidden="true">
+            {user?.username.slice(0, 1).toUpperCase()}
+          </Avatar>
           <div className="user-details">
             <strong>{user?.username}</strong>
             <span>{user?.role === 'admin' ? '管理员' : '普通用户'}</span>
           </div>
-          <Button
-            appearance="subtle"
+          <IconButton
             id="logout"
             className="icon-button logout-button"
             aria-label="退出登录"
@@ -170,9 +173,9 @@ export function Shell() {
             onClick={() => action.run(logout)}
           >
             <Icon name="logout" />
-          </Button>
+          </IconButton>
         </div>
-      </aside>
+      </Paper>
       <div
         id="content"
         className={`workspace content${playing ? ' is-playing' : detail ? ' is-detail' : ''}`}

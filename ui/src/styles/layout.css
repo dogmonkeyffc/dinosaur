@@ -1,3 +1,28 @@
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:where(a, button, summary, [tabindex='0']):focus-visible,
+.MuiButtonBase-root.Mui-focusVisible {
+  outline: 2px solid var(--mui-palette-primary-main);
+  outline-offset: 2px;
+}
+
+:where(a) {
+  color: var(--mui-palette-primary-main);
+}
+
+[hidden] {
+  display: none !important;
+}
+
 .app-shell {
   display: grid;
   grid-template-columns: minmax(13rem, 16rem) minmax(0, 1fr);
@@ -7,18 +32,108 @@
 .sidebar {
   position: sticky;
   top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
   height: 100dvh;
-  overflow-y: auto;
+  overflow: auto;
 }
 
-.content,
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: inherit;
+  text-decoration: none;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.brand-mark {
+  display: inline-flex;
+  color: var(--mui-palette-primary-main);
+}
+
+.brand-mark .icon {
+  width: 2rem;
+  height: 2rem;
+}
+
+.nav-group + .nav-group {
+  margin-top: 1rem;
+}
+
+.nav-label {
+  display: block;
+  padding: 0.25rem 1rem;
+  color: var(--mui-palette-text-secondary);
+  font-size: 0.875rem;
+}
+
+.nav-item {
+  gap: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.nav-count {
+  margin-inline-start: auto;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+}
+
+.server-health {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: none;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-dot.online {
+  color: var(--mui-palette-success-main);
+}
+
+.status-dot.offline {
+  color: var(--mui-palette-error-main);
+}
+
+.sidebar-account {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-details > * {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.user-details span,
+.muted,
+.field-help,
+.loading-message {
+  color: var(--mui-palette-text-secondary);
+}
+
+.sidebar .mobile-menu-toggle {
+  display: none;
+}
+
 .main-content {
   min-width: 0;
-}
-
-.main-content {
-  min-height: 100%;
-  padding: clamp(1.5rem, 4vw, 3.5rem) var(--gutter);
+  padding: clamp(1rem, 4vw, 3rem);
 }
 
 .main-content > section {
@@ -26,46 +141,82 @@
   margin-inline: auto;
 }
 
-.app-shell.is-theater {
-  display: block;
-  height: 100dvh;
-  overflow: hidden;
+.page-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.is-theater > .sidebar {
-  display: none;
-}
-
-.is-theater .content,
-.is-theater .main-content {
-  height: 100%;
-}
-
-.is-theater .main-content {
-  padding: 0;
-}
-
-.is-theater .main-content > .player-page {
-  max-width: none;
+.page-heading p {
+  margin-bottom: 0;
 }
 
 .skip-link {
   position: fixed;
-  top: 0.75rem;
-  left: 0.75rem;
-  z-index: 50;
-  padding: 0.65rem 0.9rem;
-  background: var(--surface);
-  border-radius: var(--borderRadiusMedium);
-  transform: translateY(-180%);
+  z-index: 10;
+  inset: 0.5rem auto auto 0.5rem;
+  transform: translateY(-200%);
+  background: var(--mui-palette-background-paper);
+  padding: 0.5rem;
 }
 
 .skip-link:focus {
   transform: none;
 }
 
-@media (max-width: 64rem) {
+.loading-message,
+.form-error {
+  margin-block: 1rem;
+}
+
+@media (max-width: 45rem), (max-width: 62.5rem) and (max-height: 31.25rem) and (pointer: coarse) {
   .app-shell {
-    grid-template-columns: 13rem minmax(0, 1fr);
+    display: block;
+  }
+
+  .sidebar {
+    z-index: 5;
+    display: grid;
+    align-items: center;
+    grid-template-columns: minmax(0, 1fr) auto;
+    height: auto;
+    max-height: 68dvh;
+  }
+
+  .sidebar .mobile-menu-toggle {
+    display: inline-flex;
+  }
+
+  .sidebar nav,
+  .sidebar .sidebar-account,
+  .sidebar-bottom {
+    display: none;
+  }
+
+  .sidebar.menu-open nav,
+  .sidebar.menu-open .sidebar-account {
+    display: grid;
+    grid-column: 1 / -1;
+  }
+
+  .nav-group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nav-label {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
   }
 }

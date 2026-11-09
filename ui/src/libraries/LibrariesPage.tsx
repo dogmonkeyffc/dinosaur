@@ -1,4 +1,5 @@
-import { Button, Card, Input, useRestoreFocusTarget } from '@fluentui/react-components';
+import { FormInput } from '../components/FormInput';
+import { Button, Card, IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
@@ -14,7 +15,6 @@ export function LibrariesPage() {
   const { libraries, loading, error, scan, reload } = useLibraries();
   const admin = user?.role === 'admin';
   const action = useAction();
-  const restoreFocus = useRestoreFocusTarget();
   const [filter, setFilter] = useState('all');
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<Library | null | undefined>();
@@ -29,9 +29,8 @@ export function LibrariesPage() {
       <Heading title="媒体库" description="管理扫描目录，并查看每个媒体库的可用状态。">
         {admin && (
           <Button
-            appearance="primary"
-            className="button primary"
-            {...restoreFocus}
+            variant="contained"
+
             onClick={() => setEditing(null)}
           >
             <Icon name="plus" />
@@ -40,29 +39,24 @@ export function LibrariesPage() {
         )}
       </Heading>
       <div className="list-toolbar">
-        <div className="filter-tabs" role="group" aria-label="媒体类型">
-          {[
-            ['all', '全部'],
-            ['movie', '电影'],
-            ['tv', '电视剧'],
-          ].map(([value, label]) => (
-            <Button
-              appearance="subtle"
-              key={value}
-              className={`filter-tab${filter === value ? ' active' : ''}`}
-              aria-pressed={filter === value}
-              onClick={() => setFilter(value)}
-            >
-              {label}
-              {value === 'all' && <span>{libraries.length}</span>}
-            </Button>
-          ))}
-        </div>
+        <ToggleButtonGroup
+          value={filter}
+          exclusive
+          size="small"
+          aria-label="媒体类型"
+          onChange={(_, value) => {
+            if (value) setFilter(value);
+          }}
+        >
+          <ToggleButton value="all">全部 {libraries.length}</ToggleButton>
+          <ToggleButton value="movie">电影</ToggleButton>
+          <ToggleButton value="tv">电视剧</ToggleButton>
+        </ToggleButtonGroup>
         <label className="search-field">
-          <Input
+          <FormInput
             className="form-control"
             type="search"
-            contentBefore={<Icon name="search" />}
+            startAdornment={<Icon name="search" />}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="搜索媒体库"
@@ -72,7 +66,7 @@ export function LibrariesPage() {
       </div>
       <ErrorMessage error={error || action.error} />
       {error && (
-        <Button appearance="subtle" className="text-button" onClick={reload}>
+        <Button variant="text" className="text-button" onClick={reload}>
           重新读取
         </Button>
       )}
@@ -101,26 +95,22 @@ export function LibrariesPage() {
                 </span>
                 {admin && (
                   <div className="card-actions">
-                    <Button
-                      appearance="subtle"
-                      className="icon-button"
+                    <IconButton
                       disabled={scanning}
-                      {...restoreFocus}
+
                       onClick={() => setEditing(item)}
                       aria-label={`编辑 ${item.name}`}
                     >
                       <Icon name="edit" />
-                    </Button>
-                    <Button
-                      appearance="subtle"
-                      className="icon-button"
+                    </IconButton>
+                    <IconButton
                       disabled={scanning}
-                      {...restoreFocus}
+
                       onClick={() => setDeleting(item)}
                       aria-label={`移除 ${item.name}`}
                     >
                       <Icon name="trash" />
-                    </Button>
+                    </IconButton>
                   </div>
                 )}
               </div>
@@ -133,7 +123,7 @@ export function LibrariesPage() {
                 </Link>
                 {admin && (
                   <Button
-                    appearance="subtle"
+                    variant="text"
                     className="text-button"
                     disabled={scanning || action.busy}
                     onClick={() => action.run(() => scan([item]))}
@@ -151,7 +141,7 @@ export function LibrariesPage() {
         <div className="empty-state">
           <h2>{libraries.length ? '没有找到匹配的媒体库' : '暂无媒体库'}</h2>
           {admin && !libraries.length && (
-            <Button className="button secondary" {...restoreFocus} onClick={() => setEditing(null)}>
+            <Button variant="outlined" onClick={() => setEditing(null)}>
               添加媒体库
             </Button>
           )}

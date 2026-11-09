@@ -1,0 +1,215 @@
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
+  gap: 1rem;
+}
+
+.movie-card,
+.movie-card > span {
+  display: block;
+  min-width: 0;
+}
+
+.movie-card {
+  color: inherit;
+  text-decoration: none;
+}
+
+.movie-artwork,
+.detail-poster-frame {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  background: var(--mui-palette-action-hover);
+}
+
+.movie-poster,
+.detail-poster,
+.movie-placeholder,
+.detail-poster-placeholder {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.movie-poster,
+.detail-poster,
+.resume-poster {
+  object-fit: cover;
+}
+
+.movie-placeholder,
+.detail-poster-placeholder {
+  display: grid;
+  place-items: center;
+}
+
+.movie-quality,
+.movie-watched,
+.movie-metadata-badge {
+  position: absolute;
+  margin: 0.4rem;
+}
+
+.movie-quality {
+  top: 0;
+  right: 0;
+}
+.movie-watched {
+  top: 0;
+  left: 0;
+}
+.movie-metadata-badge {
+  bottom: 0.4rem;
+  left: 0;
+}
+
+.movie-artwork .movie-watch-progress {
+  position: absolute;
+  inset: auto 0 0;
+  width: 100%;
+}
+
+.movie-title,
+.movie-meta {
+  padding-inline: 0.65rem;
+  overflow-wrap: anywhere;
+}
+
+.movie-title {
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+.movie-meta {
+  color: var(--mui-palette-text-secondary);
+  font-size: 0.875rem;
+}
+
+.movie-card > :last-child {
+  margin-bottom: 0.65rem;
+}
+
+.resume-reel,
+.detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 12rem);
+  align-items: center;
+  gap: 1.5rem;
+  padding: clamp(1rem, 4vw, 2rem);
+}
+
+.resume-reel {
+  margin-bottom: 1.5rem;
+}
+
+.resume-copy,
+.detail-copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.resume-copy .MuiLinearProgress-root {
+  display: block;
+  width: min(100%, 20rem);
+  margin-bottom: 1rem;
+}
+
+.resume-poster {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+}
+
+.shelf-heading,
+.detail-page-header,
+.movie-play-actions,
+.movie-pagination {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-block: 1rem;
+}
+
+.shelf-heading {
+  justify-content: space-between;
+}
+
+.shelf-heading h2 {
+  margin: 0;
+}
+
+.home-shelf + .home-shelf,
+.series-seasons,
+.series-folders,
+.movie-technical,
+.movie-matching,
+.series-matching {
+  margin-top: 1.5rem;
+}
+
+.movie-pagination {
+  justify-content: center;
+}
+
+.detail-layout {
+  align-items: start;
+  grid-template-columns: minmax(0, 13rem) minmax(0, 1fr);
+}
+
+.detail-back .icon {
+  transform: rotate(180deg);
+}
+
+.movie-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 7rem), 1fr));
+  gap: 0.75rem;
+}
+
+.movie-facts dd,
+.disk-capacity dd {
+  margin: 0;
+}
+
+.movie-overview {
+  white-space: pre-line;
+}
+
+.series-episodes {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.series-episode {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.series-episode-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 0.5rem;
+}
+
+@media (max-width: 38rem) {
+  .movie-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .detail-layout,
+  .resume-reel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .detail-artwork,
+  .resume-poster {
+    width: min(9rem, 100%);
+  }
+}

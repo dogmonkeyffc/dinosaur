@@ -1,4 +1,4 @@
-import { Button } from '@fluentui/react-components';
+import { Button, LinearProgress, Paper } from '@mui/material';
 import { useEffect } from 'react';
 import { useAuth } from '../auth/AuthProvider';
 import { ButtonLink } from '../components/ButtonLink';
@@ -8,7 +8,6 @@ import { useResource } from '../lib/hooks';
 import type { Movie, Page, Series } from '../lib/types';
 import { useLibraries } from '../libraries/LibraryProvider';
 import { MediaCard, Poster } from './MediaCard';
-import './home.css';
 
 function Shelf({ title, path, items }: { title: string; path: string; items: (Movie | Series)[] }) {
   if (!items.length) return null;
@@ -60,7 +59,7 @@ export function HomePage() {
       )}
       {loading && !hasMedia && <Loading />}
       {featured && (
-        <section className="resume-reel" aria-label="继续观看电影">
+        <Paper component="section" className="resume-reel" aria-label="继续观看电影">
           <div className="resume-copy">
             <span className="resume-label">
               <Icon name="film" /> 继续观看电影
@@ -71,18 +70,18 @@ export function HomePage() {
               {featured.duration > 0 ? ` / ${clock(featured.duration)}` : ''}
             </p>
             {featured.duration > 0 && (
-              <progress value={featured.position} max={featured.duration} aria-label="观看进度" />
+              <LinearProgress
+                variant="determinate"
+                value={Math.min(100, (100 * featured.position) / featured.duration)}
+                aria-label="观看进度"
+              />
             )}
-            <ButtonLink
-              to={`/watch/${featured.id}`}
-              state={{ kind: 'movie', from: '/' }}
-              appearance="primary"
-            >
+            <ButtonLink to={`/watch/${featured.id}`} state={{ kind: 'movie', from: '/' }} variant="contained">
               继续播放
             </ButtonLink>
           </div>
           <Poster url={featured.poster_url} title={featured.title} className="resume-poster" />
-        </section>
+        </Paper>
       )}
       <Shelf title="电影" path="/movies" items={movies.data?.items || []} />
       <Shelf title="剧集" path="/series" items={series.data?.items || []} />
@@ -96,7 +95,7 @@ export function HomePage() {
               : '添加一个媒体库后，就可以浏览其中的影片。'}
           </p>
           {user?.role === 'admin' && (
-            <ButtonLink to="/settings" appearance="primary">
+            <ButtonLink to="/settings" variant="contained">
               打开媒体库设置
             </ButtonLink>
           )}

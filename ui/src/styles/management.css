@@ -1,0 +1,176 @@
+form,
+form > label {
+  display: grid;
+  gap: 1rem;
+}
+
+label {
+  min-width: 0;
+}
+
+form > label {
+  gap: 0.375rem;
+}
+
+form fieldset:not(.MuiOutlinedInput-notchedOutline) {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.metadata-card fieldset:not(.MuiOutlinedInput-notchedOutline) {
+  display: grid;
+  gap: 1rem;
+}
+
+.metadata-card fieldset > label {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.field-label,
+.list-toolbar,
+.movie-toolbar,
+.modal-actions,
+.metadata-actions,
+.metadata-source-order,
+.card-top,
+.card-bottom,
+.card-status,
+.card-actions,
+.library-browse-row,
+.device-card-heading,
+.disk-section-heading,
+.disk-heading,
+.disk-capacity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.list-toolbar,
+.movie-toolbar {
+  margin-bottom: 1rem;
+}
+
+.search-field {
+  width: min(100%, 23rem);
+}
+
+.modal-actions {
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+}
+
+.library-grid,
+.disk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: 1rem;
+}
+
+.library-card,
+.disk-card,
+.account-card,
+.metadata-card,
+.empty-state {
+  padding: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.account-card,
+.metadata-card {
+  max-width: 50rem;
+  margin-bottom: 1rem;
+}
+
+.card-top,
+.card-bottom,
+.library-browse-row,
+.device-card-heading,
+.disk-section-heading,
+.disk-heading,
+.disk-capacity {
+  justify-content: space-between;
+}
+
+.card-path,
+.path-input input {
+  font-family: ui-monospace, monospace;
+}
+
+.card-path,
+.scan-summary,
+.type-tag,
+.card-status,
+.scrape-row-note {
+  color: var(--mui-palette-text-secondary);
+}
+
+.card-status.unavailable {
+  color: var(--mui-palette-error-main);
+}
+
+.empty-state {
+  text-align: center;
+  margin-block: 1rem;
+}
+
+.mobile-login-qr {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  margin-block: 1rem;
+}
+
+.mobile-login-qr svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.device-list {
+  list-style: none;
+  padding: 0;
+}
+
+.device-list li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-block: 0.75rem;
+  border-bottom: 1px solid var(--mui-palette-divider);
+}
+
+.device-list li div {
+  display: grid;
+  min-width: 0;
+}
+
+.agent-key-options,
+.scrape-admin-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 1rem;
+  margin-block: 1rem;
+}
+
+.agent-key-options label {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.agent-key-created,
+.metadata-candidate {
+  margin-block: 1rem;
+}
+
+.disk-progress {
+  width: 100%;
+}
+
+.tmdb-attribution img {
+  width: 4rem;
+}

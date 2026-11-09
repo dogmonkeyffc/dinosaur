@@ -12,7 +12,10 @@
     "node": "^20.19.0 || >=22.12.0"
   },
   "dependencies": {
-    "@fluentui/react-components": "9.75.1",
+    "@emotion/cache": "11.14.0",
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.1",
+    "@mui/material": "9.5.0",
     "qrcode.react": "4.2.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",

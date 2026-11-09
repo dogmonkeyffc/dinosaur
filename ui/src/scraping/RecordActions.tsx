@@ -1,4 +1,4 @@
-import { Button } from '@fluentui/react-components';
+import { Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAction, useResource } from '../lib/hooks';
@@ -23,7 +23,7 @@ export function RecordActions({ item, reload }: { item: ScrapeRecord; reload: ()
       </Link>
       {!managed && (
         <Button
-          appearance="subtle"
+          variant="text"
           className="text-button"
           disabled={action.busy}
           onClick={() =>
@@ -64,7 +64,7 @@ export function RecordCandidates({ item, reload }: { item: ScrapeRecord; reload:
       {match.notice && <p role="status">{match.notice}</p>}
       <CandidateList candidates={candidates} disabled={match.busy} select={match.select} />
       {resource.error && (
-        <Button appearance="subtle" className="text-button" onClick={resource.reload}>
+        <Button variant="text" className="text-button" onClick={resource.reload}>
           重新加载候选
         </Button>
       )}

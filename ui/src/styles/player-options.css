@@ -38,7 +38,7 @@
 #player-art .art-selector-item:focus-visible {
   outline: 2px solid #b9d7ff;
   outline-offset: -3px;
-  border-radius: 4px;
+  border-radius: var(--borderRadiusMedium);
 }
 #player-art .art-control-selector .art-selector-list {
   opacity: 0;
@@ -47,6 +47,7 @@
   align-items: stretch;
   bottom: calc(var(--art-control-height) + 8px);
   background: #172536f5;
+  border-radius: var(--borderRadiusMedium);
   box-shadow: 0 8px 24px #0008;
   overflow-x: hidden;
 }

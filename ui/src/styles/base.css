@@ -83,7 +83,7 @@ button:disabled {
   place-items: center;
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 0.75rem;
+  border-radius: var(--borderRadiusMedium);
   background: var(--colorBrandBackground);
   color: white;
 }

@@ -40,7 +40,7 @@
 .filter-tabs .filter-tab {
   min-width: 0;
   min-height: 2.5rem;
-  border-radius: 0.6rem;
+  border-radius: var(--borderRadiusMedium);
   padding-inline: 0.75rem;
 }
 

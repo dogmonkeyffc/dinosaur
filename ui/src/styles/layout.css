@@ -56,7 +56,7 @@
   z-index: 50;
   padding: 0.65rem 0.9rem;
   background: var(--surface);
-  border-radius: 0.5rem;
+  border-radius: var(--borderRadiusMedium);
   transform: translateY(-180%);
 }
 

@@ -7,7 +7,7 @@
   min-height: 18rem;
   padding: clamp(1.5rem, 5vw, 3rem);
   margin-block: 0 2.5rem;
-  border-radius: 1.25rem;
+  border-radius: var(--borderRadiusMedium);
   overflow: hidden;
   isolation: isolate;
   background: #172536;
@@ -76,7 +76,7 @@
   width: min(100%, 12rem);
   aspect-ratio: 2 / 3;
   object-fit: cover;
-  border-radius: 0.65rem;
+  border-radius: var(--borderRadiusMedium);
 }
 
 .shelf-heading {

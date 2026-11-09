@@ -61,7 +61,7 @@
   right: 10px;
   bottom: 0.65rem;
   padding: 4px 7px;
-  border-radius: 5px;
+  border-radius: var(--borderRadiusMedium);
   background: #172536;
   color: #f2f6fc;
   font-size: 0.875rem;
@@ -90,7 +90,7 @@
   padding: 16px;
   background: var(--surface-raised);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--borderRadiusMedium);
 }
 .candidate-preview h3 {
   margin: 0 0 10px;

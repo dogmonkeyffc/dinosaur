@@ -17,7 +17,7 @@
   min-width: 0;
   padding: 12px 14px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--borderRadiusMedium);
   background: var(--surface);
   font-size: 0.875rem;
 }
@@ -45,7 +45,7 @@
   padding: 20px;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--borderRadiusMedium);
 }
 .series-episode > div:first-child {
   min-width: 0;

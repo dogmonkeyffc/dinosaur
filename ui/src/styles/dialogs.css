@@ -2,7 +2,7 @@
   padding: 29px;
   background: var(--colorNeutralBackground1);
   border: 1px solid var(--colorNeutralStroke2);
-  border-radius: 10px;
+  border-radius: var(--borderRadiusMedium);
   max-width: 590px;
   margin-bottom: 55px;
 }
@@ -10,7 +10,6 @@
 .device-card {
   width: 100%;
   max-width: 52rem;
-  border-radius: 0.9rem;
 }
 
 .account-card form {

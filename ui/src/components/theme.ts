@@ -19,13 +19,18 @@ const brand: BrandVariants = {
   160: '#f2f7ff',
 };
 
-const typography = {
+const cornerRadius = '8px';
+const sharedTokens = {
+  borderRadiusSmall: cornerRadius,
+  borderRadiusMedium: cornerRadius,
+  borderRadiusLarge: cornerRadius,
+  borderRadiusXLarge: cornerRadius,
   fontFamilyBase: "system-ui, 'Noto Sans SC', 'Microsoft YaHei', sans-serif",
 };
 
 export const lightTheme = {
   ...createLightTheme(brand),
-  ...typography,
+  ...sharedTokens,
   colorNeutralBackground1: '#ffffff',
   colorNeutralBackground2: '#edf1f6',
   colorNeutralBackground3: '#f5f7fa',
@@ -39,7 +44,7 @@ export const lightTheme = {
 
 export const darkTheme = {
   ...createDarkTheme(brand),
-  ...typography,
+  ...sharedTokens,
   colorNeutralBackground1: '#1a2634',
   colorNeutralBackground2: '#202e3e',
   colorNeutralBackground3: '#101923',

@@ -11,7 +11,7 @@
   margin-top: 24px;
   padding: 16px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--borderRadiusMedium);
   background: var(--bg);
 }
 .agent-key-created input {

@@ -18,14 +18,14 @@
   padding: clamp(1rem, 3vw, 2.25rem);
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 1.25rem;
+  border-radius: var(--borderRadiusMedium);
 }
 
 .detail-poster-frame {
   position: relative;
   aspect-ratio: 2 / 3;
   overflow: hidden;
-  border-radius: 0.875rem;
+  border-radius: var(--borderRadiusMedium);
   background: var(--surface-raised);
   box-shadow: var(--shadow8);
 }

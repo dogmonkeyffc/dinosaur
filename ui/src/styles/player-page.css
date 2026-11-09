@@ -23,7 +23,7 @@
   left: 20px;
   right: 20px;
   padding: 12px 16px;
-  border-radius: 8px;
+  border-radius: var(--borderRadiusMedium);
   background: #172536f5;
   z-index: 30;
 }
@@ -81,7 +81,7 @@
 #player-art .player-back:hover {
   color: #b9d7ff;
   background: #ffffff12;
-  border-radius: 50%;
+  border-radius: var(--borderRadiusMedium);
 }
 @media (max-width: 720px) {
   #player-art .art-layer-navigation {

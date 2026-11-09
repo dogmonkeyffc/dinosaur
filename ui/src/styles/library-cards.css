@@ -23,7 +23,7 @@
   place-items: center;
   width: 2.75rem;
   height: 2.75rem;
-  border-radius: 0.75rem;
+  border-radius: var(--borderRadiusMedium);
   background: var(--surface-raised);
   color: var(--accent);
 }
@@ -83,7 +83,7 @@
   min-height: 16rem;
   padding: 1.5rem;
   border: 1px dashed var(--line);
-  border-radius: 1rem;
+  border-radius: var(--borderRadiusMedium);
   background: var(--surface);
   text-align: center;
 }

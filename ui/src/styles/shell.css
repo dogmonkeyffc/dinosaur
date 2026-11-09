@@ -32,7 +32,7 @@
   gap: 0.65rem;
   min-height: 2.5rem;
   padding: 0.45rem 0.65rem;
-  border-radius: 0.65rem;
+  border-radius: 0.5rem;
   overflow-wrap: anywhere;
   font-size: 0.9375rem;
 }
@@ -42,10 +42,9 @@
 }
 
 .nav-item.active {
-  box-shadow: inset 3px 0 var(--accent);
-  background: var(--surface-raised);
+  background: var(--colorBrandBackground2);
   color: var(--accent);
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .nav-item .icon {

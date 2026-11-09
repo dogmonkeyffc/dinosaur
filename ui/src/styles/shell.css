@@ -37,14 +37,8 @@
   font-size: 0.9375rem;
 }
 
-.nav-item:hover {
+.nav-item:not(.active):hover {
   background: var(--surface-raised);
-}
-
-.nav-item.active {
-  background: var(--colorBrandBackground2);
-  color: var(--accent);
-  font-weight: 600;
 }
 
 .nav-item .icon {

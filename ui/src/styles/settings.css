@@ -44,12 +44,6 @@
   padding-inline: 0.75rem;
 }
 
-.filter-tabs .filter-tab.active {
-  background: var(--surface-raised);
-  color: var(--accent);
-  box-shadow: inset 0 -2px var(--accent);
-}
-
 .filter-tab span {
   margin-inline-start: 0.35rem;
 }

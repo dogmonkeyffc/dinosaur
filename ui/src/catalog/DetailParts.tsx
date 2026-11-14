@@ -58,7 +58,7 @@ export function WatchedButton({ item, reload }: { item: Movie; reload: () => voi
 }
 export function PlayActions({ item, reload }: { item: Movie; reload: () => void }) {
   const location = useLocation();
-  const from = location.pathname;
+  const from = location.pathname + location.search;
   const backState = location.state;
   const resume = item.position > 0 && !item.watched;
   return (
@@ -122,7 +122,7 @@ export function TechnicalInfo({ item }: { item: Movie }) {
 }
 export function EpisodeCard({ item, reload }: { item: Movie; reload: () => void }) {
   const location = useLocation();
-  const from = location.pathname;
+  const from = location.pathname + location.search;
   const backState = location.state;
   const resume = item.position > 0 && !item.watched;
   return (

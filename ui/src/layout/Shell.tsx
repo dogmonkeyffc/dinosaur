@@ -40,14 +40,6 @@ export function Shell() {
   const detail = /^\/(movies|series)\/\d+$/.test(location.pathname);
   const navigationGroups = [
     {
-      label: '浏览',
-      entries: [
-        ['/', '看片室', 'film'],
-        ['/movies', '全部电影', 'film'],
-        ['/series', '全部剧集', 'tv'],
-      ],
-    },
-    {
       label: '媒体库',
       entries: libraries.map((library) => [
         libraryPath(library),

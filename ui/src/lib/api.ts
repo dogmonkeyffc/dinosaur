@@ -49,7 +49,7 @@ export async function api<T = Record<string, never>>(path: string, options: Opti
       keepalive,
       body: body === undefined ? undefined : JSON.stringify(body),
     });
-    const data = await response.json();
+    const data = response.status === 204 ? undefined : await response.json();
     if (!response.ok) {
       if (response.status === 401 && session && revision === epoch)
         window.dispatchEvent(new Event('session-expired'));

@@ -12,7 +12,7 @@ import (
 
 const seriesTitle = `COALESCE(NULLIF(json_extract(s.metadata_json,'$.title'),''),s.title)`
 const seriesVisible = ` EXISTS(SELECT 1 FROM tv_episodes e JOIN media_items m ON m.id=e.media_id WHERE e.series_id=s.id AND m.missing=0)`
-const seriesColumns = `s.id,s.library_id,l.name,s.metadata_version,s.aliases,` + seriesTitle + `,
+const seriesColumns = `s.id,s.library_id,l.name,s.metadata_version,s.aliases,COALESCE((SELECT work_id FROM work_members WHERE series_id=s.id),0),` + seriesTitle + `,
  COALESCE(NULLIF(json_extract(s.metadata_json,'$.year'),0),s.year),s.metadata_json,
  COALESCE(NULLIF(s.poster_key,''),(SELECT m.poster_key FROM tv_episodes e JOIN media_items m ON m.id=e.media_id WHERE e.series_id=s.id AND m.missing=0 AND m.poster_key<>'' ORDER BY e.season_number,e.episode_number,m.id LIMIT 1),''),
  (SELECT count(*) FROM tv_episodes e JOIN media_items m ON m.id=e.media_id WHERE e.series_id=s.id AND m.missing=0),
@@ -23,7 +23,7 @@ func scanSeries(row interface{ Scan(...any) error }) (television.Series, error) 
 	var item television.Series
 	var raw, aliases string
 	var version int64
-	err := row.Scan(&item.ID, &item.LibraryID, &item.LibraryName, &version, &aliases, &item.Title, &item.Year, &raw, &item.PosterKey, &item.EpisodeCount, &item.SeasonCount)
+	err := row.Scan(&item.ID, &item.LibraryID, &item.LibraryName, &version, &aliases, &item.WorkID, &item.Title, &item.Year, &raw, &item.PosterKey, &item.EpisodeCount, &item.SeasonCount)
 	if err != nil {
 		return item, err
 	}
@@ -42,7 +42,7 @@ func (s *Store) SeriesByID(ctx context.Context, id int64) (television.Series, er
 	return scanSeries(s.DB.QueryRowContext(ctx, `SELECT `+seriesColumns+seriesFrom+` WHERE s.id=? AND `+seriesVisible, id))
 }
 
-func (s *Store) SeriesPage(ctx context.Context, filter media.Filter, userID int64) (television.Page, error) {
+func (s *Store) RawSeriesPage(ctx context.Context, filter media.Filter, userID int64) (television.Page, error) {
 	page := television.Page{Items: []television.Series{}, Page: filter.Page, PageSize: filter.PageSize}
 	where := ` WHERE ` + seriesVisible
 	args := []any{}

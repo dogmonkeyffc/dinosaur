@@ -9,6 +9,7 @@ import { LibraryProvider } from './libraries/LibraryProvider';
 import { LibrariesPage } from './libraries/LibrariesPage';
 import { HomePage } from './catalog/HomePage';
 import { CatalogPage } from './catalog/CatalogPage';
+import { WorkPage } from './catalog/WorkPage';
 import { MovieDetailPage, SeriesDetailPage } from './catalog/DetailPages';
 
 const AccountPage = lazy(() =>
@@ -76,6 +77,7 @@ export function App() {
           <Route path="/series" element={<CatalogPage key="tv" kind="tv" />} />
           <Route path="/movies/:id" element={<MovieDetailPage />} />
           <Route path="/series/:id" element={<SeriesDetailPage />} />
+          <Route path="/works/:id" element={<WorkPage />} />
           <Route path="/watch/:id" element={<PlayerPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

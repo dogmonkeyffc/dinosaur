@@ -1,0 +1,33 @@
+.work-editor-fields {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.work-editor-fields label {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.work-candidates {
+  padding: 0;
+  list-style: none;
+}
+
+.work-candidates li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-block: 0.5rem;
+  border-bottom: 1px solid var(--mui-palette-divider);
+}
+
+.work-candidates li > span {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}

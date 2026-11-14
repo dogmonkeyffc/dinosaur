@@ -19,20 +19,24 @@ export function Poster({ url, title, className }: { url?: string; title: string;
   ) : null;
 }
 
-export function MediaCard({ item }: { item: Movie | Series }) {
+export function MediaCard({ item, from }: { item: Movie | Series; from?: string }) {
   const location = useLocation();
   const movie = 'duration' in item ? item : null;
   const series = 'episode_count' in item ? item : null;
   const title = movie?.series_id ? `${movie.series_title} · ${movie.title}` : item.title;
   const status = item.metadata?.status;
   const badge = status === 'needs_review' ? '待确认匹配' : status === 'failed' ? '刮削失败' : '';
-  const path = `/${series ? 'series' : 'movies'}/${item.id}`;
+  const path = series?.work_id ? `/works/${series.work_id}` : `/${series ? 'series' : 'movies'}/${item.id}`;
   return (
     <Card variant="outlined">
       <CardActionArea
         component={Link}
         to={path}
-        state={{ kind: movie?.type || (series ? 'tv' : 'movie'), from: location.pathname + location.search }}
+        state={{
+          kind: movie?.type || (series ? 'tv' : 'movie'),
+          from: from || location.pathname + location.search,
+          backState: location.state,
+        }}
         className="movie-card"
         aria-label={`查看 ${title}`}
       >
@@ -75,7 +79,7 @@ export function MediaCard({ item }: { item: Movie | Series }) {
         <span className="movie-meta">
           {item.year ? `${item.year} · ` : ''}
           {series
-            ? `${series.season_count} 季 · ${series.episode_count} 个文件`
+            ? `${series.work_id ? `${series.member_count} 个篇章 · ` : ''}${series.season_count} 季 · ${series.episode_count} 个文件`
             : duration(movie?.duration || 0)}
         </span>
         {series && (

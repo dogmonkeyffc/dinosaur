@@ -16,7 +16,11 @@ export function DetailHeader({ series = false }: { series?: boolean }) {
       <IconButton
         className="detail-back"
         aria-label="返回上一页"
-        onClick={() => navigate(location.state?.from || (series ? '/series' : '/movies'))}
+        onClick={() =>
+          navigate(location.state?.from || (series ? '/series' : '/movies'), {
+            state: location.state?.backState,
+          })
+        }
       >
         <Icon name="arrow" />
       </IconButton>

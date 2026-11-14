@@ -10,6 +10,7 @@ import (
 )
 
 func (s *Server) mountTelevision(mux *http.ServeMux) {
+	s.mountWorks(mux)
 	mux.Handle("GET /api/series", s.require(false, http.HandlerFunc(s.listSeries)))
 	mux.Handle("GET /api/series/{id}", s.require(false, http.HandlerFunc(s.seriesDetail)))
 	mux.Handle("GET /api/series/{id}/poster", s.require(false, http.HandlerFunc(s.seriesPoster)))
@@ -26,7 +27,13 @@ func (s *Server) listSeries(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	page, err := s.store.SeriesPage(r.Context(), filter, current(r).user.ID)
+	var page television.Page
+	var err error
+	if r.URL.Query().Get("raw") == "1" {
+		page, err = s.store.RawSeriesPage(r.Context(), filter, current(r).user.ID)
+	} else {
+		page, err = s.store.SeriesPage(r.Context(), filter, current(r).user.ID)
+	}
 	if err != nil {
 		s.internal(w, r, err)
 		return
@@ -66,6 +73,14 @@ func (s *Server) seriesDetail(w http.ResponseWriter, r *http.Request) {
 		season.Episodes = append(season.Episodes, episodes[i])
 	}
 	result.Resume = television.ResumeEpisode(episodes)
+	if item.WorkID != 0 {
+		detail, err := s.store.WorkByID(r.Context(), item.WorkID, current(r).user.ID)
+		if s.workError(w, r, err) {
+			return
+		}
+		setWorkPosters(&detail)
+		result.Work = &detail.Work
+	}
 	writeJSON(w, 200, result)
 }
 

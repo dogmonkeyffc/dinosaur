@@ -1,4 +1,8 @@
 export const errorMessages: Record<string, string> = {
+  invalid_work: '请填写作品名称并选择篇章。',
+  series_not_found: '部分篇章已不存在，请刷新后重新选择。',
+  cross_library: '同一作品的篇章必须来自同一个媒体库。',
+  work_conflict: '所选篇章已属于其他作品，请先从原作品移出。',
   pairing_expired: '二维码或配对码已过期、已使用，请重新生成。',
   invalid_pairing: '配对信息无效。',
   pairing_conflict: '设备已完成授权，请重新生成配对码。',

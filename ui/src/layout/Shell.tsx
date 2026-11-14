@@ -37,7 +37,7 @@ export function Shell() {
   const action = useAction();
   const health = useResource<{ status: string }>('/health/ready', 30000);
   const playing = location.pathname.startsWith('/watch/');
-  const detail = /^\/(movies|series)\/\d+$/.test(location.pathname);
+  const detail = /^\/(movies|series|works)\/\d+$/.test(location.pathname);
   const navigationGroups = [
     {
       label: '媒体库',

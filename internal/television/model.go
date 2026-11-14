@@ -18,6 +18,8 @@ type EpisodeName struct {
 }
 
 type Series struct {
+	WorkID       int64           `json:"work_id,omitempty"`
+	MemberCount  int             `json:"member_count,omitempty"`
 	ID           int64           `json:"id"`
 	LibraryID    int64           `json:"library_id"`
 	LibraryName  string          `json:"library_name"`
@@ -37,6 +39,7 @@ type Season struct {
 }
 
 type Detail struct {
+	Work    *Work       `json:"work,omitempty"`
 	Series  Series      `json:"series"`
 	Folders []string    `json:"folders"`
 	Seasons []Season    `json:"seasons"`

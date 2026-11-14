@@ -104,6 +104,7 @@ export function SeriesDetailPage() {
               info={item.metadata}
               reload={reload}
             />
+            {data.work && <ButtonLink to={`/works/${data.work.id}`}>返回作品 · {data.work.title}</ButtonLink>}
             <SeriesSeasons data={data} reload={reload} />
           </article>
         </Paper>

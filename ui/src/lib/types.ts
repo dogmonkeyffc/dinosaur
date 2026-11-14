@@ -75,7 +75,24 @@ export interface Movie {
   series_title?: string;
   season_number?: number;
 }
+export interface Work {
+  id: number;
+  title: string;
+  library_id: number;
+  poster_url?: string;
+  episode_count: number;
+  season_count: number;
+  watched_count: number;
+  member_count: number;
+}
+export interface WorkDetail {
+  work: Work;
+  members: Series[];
+  all_members?: Series[];
+}
 export interface Series {
+  work_id?: number;
+  member_count?: number;
   id: number;
   title: string;
   year: number;
@@ -88,6 +105,7 @@ export interface Series {
   poster_url?: string;
 }
 export interface SeriesDetail {
+  work?: Work;
   series: Series;
   folders: string[];
   seasons: { number: number; episodes: Movie[] }[];

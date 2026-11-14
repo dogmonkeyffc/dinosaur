@@ -9,6 +9,7 @@ import { activeJob } from '../lib/format';
 import type { MediaKind, Movie, Page, Series } from '../lib/types';
 import { useJobs } from '../metadata/useJobs';
 import { MediaCard } from './MediaCard';
+import { CreateWork } from './CreateWork';
 
 export function CatalogPage({ kind }: { kind: MediaKind }) {
   const tv = kind === 'tv';
@@ -48,6 +49,7 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
   return (
     <section id={tv ? 'series-section' : 'movies-section'} aria-label={title}>
       <Heading title={title} />
+      {tv && <CreateWork libraryID={Number(library)} />}
       <div className="movie-toolbar">
         <label className="search-field">
           <FormInput

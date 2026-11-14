@@ -46,7 +46,11 @@
   pointer-events: none;
   align-items: stretch;
   bottom: calc(var(--art-control-height) + 8px);
-  background: var(--mui-palette-background-paper);
+  background: #18212b;
+  color: #f2f6fc;
+  text-shadow: none;
+  color-scheme: dark;
+  border: 1px solid #ffffff38;
   border-radius: var(--mui-shape-borderRadius);
   box-shadow: 0 8px 24px #0008;
   overflow-x: hidden;
@@ -63,6 +67,16 @@
   line-height: 1.5;
   white-space: normal;
   text-align: left;
+}
+#player-art .art-selector-list .art-selector-item:hover,
+#player-art .art-selector-list .art-selector-item:focus-visible {
+  background: #ffffff1a;
+  color: #f2f6fc;
+}
+#player-art .art-selector-list .art-selector-item.art-current {
+  background: #b9d7ff24;
+  color: #b9d7ff;
+  font-weight: 600;
 }
 @media (max-width: 720px) {
   #player-art .art-controls .art-control:not(.art-control-time) {

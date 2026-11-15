@@ -53,6 +53,10 @@ func (s Service) Redeem(ctx context.Context, kind, secret, name string) (Session
 	if len(secret) != 43 || kind != "mobile" && kind != "tv" || kind == "mobile" && !ValidName(name) {
 		return Session{}, ErrInvalid
 	}
+	return s.redeem(ctx, kind, secret, name)
+}
+
+func (s Service) redeem(ctx context.Context, kind, secret, name string) (Session, error) {
 	token, err := auth.NewToken()
 	if err != nil {
 		return Session{}, err

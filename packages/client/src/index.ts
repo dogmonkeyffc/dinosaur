@@ -24,6 +24,9 @@ export class Client extends Transport {
   me() {
     return this.request<{ user: User }>('/api/auth/me');
   }
+  exchangeLoginCode(code: string, name: string) {
+    return this.request<DeviceSession>('/api/devices/login-code/exchange', 'POST', { code, name });
+  }
   exchange(ticket: string, name: string) {
     return this.request<DeviceSession>('/api/devices/qr/exchange', 'POST', { ticket, name });
   }

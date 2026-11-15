@@ -6,6 +6,7 @@ export function Accounts({
   accounts,
   select,
   scan,
+  codeLogin,
   logout,
   busy,
   close,
@@ -13,6 +14,7 @@ export function Accounts({
   accounts: Account[];
   select: (account: Account) => void;
   scan: () => void;
+  codeLogin: () => void;
   logout: (account: Account) => void;
   busy: boolean;
   close?: () => void;
@@ -35,7 +37,8 @@ export function Accounts({
           </View>
         </View>
       ))}
-      <Button primary onPress={scan}>
+      <Button primary onPress={codeLogin}>配对码登录</Button>
+      <Button onPress={scan}>
         扫描 Web 登录二维码
       </Button>
     </Screen>

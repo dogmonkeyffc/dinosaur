@@ -11,7 +11,9 @@ import (
 
 func (s *Server) mountDevices(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/server", s.serverInfo)
-	mux.Handle("POST /api/devices/qr", s.require(false, http.HandlerFunc(s.createMobileQR)))
+	mux.Handle("POST /api/devices/login-code", s.require(false, browserOnly(s.createLoginCode)))
+	mux.HandleFunc("POST /api/devices/login-code/exchange", s.exchangeLoginCode)
+	mux.Handle("POST /api/devices/qr", s.require(false, browserOnly(s.createMobileQR)))
 	mux.HandleFunc("POST /api/devices/qr/exchange", s.exchangeMobileQR)
 	mux.HandleFunc("POST /api/devices/pairings", s.createTVPairing)
 	mux.HandleFunc("POST /api/devices/pairings/poll", s.pollTVPairing)

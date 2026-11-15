@@ -9,6 +9,6 @@ func (s *Server) serverInfo(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, 200, map[string]any{
 		"id": s.serverID, "name": name, "api_version": 1,
-		"capabilities": []string{"mobile_qr_login", "tv_pairing", "device_sessions"},
+		"capabilities": []string{"mobile_qr_login", "mobile_code_login", "tv_pairing", "device_sessions"},
 	})
 }

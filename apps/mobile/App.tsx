@@ -5,10 +5,11 @@ import type { Account } from '@dinosaur/contracts';
 import { Busy, ErrorText, loadAccounts, removeAccount, styles, useTask } from '@dinosaur/native-kit';
 import { Scanner } from './src/auth/Scanner';
 import { Accounts } from './src/auth/Accounts';
+import { CodeLogin } from './src/auth/CodeLogin';
 import { PairTV } from './src/pairing/PairTV';
 import { Home } from './src/catalog/Home';
 
-type Route = 'accounts' | 'scan' | 'home' | 'pair';
+type Route = 'accounts' | 'scan' | 'code' | 'home' | 'pair';
 export default function App() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [active, setActive] = useState('');
@@ -105,6 +106,17 @@ export default function App() {
         }}
       />
     );
+  if (route === 'code')
+    return (
+      <CodeLogin
+        close={() => setRoute(account ? 'home' : 'accounts')}
+        onLogin={(item) => {
+          setAccounts((items) => [item, ...items.filter((old) => old.key !== item.key)]);
+          setActive(item.key);
+          setRoute('home');
+        }}
+      />
+    );
   if (route === 'pair' && account)
     return (
       <PairTV
@@ -129,6 +141,7 @@ export default function App() {
         accounts={accounts}
         select={choose}
         scan={scan}
+        codeLogin={() => setRoute('code')}
         logout={(item) => task.run(() => logout(item))}
         busy={task.busy}
         close={account ? () => setRoute('home') : undefined}

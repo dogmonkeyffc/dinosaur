@@ -20,14 +20,7 @@ func (s *Server) createMobileQR(w http.ResponseWriter, r *http.Request) {
 	if s.deviceError(w, r, err) {
 		return
 	}
-	origin := s.config.PublicURL
-	if origin == "" {
-		scheme := "http"
-		if s.config.CookieSecure || r.TLS != nil {
-			scheme = "https"
-		}
-		origin = scheme + "://" + r.Host
-	}
+	origin := s.deviceOrigin(r)
 	query := url.Values{"server": {origin}, "ticket": {secret}}
 	writeJSON(w, 201, map[string]any{"qr_payload": "dinosaur://login?" + query.Encode(), "expires_at": grant.ExpiresAt, "user": who.user})
 }

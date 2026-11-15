@@ -21,7 +21,24 @@ func (s *Store) CreateGrant(ctx context.Context, grant deviceauth.Grant) error {
 	if _, err := tx.ExecContext(ctx, `DELETE FROM device_grants WHERE expires_at<=?`, now); err != nil {
 		return err
 	}
+	// Check before replacing the owner's ticket: a repeated random code must
+	// retry rather than silently keeping the previous credential redeemable.
+	var collision int
+	if err := tx.QueryRowContext(ctx, `SELECT count(*) FROM device_grants WHERE secret_hash=?`, grant.SecretHash).Scan(&collision); err != nil {
+		return err
+	}
+	if collision != 0 {
+		return deviceauth.ErrConflict
+	}
 	if grant.Kind == "mobile" {
+		var valid int
+		err := tx.QueryRowContext(ctx, `SELECT 1 FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.kind='browser' AND s.expires_at>? AND u.disabled=0`, grant.OwnerHash, now).Scan(&valid)
+		if errors.Is(err, sql.ErrNoRows) {
+			return deviceauth.ErrExpired
+		}
+		if err != nil {
+			return err
+		}
 		if _, err := tx.ExecContext(ctx, `DELETE FROM device_grants WHERE kind='mobile' AND owner_hash=?`, grant.OwnerHash); err != nil {
 			return err
 		}
@@ -97,7 +114,7 @@ func (s *Store) RedeemGrant(ctx context.Context, kind, secret string, session de
 	if !owner.Valid {
 		return auth.User{}, deviceauth.ErrPending
 	}
-	user, err := scanUser(tx.QueryRowContext(ctx, `SELECT u.id,u.username,u.password_hash,u.role,u.disabled,u.created_at FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>? AND u.disabled=0`, owner.String, now))
+	user, err := scanUser(tx.QueryRowContext(ctx, `SELECT u.id,u.username,u.password_hash,u.role,u.disabled,u.created_at FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>? AND u.disabled=0 AND (? <> 'mobile' OR s.kind='browser')`, owner.String, now, kind))
 	if errors.Is(err, sql.ErrNoRows) {
 		return auth.User{}, deviceauth.ErrExpired
 	}

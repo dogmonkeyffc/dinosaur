@@ -65,13 +65,18 @@ export function saveAccount(server: ConnectedServer, session: DeviceSession): Pr
     if (next.length > 12) throw new Error('最多保存 12 个账号，请先退出一个账号。');
     const account: Account = { ...session, key, server: { ...server, url: serverURL(server.url) } };
     const previous = await SecureStore.getItemAsync(keyFor(key));
+    if (previous) {
+      const old = JSON.parse(previous) as Account;
+      if (serverURL(old.server.url) !== account.server.url)
+        throw new Error('该账号已绑定另一服务器地址，请先退出原账号再更换地址。');
+    }
     await SecureStore.setItemAsync(keyFor(key), JSON.stringify(account));
     await SecureStore.setItemAsync(indexKey, JSON.stringify(next));
     if (previous) {
       try {
         const old = JSON.parse(previous) as Account;
         if (old.token !== session.token && /^[A-Za-z0-9_-]{43}$/.test(old.token)) {
-          const client = new Client(server.url, old.token);
+          const client = new Client(serverURL(old.server.url), old.token);
           client
             .logout()
             .catch(() => {})

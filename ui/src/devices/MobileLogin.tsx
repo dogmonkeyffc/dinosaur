@@ -7,7 +7,8 @@ import { useAction } from '../lib/hooks';
 import { ErrorMessage } from '../components/common';
 
 interface Ticket {
-  qr_payload: string;
+  qr_payload?: string;
+  code?: string;
   expires_at: number;
 }
 
@@ -25,7 +26,20 @@ export function MobileLogin() {
   return (
     <Card component="section" className="account-card device-card">
       <div className="device-card-heading">
-        <h2>手机扫码登录</h2>
+        <h2>手机登录</h2>
+        <Button
+          variant="contained"
+          disabled={action.busy}
+          onClick={() =>
+            action.run(async () => {
+              const result = await api<Ticket>('/api/devices/login-code', { method: 'POST', body: {} });
+              setNow(Date.now());
+              setTicket(result);
+            })
+          }
+        >
+          {ticket?.code ? '刷新配对码' : '生成配对码'}
+        </Button>
         <Button
           variant="outlined"
           disabled={action.busy}
@@ -37,11 +51,22 @@ export function MobileLogin() {
             })
           }
         >
-          {ticket ? '刷新二维码' : '生成二维码'}
+          {ticket?.qr_payload ? '刷新二维码' : '生成二维码'}
         </Button>
       </div>
       <span>登录账号：{user?.username}</span>
-      {ticket && seconds > 0 && (
+      {ticket?.code && seconds > 0 && (
+        <div className="mobile-login-qr">
+          <output
+            aria-label="手机一次性配对码"
+            style={{ fontSize: '2rem', letterSpacing: '0.2em', fontVariantNumeric: 'tabular-nums' }}
+          >
+            {ticket.code}
+          </output>
+          <span role="status">{seconds} 秒后过期 · 仅可使用一次</span>
+        </div>
+      )}
+      {ticket?.qr_payload && seconds > 0 && (
         <div className="mobile-login-qr">
           <QRCodeSVG
             value={ticket.qr_payload}
@@ -53,7 +78,7 @@ export function MobileLogin() {
           <span role="status">{seconds} 秒后过期</span>
         </div>
       )}
-      {ticket && !seconds && <p role="status">二维码已过期</p>}
+      {ticket && !seconds && <p role="status">登录凭证已过期</p>}
       <ErrorMessage error={action.error} />
     </Card>
   );

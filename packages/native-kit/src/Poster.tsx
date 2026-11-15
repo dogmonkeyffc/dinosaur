@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Image, Pressable, Text, View } from 'react-native';
 import type { Client } from '@dinosaur/client';
-import type { Movie, Series } from '@dinosaur/contracts';
+import type { Movie } from '@dinosaur/contracts';
 import { colors } from './theme';
 
 export function Poster({
@@ -12,7 +12,7 @@ export function Poster({
   preferred,
   showTitle = true,
 }: {
-  item: Movie | Series;
+  item: Pick<Movie, 'id' | 'title' | 'poster_url'>;
   client: Client;
   width: number;
   press: () => void;

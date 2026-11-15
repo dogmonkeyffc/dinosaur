@@ -5,3 +5,4 @@ export * from './accounts';
 export * from './catalog';
 export * from './player/Player';
 export * from './Poster';
+export * from './catalog/CatalogDetails';

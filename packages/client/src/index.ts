@@ -11,6 +11,7 @@ import type {
   SeriesDetail,
   TVPairing,
   User,
+  WorkDetail,
 } from '@dinosaur/contracts';
 import { Transport } from './transport';
 export { ApiError, Transport } from './transport';
@@ -61,6 +62,9 @@ export class Client extends Transport {
   }
   detail(id: number) {
     return this.request<SeriesDetail>(`/api/series/${id}`);
+  }
+  work(id: number) {
+    return this.request<WorkDetail>(`/api/works/${id}`);
   }
   recent() {
     return this.request<{ items: Movie[] }>('/api/playback/continue');

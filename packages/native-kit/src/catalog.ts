@@ -41,11 +41,12 @@ export function useMediaPage(client: Client, kind: MediaKind, page: number, quer
   return { items, recent, total, error, loading, reload: () => setRevision((value) => value + 1) };
 }
 
-export function useMediaDetail(client: Client, kind: MediaKind, id: number) {
+export function useMediaDetail(client: Client, kind: MediaKind, id: number, enabled = true) {
   const [movie, setMovie] = useState<Movie>();
   const [series, setSeries] = useState<SeriesDetail>();
   const [error, setError] = useState('');
   useEffect(() => {
+    if (!enabled) return;
     let active = true;
     setMovie(undefined);
     setSeries(undefined);
@@ -63,6 +64,6 @@ export function useMediaDetail(client: Client, kind: MediaKind, id: number) {
     return () => {
       active = false;
     };
-  }, [client, kind, id]);
+  }, [client, kind, id, enabled]);
   return { movie, series, error };
 }

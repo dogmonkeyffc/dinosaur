@@ -127,3 +127,47 @@ func TestWorkHTTPCreateReplaceBrowseAndDissolve(t *testing.T) {
 		t.Fatalf("delete removed series rather than dissolving group: %+v %v", page, err)
 	}
 }
+
+func TestWorkSeasonNumbers(t *testing.T) {
+	s, _, admin, viewer, _, ids := workHTTPFixture(t)
+	body := map[string]any{
+		"title": "Season labels", "series_ids": ids,
+		"season_numbers": map[int64]int{ids[0]: 1, ids[1]: 3, ids[2]: 4},
+	}
+	created := request(t, s, "POST", "/api/admin/works", body, &admin, nil)
+	status(t, created, 201)
+	var result struct {
+		Work television.Work `json:"work"`
+	}
+	if err := json.Unmarshal(created.Body.Bytes(), &result); err != nil {
+		t.Fatal(err)
+	}
+	path := fmt.Sprintf("/api/works/%d", result.Work.ID)
+	adminPath := fmt.Sprintf("/api/admin/works/%d", result.Work.ID)
+	readSeasons := func() map[int64]int {
+		t.Helper()
+		response := request(t, s, "GET", path, nil, &viewer, nil)
+		status(t, response, 200)
+		var detail television.WorkDetail
+		if err := json.Unmarshal(response.Body.Bytes(), &detail); err != nil {
+			t.Fatal(err)
+		}
+		return detail.SeasonNumbers
+	}
+	if seasons := readSeasons(); len(seasons) != 3 || seasons[ids[0]] != 1 || seasons[ids[1]] != 3 || seasons[ids[2]] != 4 {
+		t.Fatalf("saved labels: %v", seasons)
+	}
+	delete(body, "season_numbers")
+	body["series_ids"] = []int64{ids[1], ids[0]}
+	status(t, request(t, s, "PUT", adminPath, body, &admin, nil), 200)
+	if seasons := readSeasons(); len(seasons) != 2 || seasons[ids[1]] != 3 || seasons[ids[0]] != 1 {
+		t.Fatalf("legacy edit did not preserve retained labels: %v", seasons)
+	}
+	body["season_numbers"] = map[int64]int{ids[2]: 4}
+	status(t, request(t, s, "PUT", adminPath, body, &admin, nil), 400)
+	body["season_numbers"] = map[int64]int{}
+	status(t, request(t, s, "PUT", adminPath, body, &admin, nil), 200)
+	if seasons := readSeasons(); len(seasons) != 0 {
+		t.Fatalf("cleared labels: %v", seasons)
+	}
+}

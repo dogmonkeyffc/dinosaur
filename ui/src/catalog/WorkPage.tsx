@@ -18,6 +18,7 @@ export function WorkPage() {
   const result = useResource<WorkDetail>(`/api/works/${id}`);
   const [editing, setEditing] = useState(false);
   const work = result.data?.work;
+  const seasons = result.data?.season_numbers ?? {};
   useActiveLibrary(work?.library_id);
   useEffect(() => {
     if (work) document.title = `${work.title} · Dinosaur`;
@@ -45,6 +46,7 @@ export function WorkPage() {
                   key={member.id}
                   item={{ ...member, work_id: undefined }}
                   from={location.pathname}
+                  workSeason={seasons[member.id]}
                 />
               ))}
             </div>

@@ -89,6 +89,7 @@ export interface WorkDetail {
   work: Work;
   members: Series[];
   all_members?: Series[];
+  season_numbers?: Record<number, number>;
 }
 export interface Series {
   work_id?: number;

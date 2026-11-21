@@ -19,7 +19,7 @@ export function Poster({ url, title, className }: { url?: string; title: string;
   ) : null;
 }
 
-export function MediaCard({ item, from }: { item: Movie | Series; from?: string }) {
+export function MediaCard({ item, from, workSeason }: { item: Movie | Series; from?: string; workSeason?: number }) {
   const location = useLocation();
   const movie = 'duration' in item ? item : null;
   const series = 'episode_count' in item ? item : null;
@@ -79,7 +79,7 @@ export function MediaCard({ item, from }: { item: Movie | Series; from?: string 
         <span className="movie-meta">
           {item.year ? `${item.year} · ` : ''}
           {series
-            ? `${series.work_id ? `${series.member_count} 个篇章 · ` : ''}${series.season_count} 季 · ${series.episode_count} 个文件`
+            ? `${series.work_id ? `${series.member_count} 个篇章 · ` : ''}${workSeason ? `第 ${workSeason} 季` : `${series.season_count} 季`} · ${series.episode_count} 个文件`
             : duration(movie?.duration || 0)}
         </span>
         {series && (

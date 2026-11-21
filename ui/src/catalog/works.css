@@ -31,3 +31,7 @@
   overflow-wrap: anywhere;
   min-width: 0;
 }
+
+.work-member-season {
+  width: 5rem;
+}

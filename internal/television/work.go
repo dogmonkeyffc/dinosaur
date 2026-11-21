@@ -18,9 +18,10 @@ type Work struct {
 }
 
 type WorkDetail struct {
-	Work       Work     `json:"work"`
-	Members    []Series `json:"members"`
-	AllMembers []Series `json:"all_members,omitempty"`
+	Work          Work          `json:"work"`
+	Members       []Series      `json:"members"`
+	AllMembers    []Series      `json:"all_members,omitempty"`
+	SeasonNumbers map[int64]int `json:"season_numbers,omitempty"`
 }
 
 type WorkError struct{ Code, Message string }
@@ -52,6 +53,20 @@ func ValidateWorkMember(libraryID, memberLibrary, workID, memberWork int64) erro
 	}
 	if memberWork != 0 && memberWork != workID {
 		return &WorkError{"work_conflict", "series already belongs to another work"}
+	}
+	return nil
+}
+
+// ValidateWorkSeasons validates optional season labels for the supplied members.
+func ValidateWorkSeasons(ids []int64, seasons map[int64]int) error {
+	members := make(map[int64]bool, len(ids))
+	for _, id := range ids {
+		members[id] = true
+	}
+	for id, season := range seasons {
+		if !members[id] || season < 1 || season > 999 {
+			return &WorkError{"invalid_work_season", "season numbers must be between 1 and 999 and refer to work members"}
+		}
 	}
 	return nil
 }

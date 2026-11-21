@@ -22,6 +22,17 @@ export function WorkEditor({
   const navigate = useNavigate();
   const [title, setTitle] = useState(detail?.work.title || '');
   const [members, setMembers] = useState<Series[]>(detail?.all_members || detail?.members || []);
+  const [seasons, setSeasons] = useState<Record<number, string>>(() =>
+    Object.fromEntries(Object.entries(detail?.season_numbers ?? {}).map(([id, season]) => [id, String(season)])),
+  );
+  const seasonNumbers: Record<number, number> = {};
+  let invalidSeason = false;
+  for (const member of members) {
+    const value = seasons[member.id]?.trim();
+    if (!value) continue;
+    if (/^[0-9]{1,3}$/.test(value) && Number(value) > 0) seasonNumbers[member.id] = Number(value);
+    else invalidSeason = true;
+  }
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -40,7 +51,7 @@ export function WorkEditor({
     action.run(async () => {
       const result = await api<{ work: Work }>(`/api/admin/works${work ? `/${work.id}` : ''}`, {
         method: work ? 'PUT' : 'POST',
-        body: { title: title.trim(), series_ids: members.map((item) => item.id) },
+        body: { title: title.trim(), series_ids: members.map((item) => item.id), season_numbers: seasonNumbers },
       });
       saved(result.work);
     });
@@ -65,7 +76,13 @@ export function WorkEditor({
               required
             />
           </label>
-          <WorkMembers members={members} setMembers={setMembers} />
+          <WorkMembers
+            members={members}
+            setMembers={setMembers}
+            seasons={seasons}
+            setSeason={(id, value) => setSeasons((previous) => ({ ...previous, [id]: value }))}
+          />
+          {invalidSeason && <ErrorMessage error="季号须为 1 至 999 的整数。" />}
           <label>
             搜索篇章
             <FormInput
@@ -131,7 +148,7 @@ export function WorkEditor({
         <Button disabled={action.busy} onClick={close}>
           取消
         </Button>
-        <Button variant="contained" disabled={action.busy || !title.trim() || !members.length} onClick={save}>
+        <Button variant="contained" disabled={action.busy || !title.trim() || !members.length || invalidSeason} onClick={save}>
           保存
         </Button>
       </DialogActions>

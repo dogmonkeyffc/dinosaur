@@ -1,4 +1,5 @@
 export const errorMessages: Record<string, string> = {
+  invalid_work_season: '季号须为 1 至 999 的整数。',
   invalid_work: '请填写作品名称并选择篇章。',
   series_not_found: '部分篇章已不存在，请刷新后重新选择。',
   cross_library: '同一作品的篇章必须来自同一个媒体库。',

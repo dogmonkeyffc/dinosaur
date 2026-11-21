@@ -70,14 +70,22 @@ func (s *Server) workDetail(w http.ResponseWriter, r *http.Request) {
 	setWorkPosters(&detail)
 	if current(r).user.Role != "admin" {
 		detail.AllMembers = nil
+		visible := make(map[int64]int, len(detail.Members))
+		for _, member := range detail.Members {
+			if season := detail.SeasonNumbers[member.ID]; season > 0 {
+				visible[member.ID] = season
+			}
+		}
+		detail.SeasonNumbers = visible
 	}
 	writeJSON(w, 200, detail)
 }
 
 func (s *Server) saveWork(w http.ResponseWriter, r *http.Request) {
 	var body struct {
-		Title     string  `json:"title"`
-		SeriesIDs []int64 `json:"series_ids"`
+		Title         string        `json:"title"`
+		SeriesIDs     []int64       `json:"series_ids"`
+		SeasonNumbers map[int64]int `json:"season_numbers"`
 	}
 	if !decodeJSON(w, r, &body) {
 		return
@@ -90,7 +98,7 @@ func (s *Server) saveWork(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	work, err := s.store.SaveWork(r.Context(), id, body.Title, body.SeriesIDs)
+	work, err := s.store.SaveWorkSeasons(r.Context(), id, body.Title, body.SeriesIDs, body.SeasonNumbers)
 	if s.workError(w, r, err) {
 		return
 	}

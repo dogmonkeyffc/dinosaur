@@ -9,9 +9,16 @@ import (
 )
 
 func (s *Store) SaveWork(ctx context.Context, id int64, title string, ids []int64) (television.Work, error) {
+	return s.SaveWorkSeasons(ctx, id, title, ids, nil)
+}
+
+func (s *Store) SaveWorkSeasons(ctx context.Context, id int64, title string, ids []int64, seasons map[int64]int) (television.Work, error) {
 	result := television.Work{}
 	title, err := television.ValidateWork(title, ids)
 	if err != nil {
+		return result, err
+	}
+	if err := television.ValidateWorkSeasons(ids, seasons); err != nil {
 		return result, err
 	}
 	tx, err := s.DB.BeginTx(ctx, nil)
@@ -48,11 +55,17 @@ func (s *Store) SaveWork(ctx context.Context, id int64, title string, ids []int6
 			return result, err
 		}
 	}
+	if seasons == nil && id != 0 {
+		seasons, err = workSeasonNumbers(ctx, tx, id)
+		if err != nil {
+			return result, err
+		}
+	}
 	if _, err := tx.ExecContext(ctx, `DELETE FROM work_members WHERE work_id=?`, id); err != nil {
 		return result, err
 	}
 	for position, memberID := range ids {
-		if _, err := tx.ExecContext(ctx, `INSERT INTO work_members(work_id,series_id,position) VALUES(?,?,?)`, id, memberID, position); err != nil {
+		if _, err := tx.ExecContext(ctx, `INSERT INTO work_members(work_id,series_id,position,season_number) VALUES(?,?,?,?)`, id, memberID, position, seasons[memberID]); err != nil {
 			return result, err
 		}
 	}

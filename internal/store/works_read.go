@@ -36,6 +36,11 @@ func (s *Store) WorkByID(ctx context.Context, id, userID int64) (television.Work
 	if err != nil {
 		return result, err
 	}
+	result.SeasonNumbers, err = workSeasonNumbers(ctx, tx, id)
+	if err != nil {
+		return result, err
+	}
+
 	for i := range result.AllMembers {
 		item := &result.AllMembers[i]
 		err := tx.QueryRowContext(ctx, `SELECT count(*) FROM tv_episodes e JOIN media_items m ON m.id=e.media_id JOIN playback_progress p ON p.media_id=m.id WHERE e.series_id=? AND m.missing=0 AND p.user_id=? AND p.watched=1`, item.ID, userID).Scan(&item.WatchedCount)
@@ -85,4 +90,22 @@ func (s *Store) Works(ctx context.Context, libraryID, userID int64) ([]televisio
 		result = append(result, detail.Work)
 	}
 	return result, nil
+}
+
+func workSeasonNumbers(ctx context.Context, tx *sql.Tx, id int64) (map[int64]int, error) {
+	rows, err := tx.QueryContext(ctx, `SELECT series_id,season_number FROM work_members WHERE work_id=? AND season_number>0`, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	seasons := map[int64]int{}
+	for rows.Next() {
+		var seriesID int64
+		var season int
+		if err := rows.Scan(&seriesID, &season); err != nil {
+			return nil, err
+		}
+		seasons[seriesID] = season
+	}
+	return seasons, rows.Err()
 }

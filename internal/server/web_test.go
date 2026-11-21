@@ -11,7 +11,7 @@ import (
 func TestEmbeddedReactRoutesAndAssets(t *testing.T) {
 	s, _ := fixture(t)
 	assets := map[string]bool{}
-	for _, path := range []string{"/", "/login", "/setup", "/settings", "/settings/account", "/settings/system", "/settings/metadata", "/settings/scraping", "/movies", "/movies/1", "/series/1", "/watch/1"} {
+	for _, path := range []string{"/", "/login", "/setup", "/settings", "/settings/account", "/settings/system", "/settings/playback", "/settings/metadata", "/settings/scraping", "/movies", "/movies/1", "/series/1", "/works/1", "/watch/1"} {
 		w := request(t, s, "GET", path, nil, nil, nil)
 		if w.Code != 200 || !strings.HasPrefix(w.Header().Get("Content-Type"), "text/html") || !strings.Contains(w.Body.String(), `id="root"`) {
 			t.Fatalf("bad React route %s: %d", path, w.Code)

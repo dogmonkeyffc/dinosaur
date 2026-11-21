@@ -9,6 +9,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthProvider';
 import { ToastProvider } from './components/Toast';
 import { App } from './App';
+import './styles/sidebar.css';
 import './styles/layout.css';
 import './styles/media.css';
 import './styles/management.css';

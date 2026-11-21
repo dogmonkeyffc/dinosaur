@@ -97,7 +97,7 @@ export function Shell() {
       <a className="skip-link" href="#content-main">
         跳到主要内容
       </a>
-      <Paper component="aside" square ref={sidebar} className={`sidebar${menu ? ' menu-open' : ''}`}>
+      <Paper component="aside" elevation={0} square ref={sidebar} className={`sidebar${menu ? ' menu-open' : ''}`}>
         <Brand />
         <Button
           variant="text"

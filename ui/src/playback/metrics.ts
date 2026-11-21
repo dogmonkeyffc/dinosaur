@@ -5,9 +5,16 @@ import {
   MetricSample,
   playbackMetricID,
   playbackQuality,
+  type MetricSelection,
   type PlaybackMode,
 } from './metric-sample';
 import { buffered, currentTime } from './timeline';
+
+interface SourceSelection extends MetricSelection {
+  mode: PlaybackMode;
+  quality: string;
+  burnSubtitle: boolean;
+}
 
 interface SourceMetrics {
   sample: MetricSample;
@@ -59,11 +66,18 @@ export class PlaybackMetrics {
     return this.video.currentSrc === source.url;
   }
 
-  start(url: URL, mode: PlaybackMode, quality: string, burnSubtitle: boolean) {
+  start(url: URL, { mode, quality, burnSubtitle, ...selection }: SourceSelection) {
     const id = playbackMetricID();
     if (mode !== 'direct') url.searchParams.set('stream_id', id);
     const source = {
-      sample: new MetricSample(id, mode, playbackQuality(quality), performance.now(), burnSubtitle),
+      sample: new MetricSample(
+        id,
+        mode,
+        playbackQuality(quality),
+        performance.now(),
+        burnSubtitle,
+        selection,
+      ),
       url: new URL(url.pathname + url.search, location.origin).href,
       epoch: currentSession().epoch,
     };

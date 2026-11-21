@@ -74,6 +74,36 @@ test('omits autoplay-blocked startup and excludes time in the back-forward cache
   assert.equal(snapshot.stream_id, undefined);
 });
 
+test('keeps the source selection in every snapshot and preserves false and track zero', () => {
+  const sample = new MetricSample(id, 'remux', 'auto', 0, false, {
+    mediaId: 42,
+    compatibilityRequested: false,
+    audioIndex: 0,
+  });
+  sample.playing(1);
+  for (const now of [1, 2000]) {
+    const body = JSON.parse(JSON.stringify(sample.snapshot(now)));
+    assert.equal(body.media_id, 42);
+    assert.equal(body.compatibility_requested, false);
+    assert.equal(body.audio_index, 0);
+    assert.equal(body.mode, 'remux');
+  }
+});
+
+test('omits invalid IDs and track indexes while preserving explicit compatible selection', () => {
+  for (const mediaId of [undefined, 0, -1, 2.5, Infinity, Number.MAX_SAFE_INTEGER + 1, '42']) {
+    const sample = new MetricSample(id, 'transcode', '720', 0, false, {
+      mediaId,
+      compatibilityRequested: true,
+      audioIndex: -1,
+    });
+    const body = sample.snapshot(0);
+    assert.ok(!Object.hasOwn(body, 'media_id'));
+    assert.ok(!Object.hasOwn(body, 'audio_index'));
+    assert.equal(body.compatibility_requested, true);
+  }
+});
+
 test('reports contiguous buffered-ahead duration and optional frame counts', () => {
   const ranges = { length: 2, start: (i) => [0, 20][i], end: (i) => [8, 40][i] };
   assert.equal(bufferedAhead(ranges, 5), 3000);

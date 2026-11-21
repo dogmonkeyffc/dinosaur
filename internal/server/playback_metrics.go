@@ -31,13 +31,18 @@ type playbackMetricPayload struct {
 
 type playbackMetricWrite struct {
 	playbackMetricPayload
-	StreamID *string `json:"stream_id"`
+	StreamID               *string `json:"stream_id"`
+	MediaID                *int64  `json:"media_id"`
+	AudioIndex             *int    `json:"audio_index"`
+	CompatibilityRequested bool    `json:"compatibility_requested"`
 }
 
 type playbackMetricResponse struct {
 	playbackMetricPayload
-	UpdatedAt      int64    `json:"updated_at"`
-	TranscodeSpeed *float64 `json:"transcode_speed,omitempty"`
+	UpdatedAt      int64               `json:"updated_at"`
+	TranscodeSpeed *float64            `json:"transcode_speed,omitempty"`
+	Source         *playmetrics.Source `json:"source,omitempty"`
+	Reason         string              `json:"reason,omitempty"`
 }
 
 func (s *Server) savePlaybackMetrics(w http.ResponseWriter, r *http.Request) {
@@ -66,6 +71,14 @@ func (s *Server) savePlaybackMetrics(w http.ResponseWriter, r *http.Request) {
 		fail(w, http.StatusBadRequest, "invalid_playback_metrics", err.Error())
 		return
 	}
+	if (p.MediaID != nil && *p.MediaID <= 0) || (p.AudioIndex != nil && *p.AudioIndex < 0) {
+		fail(w, http.StatusBadRequest, "invalid_playback_metrics", "invalid media or audio index")
+		return
+	}
+	if p.MediaID != nil {
+		snapshot.Source = s.playbackMetricSource(r, p)
+		snapshot.Reason = playbackMetricReason(p)
+	}
 	if err := s.store.SavePlaybackMetrics(r.Context(), id.user.ID, snapshot); err != nil {
 		s.internal(w, r, err)
 		return
@@ -87,7 +100,7 @@ func (s *Server) listPlaybackMetrics(w http.ResponseWriter, r *http.Request) {
 				StartupMS: item.StartupMS, Stalls: &item.Stalls, StallMS: &item.StallMS, PlayedMS: &item.PlayedMS,
 				BufferMS: &item.BufferMS, DroppedFrames: item.DroppedFrames, TotalFrames: item.TotalFrames,
 			},
-			UpdatedAt: item.UpdatedAt, TranscodeSpeed: item.TranscodeSpeed,
+			UpdatedAt: item.UpdatedAt, TranscodeSpeed: item.TranscodeSpeed, Source: item.Source, Reason: item.Reason,
 		})
 	}
 	writeJSON(w, http.StatusOK, struct {

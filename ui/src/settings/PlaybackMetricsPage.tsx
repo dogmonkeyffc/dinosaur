@@ -8,21 +8,59 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material';
+import { useId, useState } from 'react';
 import { ErrorMessage, Heading, Loading } from '../components/common';
 import { time } from '../lib/format';
 import { useResource } from '../lib/hooks';
-import type { PlaybackMetricRow, PlaybackMode, PlaybackQuality } from '../playback/metric-sample';
+import type { PlaybackMetricRow } from '../playback/metric-sample';
+import { modeLabel, PlaybackMetricDetails, qualityLabel, resolution } from './PlaybackMetricDetails';
 
-const modes: Record<PlaybackMode, string> = { direct: '直接播放', remux: '兼容封装', transcode: '兼容转码' };
-const qualities: Record<PlaybackQuality, string> = {
-  auto: '自动',
-  original: '原画',
-  '1080': '1080p',
-  '720': '720p',
-  '480': '480p',
-};
+const columnCount = 12;
 const seconds = new Intl.NumberFormat('zh-CN', { maximumFractionDigits: 2 });
 const duration = (ms: number | null | undefined) => (ms == null ? '—' : `${seconds.format(ms / 1000)} 秒`);
+
+function MetricRow({ item }: { item: PlaybackMetricRow }) {
+  const [expanded, setExpanded] = useState(false);
+  const detailsId = useId();
+  return (
+    <>
+      <TableRow>
+        <TableCell>
+          <Button
+            size="small"
+            aria-expanded={expanded}
+            aria-controls={detailsId}
+            onClick={() => setExpanded((value) => !value)}
+          >
+            {expanded ? '收起' : '展开'}
+          </Button>
+        </TableCell>
+        <TableCell>{time(item.updated_at)}</TableCell>
+        <TableCell>{modeLabel(item)}</TableCell>
+        <TableCell>{qualityLabel(item)}</TableCell>
+        <TableCell>{resolution(item)}</TableCell>
+        <TableCell align="right">{duration(item.startup_ms)}</TableCell>
+        <TableCell align="right">{duration(item.played_ms)}</TableCell>
+        <TableCell align="right">{item.stalls}</TableCell>
+        <TableCell align="right">{duration(item.stall_ms)}</TableCell>
+        <TableCell align="right">{duration(item.buffer_ms)}</TableCell>
+        <TableCell align="right">
+          {item.dropped_frames == null && item.total_frames == null
+            ? '—'
+            : `${item.dropped_frames ?? '—'} / ${item.total_frames ?? '—'}`}
+        </TableCell>
+        <TableCell align="right">
+          {item.transcode_speed == null ? '—' : `${seconds.format(item.transcode_speed)}×`}
+        </TableCell>
+      </TableRow>
+      <TableRow id={detailsId} hidden={!expanded} sx={{ display: expanded ? 'table-row' : 'none' }}>
+        <TableCell colSpan={columnCount} sx={{ py: 2 }}>
+          {expanded && <PlaybackMetricDetails item={item} />}
+        </TableCell>
+      </TableRow>
+    </>
+  );
+}
 
 export function PlaybackMetricsPage() {
   const { data, error, loading, reload } = useResource<{ items: PlaybackMetricRow[] }>(
@@ -48,10 +86,11 @@ export function PlaybackMetricsPage() {
           <Table size="small" aria-label="播放指标" sx={{ whiteSpace: 'nowrap' }}>
             <TableHead>
               <TableRow>
+                <TableCell>详情</TableCell>
                 <TableCell>更新时间</TableCell>
                 <TableCell>播放模式</TableCell>
                 <TableCell>画质</TableCell>
-                <TableCell>分辨率</TableCell>
+                <TableCell>输出分辨率</TableCell>
                 <TableCell align="right">起播耗时</TableCell>
                 <TableCell align="right">播放时长</TableCell>
                 <TableCell align="right">卡顿次数</TableCell>
@@ -63,28 +102,7 @@ export function PlaybackMetricsPage() {
             </TableHead>
             <TableBody>
               {items.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>{time(item.updated_at)}</TableCell>
-                  <TableCell>
-                    {modes[item.mode]}
-                    {item.burn_subtitle ? ' · 烧录字幕' : ''}
-                  </TableCell>
-                  <TableCell>{qualities[item.quality]}</TableCell>
-                  <TableCell>{item.width && item.height ? `${item.width} × ${item.height}` : '—'}</TableCell>
-                  <TableCell align="right">{duration(item.startup_ms)}</TableCell>
-                  <TableCell align="right">{duration(item.played_ms)}</TableCell>
-                  <TableCell align="right">{item.stalls}</TableCell>
-                  <TableCell align="right">{duration(item.stall_ms)}</TableCell>
-                  <TableCell align="right">{duration(item.buffer_ms)}</TableCell>
-                  <TableCell align="right">
-                    {item.dropped_frames == null && item.total_frames == null
-                      ? '—'
-                      : `${item.dropped_frames ?? '—'} / ${item.total_frames ?? '—'}`}
-                  </TableCell>
-                  <TableCell align="right">
-                    {item.transcode_speed == null ? '—' : `${seconds.format(item.transcode_speed)}×`}
-                  </TableCell>
-                </TableRow>
+                <MetricRow key={item.id} item={item} />
               ))}
             </TableBody>
           </Table>

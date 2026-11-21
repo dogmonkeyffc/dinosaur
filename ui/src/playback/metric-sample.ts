@@ -7,6 +7,9 @@ export interface PlaybackMetric {
   quality: PlaybackQuality;
   stream_id?: string;
   burn_subtitle?: boolean;
+  media_id?: number;
+  compatibility_requested?: boolean;
+  audio_index?: number;
   width: number;
   height: number;
   startup_ms?: number;
@@ -18,9 +21,29 @@ export interface PlaybackMetric {
   total_frames?: number;
 }
 
+export interface PlaybackMetricSource {
+  title?: string;
+  path?: string;
+  width?: number;
+  height?: number;
+  video_codec?: string;
+  audio_codec?: string;
+  container?: string;
+  bitrate_bps?: number;
+  size_bytes?: number;
+}
+
 export interface PlaybackMetricRow extends Omit<PlaybackMetric, 'stream_id'> {
   updated_at: number;
   transcode_speed?: number;
+  source?: PlaybackMetricSource;
+  reason?: string;
+}
+
+export interface MetricSelection {
+  mediaId?: number;
+  compatibilityRequested?: boolean;
+  audioIndex?: number;
 }
 
 export function playbackMetricID() {
@@ -73,6 +96,7 @@ export class MetricSample {
     quality: PlaybackQuality,
     loadTime: number,
     burnSubtitle = false,
+    { mediaId, compatibilityRequested, audioIndex }: MetricSelection = {},
   ) {
     this.loadTime = loadTime;
     this.phaseStart = loadTime;
@@ -82,6 +106,13 @@ export class MetricSample {
       quality,
       ...(mode !== 'direct' ? { stream_id: id } : {}),
       burn_subtitle: burnSubtitle,
+      ...(mediaId != null && Number.isSafeInteger(mediaId) && mediaId > 0 ? { media_id: mediaId } : {}),
+      ...(typeof compatibilityRequested === 'boolean'
+        ? { compatibility_requested: compatibilityRequested }
+        : {}),
+      ...(audioIndex != null && Number.isSafeInteger(audioIndex) && audioIndex >= 0
+        ? { audio_index: audioIndex }
+        : {}),
       width: 0,
       height: 0,
       stalls: 0,

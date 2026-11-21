@@ -1,4 +1,4 @@
-// Package playmetrics validates anonymous playback performance measurements.
+// Package playmetrics describes and validates playback performance measurements.
 package playmetrics
 
 import (
@@ -33,6 +33,21 @@ func ValidSpeed(speed float64) bool {
 type Snapshot struct {
 	Metrics
 	StreamID *string
+	Source   *Source
+	Reason   string
+}
+
+// Source describes the original media rather than the playback output.
+type Source struct {
+	Title      string `json:"title"`
+	Path       string `json:"path"`
+	Width      int    `json:"width"`
+	Height     int    `json:"height"`
+	VideoCodec string `json:"video_codec"`
+	AudioCodec string `json:"audio_codec"`
+	Container  string `json:"container"`
+	BitrateBPS int64  `json:"bitrate_bps"`
+	SizeBytes  int64  `json:"size_bytes"`
 }
 
 type Metrics struct {
@@ -51,9 +66,12 @@ type Metrics struct {
 	TotalFrames   *int64
 }
 
-// Item is the anonymous diagnostics view. UpdatedAt is a Unix second.
+// Item is the diagnostics view without user or stream identifiers.
+// UpdatedAt is a Unix second.
 type Item struct {
 	Metrics
+	Source         *Source
+	Reason         string
 	UpdatedAt      int64
 	TranscodeSpeed *float64
 }

@@ -151,12 +151,14 @@ export class PlaybackEngine {
     const url = new URL(this.info.stream_url, location.origin);
     if (this.info.plan.mode !== 'direct') url.searchParams.set('start', this.savedPosition.toFixed(3));
     url.searchParams.set('_', String(Date.now()));
-    const onAutoplayError = this.metrics.start(
-      url,
-      this.info.plan.mode,
-      this.quality,
-      this.info.plan.subtitle != null,
-    );
+    const onAutoplayError = this.metrics.start(url, {
+      mode: this.info.plan.mode,
+      quality: this.quality,
+      burnSubtitle: this.info.plan.subtitle != null,
+      mediaId: this.info.item.id,
+      compatibilityRequested: this.mode === 'compatible',
+      audioIndex: this.info.plan.audio,
+    });
     const onMetadata = () => {
       if (this.disposed) return;
       if (this.info.plan.mode === 'direct') this.seekDirect(this.savedPosition);

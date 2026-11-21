@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -25,6 +26,15 @@ func (s *Store) SavePlaybackMetrics(ctx context.Context, userID int64, snapshot 
 		id := strings.ToLower(*snapshot.StreamID)
 		streamID = &id
 	}
+	var sourceJSON *string
+	if snapshot.Source != nil {
+		data, err := json.Marshal(snapshot.Source)
+		if err != nil {
+			return fmt.Errorf("encode playback metrics source: %w", err)
+		}
+		encoded := string(data)
+		sourceJSON = &encoded
+	}
 	tx, err := s.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -37,7 +47,8 @@ func (s *Store) SavePlaybackMetrics(ctx context.Context, userID int64, snapshot 
 	}
 	_, err = tx.ExecContext(ctx, savePlaybackMetricsSQL, userID, strings.ToLower(snapshot.ID), streamID,
 		snapshot.Mode, snapshot.Quality, snapshot.BurnSubtitle, snapshot.Width, snapshot.Height, snapshot.StartupMS, snapshot.Stalls,
-		snapshot.StallMS, snapshot.PlayedMS, snapshot.BufferMS, snapshot.DroppedFrames, snapshot.TotalFrames, now.UnixNano())
+		snapshot.StallMS, snapshot.PlayedMS, snapshot.BufferMS, snapshot.DroppedFrames, snapshot.TotalFrames, now.UnixNano(),
+		sourceJSON, snapshot.Reason)
 	if err != nil {
 		return err
 	}
@@ -48,12 +59,15 @@ func (s *Store) SavePlaybackMetrics(ctx context.Context, userID int64, snapshot 
 }
 
 // Keep counters monotonic and preserve optional values if subsequent reports omit
-// them. A report with any regressing core counter cannot replace current gauges.
+// them. Source and reason are independently set once, when first known.
+// A report with any regressing core counter cannot replace current gauges.
 // With no sequence in the protocol, equal counters have arrival-order semantics.
 const savePlaybackMetricsSQL = `
-INSERT INTO playback_metrics(user_id,id,stream_id,mode,quality,burn_subtitle,width,height,startup_ms,stalls,stall_ms,played_ms,buffer_ms,dropped_frames,total_frames,updated_at_ns)
-VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+INSERT INTO playback_metrics(user_id,id,stream_id,mode,quality,burn_subtitle,width,height,startup_ms,stalls,stall_ms,played_ms,buffer_ms,dropped_frames,total_frames,updated_at_ns,source_json,reason)
+VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 ON CONFLICT(user_id,id) DO UPDATE SET
+  source_json=coalesce(playback_metrics.source_json, excluded.source_json),
+  reason=coalesce(nullif(playback_metrics.reason, ''), excluded.reason),
   startup_ms=coalesce(playback_metrics.startup_ms, excluded.startup_ms),
   stalls=max(playback_metrics.stalls, excluded.stalls),
   stall_ms=max(playback_metrics.stall_ms, excluded.stall_ms),
@@ -116,7 +130,7 @@ func (s *Store) ListPlaybackMetrics(ctx context.Context) ([]playmetrics.Item, er
 		return nil, err
 	}
 	rows, err := tx.QueryContext(ctx, `SELECT m.id,m.mode,m.quality,m.burn_subtitle,m.width,m.height,m.startup_ms,m.stalls,m.stall_ms,
- m.played_ms,m.buffer_ms,m.dropped_frames,m.total_frames,m.updated_at_ns,t.speed
+ m.played_ms,m.buffer_ms,m.dropped_frames,m.total_frames,m.updated_at_ns,t.speed,m.source_json,m.reason
  FROM playback_metrics m LEFT JOIN playback_transcode_speeds t
  ON m.user_id=t.user_id AND m.stream_id=t.stream_id AND m.mode='transcode'
  ORDER BY m.updated_at_ns DESC,m.rowid DESC LIMIT ?`, playbackMetricsListLimit)
@@ -128,10 +142,16 @@ func (s *Store) ListPlaybackMetrics(ctx context.Context) ([]playmetrics.Item, er
 	for rows.Next() {
 		var item playmetrics.Item
 		var updatedNS int64
+		var sourceJSON sql.NullString
 		if err := rows.Scan(&item.ID, &item.Mode, &item.Quality, &item.BurnSubtitle, &item.Width, &item.Height, &item.StartupMS,
 			&item.Stalls, &item.StallMS, &item.PlayedMS, &item.BufferMS, &item.DroppedFrames, &item.TotalFrames,
-			&updatedNS, &item.TranscodeSpeed); err != nil {
+			&updatedNS, &item.TranscodeSpeed, &sourceJSON, &item.Reason); err != nil {
 			return nil, err
+		}
+		if sourceJSON.Valid {
+			if err := json.Unmarshal([]byte(sourceJSON.String), &item.Source); err != nil {
+				return nil, fmt.Errorf("decode playback metrics source: %w", err)
+			}
 		}
 		item.UpdatedAt = time.Unix(0, updatedNS).Unix()
 		items = append(items, item)

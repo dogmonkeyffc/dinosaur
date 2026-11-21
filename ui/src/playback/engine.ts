@@ -6,7 +6,7 @@ import { escapeHTML, type ArtInstance } from './artplayer';
 import { createTimelineVideo, currentTime, setCurrentTime } from './timeline';
 import { applySubtitle, clearSubtitles } from './subtitles';
 import { settingsControls } from './options';
-import { syncOptions } from './option-menu';
+import { syncAutoResolution, syncOptions } from './option-menu';
 import { bindEvents } from './events';
 
 interface Callbacks {
@@ -143,6 +143,7 @@ export class PlaybackEngine {
     clearSubtitles(this);
     this.video.removeAttribute('src');
     this.video.load();
+    syncAutoResolution(this);
     const url = new URL(this.info.stream_url, location.origin);
     if (this.info.plan.mode !== 'direct') url.searchParams.set('start', this.savedPosition.toFixed(3));
     url.searchParams.set('_', String(Date.now()));

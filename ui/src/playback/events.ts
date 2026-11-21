@@ -1,5 +1,6 @@
 import type { PlaybackEngine } from './engine';
 import { clearSubtitles, refreshSubtitle } from './subtitles';
+import { syncAutoResolution } from './option-menu';
 
 export function bindEvents(engine: PlaybackEngine) {
   const { video, art, callbacks } = engine;
@@ -16,6 +17,7 @@ export function bindEvents(engine: PlaybackEngine) {
     art.controls.isHover = false;
   });
   const bind = (event: string, handler: () => void) => art.events.proxy(video, event, handler);
+  for (const event of ['loadedmetadata', 'resize', 'emptied']) bind(event, () => syncAutoResolution(engine));
   bind('timeupdate', () => {
     if (engine.ready && !engine.loading) engine.savedPosition = engine.position();
     refreshSubtitle(engine);

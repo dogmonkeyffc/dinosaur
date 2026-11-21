@@ -42,6 +42,17 @@ export function settingKeyboard(engine: PlaybackEngine, element: HTMLElement, ev
   }
 }
 
+export function syncAutoResolution(engine: PlaybackEngine) {
+  const item = engine.root.querySelector('[data-setting-key="quality"] .art-selector-item[data-value="auto"]');
+  if (!item) return;
+  const { readyState, videoHeight } = engine.video;
+  const label =
+    engine.quality === 'auto' && !engine.released && readyState >= HTMLMediaElement.HAVE_METADATA && videoHeight
+      ? `自动 · ${videoHeight}P`
+      : '自动';
+  if (item.textContent !== label) item.textContent = label;
+}
+
 export function syncOptions(engine: PlaybackEngine, root = engine.root) {
   const controls = root.hasAttribute('data-setting-key')
     ? [root]

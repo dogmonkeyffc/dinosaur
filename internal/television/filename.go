@@ -22,6 +22,9 @@ func ParseEpisode(path string) (EpisodeName, bool) {
 	if !episodeMark.MatchString(stem) {
 		stem = chineseEpisodeStem(stem, filepath.Dir(path))
 	}
+	if !episodeMark.MatchString(stem) {
+		stem = numberedEpisodeStem(stem, filepath.Dir(path))
+	}
 	indexes := episodeMark.FindStringSubmatchIndex(stem)
 	if indexes == nil {
 		return EpisodeName{}, false

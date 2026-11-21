@@ -2,6 +2,7 @@ import { api } from '../lib/api';
 import { message } from '../lib/errors';
 import type { PlaybackInfo } from '../lib/types';
 import type { PlaybackEngine } from './engine';
+import { browserHEVC } from './capabilities';
 import { applySubtitle } from './subtitles';
 
 export interface SourceSelection {
@@ -21,7 +22,7 @@ export async function changeSource(engine: PlaybackEngine, selection: SourceSele
   engine.sourceRequest?.abort();
   const request = new AbortController();
   engine.sourceRequest = request;
-  const query = new URLSearchParams({ mode, quality });
+  const query = new URLSearchParams({ mode, quality, hevc: browserHEVC() });
   if (audio >= 0) query.set('audio', String(audio));
   if (track?.delivery === 'burn') query.set('subtitle', subtitle);
   try {

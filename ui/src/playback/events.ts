@@ -63,8 +63,13 @@ export function bindEvents(engine: PlaybackEngine) {
     }
   });
   bind('error', () => {
-    if (!engine.disposed && video.getAttribute('src'))
+    if (engine.disposed || !video.getAttribute('src') || engine.sourceRequest) return;
+    if (engine.info.plan.mode === 'remux' && engine.info.item.video_codec === 'hevc') {
+      callbacks.status('正在切换到兼容转码…');
+      void engine.changeSource({ mode: 'compatible' });
+    } else {
       callbacks.error('视频加载失败，可重试兼容模式；也请确认 FFmpeg 可用且没有超过两个兼容播放任务。');
+    }
   });
   art.events.proxy(window, 'pagehide', () => engine.persist(true));
   art.events.proxy(document, 'keydown', (event) => {

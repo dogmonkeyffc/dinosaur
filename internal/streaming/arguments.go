@@ -29,6 +29,9 @@ func Arguments(path string, plan playback.Plan) []string {
 	args = append(args, "-sn", "-dn", "-map_metadata", "-1", "-map_chapters", "-1", "-filter_threads", "1")
 	if plan.Mode == "remux" && plan.Subtitle == nil {
 		args = append(args, "-c:v", "copy")
+		if plan.HEVCRemux {
+			args = append(args, "-tag:v", "hvc1")
+		}
 	} else {
 		args = append(args, "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-pix_fmt", "yuv420p", "-threads", "2", "-g", "48", "-keyint_min", "48", "-sc_threshold", "0")
 	}

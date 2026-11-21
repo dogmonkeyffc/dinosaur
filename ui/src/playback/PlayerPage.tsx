@@ -7,6 +7,7 @@ import { useResource } from '../lib/hooks';
 import { message } from '../lib/errors';
 import type { PlaybackInfo } from '../lib/types';
 import { PlaybackEngine } from './engine';
+import { browserHEVC } from './capabilities';
 import { useActiveLibrary } from '../layout/useActiveLibrary';
 
 export function PlayerPage() {
@@ -19,7 +20,8 @@ export function PlayerPage() {
   const engine = useRef<PlaybackEngine | null>(null);
   const [status, setStatus] = useState('正在准备…');
   const [error, setError] = useState('');
-  const resource = useResource<PlaybackInfo>(`/api/playback/${id}?subtitle=auto`);
+  const query = new URLSearchParams({ subtitle: 'auto', hevc: browserHEVC() });
+  const resource = useResource<PlaybackInfo>(`/api/playback/${id}?${query}`);
   const info = resource.data;
   useActiveLibrary(info?.item.library_id);
   const beginning = params.get('beginning') === '1';

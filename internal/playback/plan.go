@@ -14,6 +14,7 @@ type Audio struct {
 	Default, Original, Commentary, Dubbed bool
 }
 type Source struct {
+	BrowserHEVC      bool
 	OriginalLanguage string
 	Filename         string
 	VideoCodec       string
@@ -22,11 +23,12 @@ type Source struct {
 }
 
 type Plan struct {
-	Quality  string  `json:"quality,omitempty"`
-	Subtitle *int    `json:"subtitle,omitempty"`
-	Mode     string  `json:"mode"`
-	Audio    int     `json:"audio"`
-	Start    float64 `json:"start"`
+	HEVCRemux bool    `json:"-"`
+	Quality   string  `json:"quality,omitempty"`
+	Subtitle  *int    `json:"subtitle,omitempty"`
+	Mode      string  `json:"mode"`
+	Audio     int     `json:"audio"`
+	Start     float64 `json:"start"`
 }
 
 // SelectPlan uses a small portable browser baseline; the client can explicitly
@@ -71,8 +73,9 @@ func SelectPlan(source Source, audio *int, compatible bool, start float64) (Plan
 		plan.Mode = "direct"
 	} else if defaultAudio && extension == ".webm" && (source.VideoCodec == "vp8" || source.VideoCodec == "vp9") && (audioCodec == "" || audioCodec == "opus" || audioCodec == "vorbis") {
 		plan.Mode = "direct"
-	} else if source.VideoCodec == "h264" {
+	} else if source.VideoCodec == "h264" || (source.VideoCodec == "hevc" && source.BrowserHEVC) {
 		plan.Mode = "remux"
+		plan.HEVCRemux = source.VideoCodec == "hevc"
 	}
 	return plan, nil
 }

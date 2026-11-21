@@ -55,7 +55,7 @@ func requestPlan(r *http.Request, item media.Item) (playback.Plan, error) {
 		}
 		audio = &index
 	}
-	source := playback.Source{OriginalLanguage: item.OriginalLanguage, Filename: item.Filename, Duration: item.Duration, VideoCodec: item.VideoCodec}
+	source := playback.Source{BrowserHEVC: r.URL.Query().Get("hevc") == "1", OriginalLanguage: item.OriginalLanguage, Filename: item.Filename, Duration: item.Duration, VideoCodec: item.VideoCodec}
 	for _, track := range item.Tracks {
 		if track.Type == "audio" {
 			source.Audio = append(source.Audio, playback.Audio{Index: track.Index, Codec: track.Codec, Language: track.Language, Title: track.Title, Default: track.Default != nil && *track.Default, Original: track.Original, Commentary: track.Commentary, Dubbed: track.Dubbed})
@@ -90,6 +90,9 @@ func streamURL(id int64, plan playback.Plan, compatible bool) string {
 		query.Set("mode", "original")
 	} else if compatible {
 		query.Set("mode", "compatible")
+	}
+	if plan.Mode == "remux" && plan.HEVCRemux {
+		query.Set("hevc", "1")
 	}
 	if plan.Subtitle != nil {
 		query.Set("subtitle", strconv.Itoa(-*plan.Subtitle-1))

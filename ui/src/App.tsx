@@ -16,6 +16,9 @@ const AccountPage = lazy(() =>
   import('./settings/AccountPage').then((page) => ({ default: page.AccountPage })),
 );
 const SystemPage = lazy(() => import('./settings/SystemPage').then((page) => ({ default: page.SystemPage })));
+const PlaybackMetricsPage = lazy(() =>
+  import('./settings/PlaybackMetricsPage').then((page) => ({ default: page.PlaybackMetricsPage })),
+);
 const MetadataPage = lazy(() =>
   import('./settings/MetadataPage').then((page) => ({ default: page.MetadataPage })),
 );
@@ -54,6 +57,14 @@ export function App() {
             element={
               <Admin>
                 <SystemPage />
+              </Admin>
+            }
+          />
+          <Route
+            path="/settings/playback"
+            element={
+              <Admin>
+                <PlaybackMetricsPage />
               </Admin>
             }
           />

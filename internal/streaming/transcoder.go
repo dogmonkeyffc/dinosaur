@@ -41,6 +41,7 @@ type Stream struct {
 	once        sync.Once
 	startup     *time.Timer
 	diagnostics *stderrTail
+	progress    *ffmpegProgress
 }
 
 func (stream *Stream) Close() error {
@@ -75,10 +76,18 @@ func (t *Transcoder) Open(ctx context.Context, path string, plan playback.Plan) 
 	release := func() { <-t.slots; t.workers.Done() }
 	worker, cancel := context.WithTimeout(ctx, 6*time.Hour)
 	stop := context.AfterFunc(t.ctx, cancel)
-	command := exec.CommandContext(worker, t.executable, Arguments(path, plan)...)
-	command.WaitDelay = time.Second
+	args := Arguments(path, plan)
 	diagnostics := &stderrTail{}
-	command.Stderr = diagnostics
+	var progress *ffmpegProgress
+	var stderr io.Writer = diagnostics
+	if plan.Mode == "transcode" {
+		args = append([]string{"-nostats", "-stats_period", "2", "-progress", "pipe:2"}, args...)
+		progress = &ffmpegProgress{diagnostics: diagnostics}
+		stderr = progress
+	}
+	command := exec.CommandContext(worker, t.executable, args...)
+	command.WaitDelay = time.Second
+	command.Stderr = stderr
 	output, err := command.StdoutPipe()
 	if err == nil {
 		err = command.Start()
@@ -92,7 +101,7 @@ func (t *Transcoder) Open(ctx context.Context, path string, plan playback.Plan) 
 		release()
 		return nil, err
 	}
-	stream := &Stream{ReadCloser: output, command: command, cancel: cancel, stopParent: stop, release: release, diagnostics: diagnostics}
+	stream := &Stream{ReadCloser: output, command: command, cancel: cancel, stopParent: stop, release: release, diagnostics: diagnostics, progress: progress}
 	stream.startup = time.AfterFunc(20*time.Second, cancel)
 	return stream, nil
 }

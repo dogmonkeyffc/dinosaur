@@ -8,6 +8,7 @@ import { applySubtitle, clearSubtitles } from './subtitles';
 import { settingsControls } from './options';
 import { syncAutoResolution, syncOptions } from './option-menu';
 import { bindEvents } from './events';
+import { PlaybackMetrics } from './metrics';
 
 interface Callbacks {
   status: (message: string) => void;
@@ -19,6 +20,7 @@ interface Callbacks {
 export class PlaybackEngine {
   art: ArtInstance;
   video: HTMLVideoElement;
+  metrics: PlaybackMetrics;
   ready = false;
   loading = false;
   released = false;
@@ -118,6 +120,7 @@ export class PlaybackEngine {
       ],
     });
     this.video = this.art.video;
+    this.metrics = new PlaybackMetrics(this.art, this.video);
     bindEvents(this);
     this.start(beginning ? 0 : info.resume_position);
     this.progressTimer = window.setInterval(() => {
@@ -133,6 +136,7 @@ export class PlaybackEngine {
 
   start(position: number) {
     if (this.disposed) return;
+    this.metrics.finish();
     clearTimeout(this.pauseTimer);
     this.loading = true;
     this.ready = false;
@@ -147,22 +151,31 @@ export class PlaybackEngine {
     const url = new URL(this.info.stream_url, location.origin);
     if (this.info.plan.mode !== 'direct') url.searchParams.set('start', this.savedPosition.toFixed(3));
     url.searchParams.set('_', String(Date.now()));
-    this.art.url = url.pathname + url.search;
-    this.art.poster = this.info.item.poster_url || '';
-    this.callbacks.status('正在加载视频…');
-    this.callbacks.error('');
-    this.video.onloadedmetadata = () => {
+    const onAutoplayError = this.metrics.start(
+      url,
+      this.info.plan.mode,
+      this.quality,
+      this.info.plan.subtitle != null,
+    );
+    const onMetadata = () => {
       if (this.disposed) return;
-      if (this.info.plan.mode === 'direct') setCurrentTime(this.video, this.savedPosition);
+      if (this.info.plan.mode === 'direct') this.seekDirect(this.savedPosition);
       this.art.playbackRate = this.rate;
       syncOptions(this);
       this.ready = true;
       this.loading = false;
       applySubtitle(this);
-      this.video.play().catch(() => {
-        if (!this.disposed) this.callbacks.status('点击播放开始观看');
+      this.video.play().catch((reason) => {
+        onAutoplayError(reason);
+        if (!this.disposed && this.video.onloadedmetadata === onMetadata)
+          this.callbacks.status('点击播放开始观看');
       });
     };
+    this.video.onloadedmetadata = onMetadata;
+    this.art.url = url.pathname + url.search;
+    this.art.poster = this.info.item.poster_url || '';
+    this.callbacks.status('正在加载视频…');
+    this.callbacks.error('');
     this.art.notice.show = {
       direct: '直接播放 · 原画',
       remux: '兼容封装 · 原画',
@@ -170,12 +183,17 @@ export class PlaybackEngine {
     }[this.info.plan.mode];
   }
 
+  private seekDirect(position: number) {
+    setCurrentTime(this.video, position);
+    this.metrics.nativeSeek();
+  }
+
   seek(position: number) {
     if (!Number.isFinite(position) || this.disposed) return;
     const target = Math.max(0, Math.min(position, this.info.item.duration - 0.2));
     clearTimeout(this.seekTimer);
     if (this.info.plan.mode === 'direct' && this.ready) {
-      setCurrentTime(this.video, target);
+      this.seekDirect(target);
       this.savedPosition = target;
       return;
     }
@@ -214,6 +232,7 @@ export class PlaybackEngine {
 
   destroy() {
     this.persist(true);
+    this.metrics.destroy();
     this.disposed = true;
     this.sourceRequest?.abort();
     clearInterval(this.progressTimer);

@@ -75,6 +75,9 @@ func (s *Server) servePlaybackStream(w http.ResponseWriter, r *http.Request) {
 		s.logger.Warn("start playback failed", "media_id", source.Item.ID, "error", err)
 		return
 	}
+	if plan.Mode == "transcode" {
+		defer s.trackTranscodeSpeed(r, stream)()
+	}
 	defer stream.Close()
 	reader := bufio.NewReaderSize(stream, 64*1024)
 	if _, err := reader.Peek(1); err != nil {

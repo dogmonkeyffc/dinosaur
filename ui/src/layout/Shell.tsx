@@ -21,6 +21,7 @@ const managementGroups = [
     label: '系统与账户',
     entries: [
       ['/settings/system', '系统设置', 'disk', 'admin'],
+      ['/settings/playback', '播放指标', 'play', 'admin'],
       ['/settings/account', '账户安全', 'lock'],
     ],
   },

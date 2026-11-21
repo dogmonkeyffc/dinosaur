@@ -4,6 +4,7 @@ const nativeTime = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, '
 const nativeBuffered = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'buffered')!;
 const nativePlay = HTMLMediaElement.prototype.play;
 export const currentTime = (video: HTMLVideoElement) => Number(nativeTime.get!.call(video));
+export const buffered = (video: HTMLVideoElement) => nativeBuffered.get!.call(video) as TimeRanges;
 export const setCurrentTime = (video: HTMLVideoElement, value: number) => nativeTime.set!.call(video, value);
 
 export function createTimelineVideo(engine: PlaybackEngine) {

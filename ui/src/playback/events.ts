@@ -38,6 +38,7 @@ export function bindEvents(engine: PlaybackEngine) {
         engine.savedPosition = engine.position();
         engine.released = true;
         engine.ready = false;
+        engine.metrics.finish();
         clearSubtitles(engine);
         video.removeAttribute('src');
         video.load();

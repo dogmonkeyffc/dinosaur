@@ -39,6 +39,22 @@ Authorization: Bearer dino_agent_完整的Key
 
 任务中的 `media_id` 是电影目标，`series_id` 是整剧目标；整剧的 `media_id` 为 0，不能把分集播放 ID 当作整剧 ID。`version` 是当前资料版本；`relative_path` 为代表文件路径。详情提供 `library_root` 和文件的相对 `path`。整剧最多返回前 1000 个文件，实际数量见 `file_count`。
 
+## 手动分配未入库的分集
+
+先用目录接口取得视频的相对路径，再用媒体库的读写 Key 提交：
+
+```http
+POST /api/agent/libraries/3/episodes
+Authorization: Bearer dino_agent_完整的Key
+Content-Type: application/json
+
+{"episodes":[{"path":"剧名/第一季/[01].mkv","series_folder":"剧名","season":1,"episode":1}]}
+```
+
+每批 1–100 个文件，仅支持电视剧库。`series_folder` 是文件所在剧集的目录，必须是文件路径的上级；同一部剧的不同季可用同一个目录。季号范围为 0–999，0 代表特典。集号范围为 1–9999。
+
+接口保存分集对应关系并启动扫描，返回 `202` 和 `scan`。用 `GET /api/agent/libraries/{id}/scan` 查看最近一次扫描；完成后用任务接口找整剧 ID，再提交元数据。重新扫描时会保留分集对应关系。重复提交相同分配是安全的；已入库文件或不同分配返回 `409`。库正在扫描时也返回 `409`，等扫描结束再提交。
+
 ## 提交 JSON
 
 ```http

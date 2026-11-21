@@ -19,6 +19,8 @@ func (s *Server) mountAgent(mux *http.ServeMux) {
 	mux.Handle("GET /api/agent/tasks", s.requireAgent(false, http.HandlerFunc(s.agentTasks)))
 	mux.Handle("GET /api/agent/libraries", s.requireAgent(false, http.HandlerFunc(s.agentLibraries)))
 	mux.Handle("GET /api/agent/libraries/{id}/files", s.requireAgent(false, http.HandlerFunc(s.agentDirectory)))
+	mux.Handle("POST /api/agent/libraries/{id}/episodes", s.requireAgent(true, http.HandlerFunc(s.agentImportEpisodes)))
+	mux.Handle("GET /api/agent/libraries/{id}/scan", s.requireAgent(false, http.HandlerFunc(s.agentScanStatus)))
 	mux.Handle("GET /api/agent/{kind}/{id}", s.requireAgent(false, http.HandlerFunc(s.agentTarget)))
 	mux.Handle("GET /api/agent/{kind}/{id}/metadata", s.requireAgent(false, http.HandlerFunc(s.agentMetadata)))
 	mux.Handle("GET /api/agent/{kind}/{id}/metadata.nfo", s.requireAgent(false, http.HandlerFunc(s.agentNFO)))

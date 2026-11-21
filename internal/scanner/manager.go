@@ -10,6 +10,7 @@ import (
 	"dinosaur/internal/config"
 	"dinosaur/internal/library"
 	"dinosaur/internal/store"
+	"dinosaur/internal/television"
 )
 
 var ErrRunning = errors.New("library scan is already running")
@@ -36,6 +37,14 @@ func New(db *store.Store, c config.Config, logger *slog.Logger) *Manager {
 	return &Manager{db: db, config: c, logger: logger, ctx: ctx, cancel: cancel, active: make(map[int64]bool), slots: make(chan struct{}, 2)}
 }
 func (m *Manager) Scan(ctx context.Context, id int64) (library.ScanJob, error) {
+	return m.startScan(ctx, id, nil)
+}
+
+func (m *Manager) ImportEpisodes(ctx context.Context, id int64, assignments []television.EpisodeAssignment) (library.ScanJob, error) {
+	return m.startScan(ctx, id, assignments)
+}
+
+func (m *Manager) startScan(ctx context.Context, id int64, assignments []television.EpisodeAssignment) (library.ScanJob, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if m.closed {
@@ -50,6 +59,17 @@ func (m *Manager) Scan(ctx context.Context, id int64) (library.ScanJob, error) {
 	}
 	if item.Type != "movie" && item.Type != "tv" {
 		return library.ScanJob{}, ErrUnsupported
+	}
+	if assignments != nil {
+		if item.Type != "tv" {
+			return library.ScanJob{}, ErrUnsupported
+		}
+		if err := validateAssignments(item.RootPath, assignments); err != nil {
+			return library.ScanJob{}, err
+		}
+		if err := m.db.SaveEpisodeAssignments(ctx, id, assignments); err != nil {
+			return library.ScanJob{}, err
+		}
 	}
 	job, err := m.db.NewScan(ctx, id)
 	if err != nil {

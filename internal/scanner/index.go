@@ -9,9 +9,8 @@ import (
 	"dinosaur/internal/television"
 )
 
-func (m *Manager) index(item library.Library, relative string, old media.Item, job *library.ScanJob) error {
-	var episode television.EpisodeName
-	if item.Type == "tv" {
+func (m *Manager) index(item library.Library, relative string, old media.Item, episode television.EpisodeName, job *library.ScanJob) error {
+	if item.Type == "tv" && episode.Key == "" {
 		var ok bool
 		episode, ok = television.ParseEpisode(relative)
 		if !ok {

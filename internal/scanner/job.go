@@ -10,6 +10,7 @@ import (
 
 	"dinosaur/internal/library"
 	"dinosaur/internal/media"
+	"dinosaur/internal/television"
 )
 
 func (m *Manager) run(item library.Library, job library.ScanJob) {
@@ -66,11 +67,18 @@ func (m *Manager) scan(item library.Library, job *library.ScanJob) error {
 	if err != nil {
 		return err
 	}
+	var assigned map[string]television.EpisodeName
+	if item.Type == "tv" {
+		assigned, err = m.db.EpisodeAssignments(m.ctx, item.ID)
+		if err != nil {
+			return err
+		}
+	}
 	for _, relative := range paths {
 		if err := m.ctx.Err(); err != nil {
 			return err
 		}
-		if err := m.index(item, relative, previous[relative], job); err != nil {
+		if err := m.index(item, relative, previous[relative], assigned[relative], job); err != nil {
 			return err
 		}
 		job.Processed++

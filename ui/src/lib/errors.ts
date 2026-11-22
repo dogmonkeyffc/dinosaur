@@ -32,6 +32,8 @@ export const errorMessages: Record<string, string> = {
   unsupported_library: '暂不支持此媒体库类型，请检查配置。',
   scanner_unavailable: '扫描服务正在退出，请稍后重试。',
   invalid_filter: '筛选条件有误，请刷新后重试。',
+  username_exists: '这个用户名已存在。',
+  last_admin: '至少要保留一个可用的管理员账号。',
   invalid_credentials: '用户名或密码不正确，请重新输入。',
   invalid_setup_token: '初始化令牌不正确，请检查服务器上的令牌文件。',
   already_initialized: '管理员已创建，请刷新页面后登录。',

@@ -10,6 +10,7 @@ import { MobileLogin } from '../devices/MobileLogin';
 import { TVLogin } from '../devices/TVLogin';
 import { Devices } from '../devices/Devices';
 import { AgentKeys } from './AgentKeys';
+import { AccountManagement } from './AccountManagement';
 
 export function AccountPage() {
   const auth = useAuth();
@@ -32,6 +33,7 @@ export function AccountPage() {
   return (
     <section id="account-section">
       <Heading title="账户安全" />
+      {auth.user?.role === 'admin' && <AccountManagement currentID={auth.user.id} />}
       <MobileLogin />
       <TVLogin />
       <Devices />

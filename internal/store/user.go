@@ -97,3 +97,20 @@ func (s *Store) SetDisabled(ctx context.Context, id int64, disabled bool) error 
 	}
 	return tx.Commit()
 }
+
+func (s *Store) Users(ctx context.Context) ([]User, error) {
+	rows, err := s.DB.QueryContext(ctx, `SELECT id,username,role,disabled,created_at FROM users ORDER BY username COLLATE NOCASE,id`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	users := []User{}
+	for rows.Next() {
+		var user User
+		if err := rows.Scan(&user.ID, &user.Username, &user.Role, &user.Disabled, &user.CreatedAt); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+	return users, rows.Err()
+}

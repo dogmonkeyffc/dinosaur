@@ -121,3 +121,13 @@ func (s *Server) changePassword(w http.ResponseWriter, r *http.Request) {
 	s.clearCookie(w)
 	writeJSON(w, 200, map[string]bool{"ok": true})
 }
+
+func (s *Server) listUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := s.store.Users(r.Context())
+	if err != nil {
+		s.internal(w, r, err)
+		return
+	}
+	w.Header().Set("Cache-Control", "no-store")
+	writeJSON(w, 200, map[string]any{"users": users})
+}

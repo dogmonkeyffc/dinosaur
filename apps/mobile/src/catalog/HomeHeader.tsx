@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import type { MediaKind } from '@dinosaur/contracts';
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import type { MediaLibrary } from '@dinosaur/contracts';
 import { colors } from '@dinosaur/native-kit';
 
 export function HomeHeader({ accounts, pair }: { accounts: () => void; pair: () => void }) {
@@ -43,26 +43,27 @@ export function HomeHeader({ accounts, pair }: { accounts: () => void; pair: () 
   );
 }
 
-export function LibraryTabs({ kind, select, refresh }: {
-  kind: MediaKind;
-  select: (kind: MediaKind) => void;
+export function LibraryTabs({ libraries, selected, select, refresh }: {
+  libraries: MediaLibrary[];
+  selected?: number;
+  select: (id: number) => void;
   refresh: () => void;
 }) {
   return (
     <View style={css.heading}>
-      <View style={css.tabs}>
-        {([{ kind: 'movie', label: '电影' }, { kind: 'tv', label: '电视剧' }] as const).map((tab) => (
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={css.tabs}>
+        {libraries.map((library) => (
           <Pressable
-            key={tab.kind}
+            key={library.id}
             accessibilityRole="tab"
-            accessibilityState={{ selected: kind === tab.kind }}
-            onPress={() => select(tab.kind)}
-            style={[css.tab, kind === tab.kind && css.selected]}
+            accessibilityState={{ selected: selected === library.id }}
+            onPress={() => select(library.id)}
+            style={[css.tab, selected === library.id && css.selected]}
           >
-            <Text style={css.label}>{tab.label}</Text>
+            <Text style={css.label}>{library.name}</Text>
           </Pressable>
         ))}
-      </View>
+      </ScrollView>
       <Pressable accessibilityRole="button" accessibilityLabel="刷新" onPress={refresh} style={css.menuButton}>
         <Text style={css.menuIcon}>↻</Text>
       </Pressable>

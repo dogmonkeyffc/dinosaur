@@ -46,6 +46,12 @@ export interface Page<T> {
   page_size: number;
 }
 export type MediaKind = 'movie' | 'tv';
+
+export interface MediaLibrary {
+  id: number;
+  name: string;
+  type: MediaKind;
+}
 export interface Track {
   index: number;
   type: string;

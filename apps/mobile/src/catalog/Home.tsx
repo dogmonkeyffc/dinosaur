@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, Text, View, useWindowDimensions } from 'react-native';
-import type { Account, MediaKind } from '@dinosaur/contracts';
+import type { Account, MediaLibrary } from '@dinosaur/contracts';
 import {
   Busy,
   Button,
@@ -26,12 +26,27 @@ function HomeSession({
   accounts: () => void;
 }) {
   const client = useClient(account);
-  const [kind, setKind] = useState<MediaKind>('movie');
+  const [libraryID, setLibraryID] = useState<number>();
+  const [libraries, setLibraries] = useState<MediaLibrary[]>();
+  const [libraryError, setLibraryError] = useState('');
+  const [libraryRevision, setLibraryRevision] = useState(0);
+  const library = libraries?.find((item) => item.id === libraryID) ?? libraries?.[0];
+  const kind = library?.type ?? 'movie';
+  useEffect(() => {
+    let current = true;
+    setLibraryError('');
+    client.libraries().then(({ libraries: next }) => {
+      if (current) setLibraries(next);
+    }).catch((reason) => {
+      if (current) setLibraryError(reason instanceof Error ? reason.message : '无法读取媒体库。');
+    });
+    return () => { current = false; };
+  }, [client, libraryRevision]);
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<{ id: number; work: boolean }>();
   const [playing, setPlaying] = useState<number>();
-  const list = useMediaPage(client, kind, page, query);
+  const list = useMediaPage(client, kind, page, query, library?.id ?? null);
   const { width } = useWindowDimensions();
   const columns = width > 700 ? 4 : width >= 380 ? 3 : 2;
   const posterWidth = Math.floor((width - 48 - 8 * (columns - 1)) / columns);
@@ -73,12 +88,16 @@ function HomeSession({
               </ScrollView>
             </View>
           )}
-          <LibraryTabs kind={kind} select={(next) => {
-            setKind(next);
+          <LibraryTabs libraries={libraries ?? []} selected={library?.id} select={(id) => {
+            setLibraryID(id);
             setPage(1);
-          }} refresh={list.reload} />
-          <ErrorText error={list.error} />
-          {list.loading && <Busy />}
+          }} refresh={() => {
+            setLibraryRevision((value) => value + 1);
+            list.reload();
+          }} />
+          <ErrorText error={libraryError || list.error} />
+          {(!libraries && !libraryError || list.loading) && <Busy />}
+          {libraries?.length === 0 && <Text style={styles.muted}>暂无媒体库</Text>}
           <View style={[styles.row, { gap: 8, alignItems: 'flex-start' }]}>
             {list.items.map((item) => (
               <Poster
@@ -91,8 +110,8 @@ function HomeSession({
               />
             ))}
           </View>
-          {!list.loading && !list.items.length && <Text style={styles.muted}>暂无媒体</Text>}
-          <View style={styles.row}>
+          {library && !list.loading && !list.error && !list.items.length && <Text style={styles.muted}>暂无媒体</Text>}
+          {library && list.total > 24 && <View style={styles.row}>
             <Button disabled={page <= 1 || list.loading} onPress={() => setPage((value) => value - 1)}>
               上一页
             </Button>
@@ -105,7 +124,7 @@ function HomeSession({
             >
               下一页
             </Button>
-          </View>
+          </View>}
         </Screen>
       )}
     </View>

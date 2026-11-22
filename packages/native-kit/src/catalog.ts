@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import type { Movie, Series, SeriesDetail, MediaKind } from '@dinosaur/contracts';
 import type { Client } from '@dinosaur/client';
 
-export function useMediaPage(client: Client, kind: MediaKind, page: number, query: string) {
+export function useMediaPage(client: Client, kind: MediaKind, page: number, query: string, libraryID?: number | null) {
+  const scope = `${kind}:${libraryID}`;
+  const [loadedScope, setLoadedScope] = useState<string>();
   const [items, setItems] = useState<(Movie | Series)[]>([]);
   const [recent, setRecent] = useState<Movie[]>([]);
   const [total, setTotal] = useState(0);
@@ -10,6 +12,7 @@ export function useMediaPage(client: Client, kind: MediaKind, page: number, quer
   const [loading, setLoading] = useState(true);
   const [revision, setRevision] = useState(0);
   useEffect(() => {
+    if (libraryID === null) return;
     let active = true;
     setLoading(true);
     setError('');
@@ -17,11 +20,12 @@ export function useMediaPage(client: Client, kind: MediaKind, page: number, quer
       async () => {
         try {
           const [list, progress] = await Promise.all([
-            kind === 'tv' ? client.series(page, query) : client.movies(page, query),
+            kind === 'tv' ? client.series(page, query, libraryID) : client.movies(page, query, libraryID),
             client.recent(),
           ]);
           if (active) {
             setItems(list.items);
+            setLoadedScope(scope);
             setTotal(list.total);
             setRecent(progress.items);
           }
@@ -37,8 +41,15 @@ export function useMediaPage(client: Client, kind: MediaKind, page: number, quer
       active = false;
       clearTimeout(timer);
     };
-  }, [client, kind, page, query, revision]);
-  return { items, recent, total, error, loading, reload: () => setRevision((value) => value + 1) };
+  }, [client, kind, page, query, revision, libraryID, scope]);
+  return {
+    items: loadedScope === scope ? items : [],
+    recent,
+    total: loadedScope === scope ? total : 0,
+    error: libraryID === null ? '' : error,
+    loading: libraryID !== null && loading,
+    reload: () => setRevision((value) => value + 1),
+  };
 }
 
 export function useMediaDetail(client: Client, kind: MediaKind, id: number, enabled = true) {

@@ -1,6 +1,7 @@
 import type {
   Device,
   DeviceSession,
+  MediaLibrary,
   Movie,
   Page,
   Pairing,
@@ -54,11 +55,14 @@ export class Client extends Transport {
   logout() {
     return this.request('/api/auth/logout', 'POST');
   }
-  movies(page = 1, q = '') {
-    return this.request<Page<Movie>>(`/api/media?page=${page}&page_size=24&q=${encodeURIComponent(q)}`);
+  libraries() {
+    return this.request<{ libraries: MediaLibrary[] }>('/api/libraries');
   }
-  series(page = 1, q = '') {
-    return this.request<Page<Series>>(`/api/series?page=${page}&page_size=24&q=${encodeURIComponent(q)}`);
+  movies(page = 1, q = '', libraryID?: number) {
+    return this.request<Page<Movie>>(`/api/media?${catalogQuery(page, q, libraryID)}`);
+  }
+  series(page = 1, q = '', libraryID?: number) {
+    return this.request<Page<Series>>(`/api/series?${catalogQuery(page, q, libraryID)}`);
   }
   movie(id: number) {
     return this.request<{ item: Movie }>(`/api/media/${id}`);
@@ -84,4 +88,10 @@ export class Client extends Transport {
       ...(watched === undefined ? {} : { watched }),
     });
   }
+}
+
+
+function catalogQuery(page: number, q: string, libraryID?: number) {
+  const query = `page=${page}&page_size=24&q=${encodeURIComponent(q)}`;
+  return libraryID === undefined ? query : `${query}&library_id=${libraryID}`;
 }

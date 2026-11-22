@@ -43,31 +43,25 @@ export function HomeHeader({ accounts, pair }: { accounts: () => void; pair: () 
   );
 }
 
-export function LibraryTabs({ libraries, selected, select, refresh }: {
+export function LibraryTabs({ libraries, selected, select }: {
   libraries: MediaLibrary[];
   selected?: number;
   select: (id: number) => void;
-  refresh: () => void;
 }) {
   return (
-    <View style={css.heading}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={css.tabs}>
-        {libraries.map((library) => (
-          <Pressable
-            key={library.id}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: selected === library.id }}
-            onPress={() => select(library.id)}
-            style={[css.tab, selected === library.id && css.selected]}
-          >
-            <Text style={css.label}>{library.name}</Text>
-          </Pressable>
-        ))}
-      </ScrollView>
-      <Pressable accessibilityRole="button" accessibilityLabel="刷新" onPress={refresh} style={css.menuButton}>
-        <Text style={css.menuIcon}>↻</Text>
-      </Pressable>
-    </View>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={css.tabs}>
+      {libraries.map((library) => (
+        <Pressable
+          key={library.id}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: selected === library.id }}
+          onPress={() => select(library.id)}
+          style={[css.tab, selected === library.id && css.selected]}
+        >
+          <Text style={css.label}>{library.name}</Text>
+        </Pressable>
+      ))}
+    </ScrollView>
   );
 }
 

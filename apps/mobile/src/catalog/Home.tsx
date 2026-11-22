@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import { RefreshControl, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import type { Account, MediaLibrary } from '@dinosaur/contracts';
 import {
   Busy,
@@ -30,15 +30,20 @@ function HomeSession({
   const [libraries, setLibraries] = useState<MediaLibrary[]>();
   const [libraryError, setLibraryError] = useState('');
   const [libraryRevision, setLibraryRevision] = useState(0);
+  const [libraryLoading, setLibraryLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const library = libraries?.find((item) => item.id === libraryID) ?? libraries?.[0];
   const kind = library?.type ?? 'movie';
   useEffect(() => {
     let current = true;
     setLibraryError('');
+    setLibraryLoading(true);
     client.libraries().then(({ libraries: next }) => {
       if (current) setLibraries(next);
     }).catch((reason) => {
       if (current) setLibraryError(reason instanceof Error ? reason.message : '无法读取媒体库。');
+    }).finally(() => {
+      if (current) setLibraryLoading(false);
     });
     return () => { current = false; };
   }, [client, libraryRevision]);
@@ -47,6 +52,16 @@ function HomeSession({
   const [selected, setSelected] = useState<{ id: number; work: boolean }>();
   const [playing, setPlaying] = useState<number>();
   const list = useMediaPage(client, kind, page, query, library?.id ?? null);
+  useEffect(() => {
+    if (!libraryLoading && !list.loading) setRefreshing(false);
+  }, [libraryLoading, list.loading]);
+  function refresh() {
+    if (refreshing) return;
+    setRefreshing(true);
+    setLibraryLoading(true);
+    setLibraryRevision((value) => value + 1);
+    list.reload();
+  }
   const { width } = useWindowDimensions();
   const columns = width > 700 ? 4 : width >= 380 ? 3 : 2;
   const posterWidth = Math.floor((width - 48 - 8 * (columns - 1)) / columns);
@@ -67,7 +82,10 @@ function HomeSession({
         </View>
       )}
       {!selected && playing === undefined && (
-        <Screen backgroundColor="#121510">
+        <Screen
+          backgroundColor="#121510"
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} colors={['#426836']} />}
+        >
           <HomeHeader accounts={accounts} pair={pair} />
           <Input
             accessibilityLabel="搜索媒体"
@@ -91,12 +109,9 @@ function HomeSession({
           <LibraryTabs libraries={libraries ?? []} selected={library?.id} select={(id) => {
             setLibraryID(id);
             setPage(1);
-          }} refresh={() => {
-            setLibraryRevision((value) => value + 1);
-            list.reload();
           }} />
           <ErrorText error={libraryError || list.error} />
-          {(!libraries && !libraryError || list.loading) && <Busy />}
+          {!refreshing && ((!libraries && libraryLoading) || list.loading) && <Busy />}
           {libraries?.length === 0 && <Text style={styles.muted}>暂无媒体库</Text>}
           <View style={[styles.row, { gap: 8, alignItems: 'flex-start' }]}>
             {list.items.map((item) => (

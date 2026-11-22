@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useState, type ReactElement, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Platform,
@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
   type TextInputProps,
+  type RefreshControlProps,
 } from 'react-native';
 import { colors, styles } from './theme';
 
@@ -20,6 +21,7 @@ export function Screen({
   backgroundColor,
   onBack,
   backPreferred,
+  refreshControl,
   scrolled,
 }: {
   children: ReactNode;
@@ -29,6 +31,7 @@ export function Screen({
   backgroundColor?: string;
   onBack?: () => void;
   backPreferred?: boolean;
+  refreshControl?: ReactElement<RefreshControlProps>;
   scrolled?: (offset: number) => void;
 }) {
   return (
@@ -42,6 +45,7 @@ export function Screen({
       <StatusBar hidden={tv} barStyle="light-content" />
       <ScrollView
         keyboardShouldPersistTaps="handled"
+        refreshControl={refreshControl}
         contentOffset={{ x: 0, y: scrollY }}
         onScroll={(event) => scrolled?.(event.nativeEvent.contentOffset.y)}
         scrollEventThrottle={100}

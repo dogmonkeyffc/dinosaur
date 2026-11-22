@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"dinosaur/internal/auth"
+	"dinosaur/internal/store"
 )
 
 type responseWriter struct {
@@ -120,7 +121,11 @@ func (s *Server) require(admin bool, next http.Handler) http.Handler {
 			fail(w, 403, "invalid_csrf", "valid X-CSRF-Token header required")
 			return
 		}
-		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), identityKey{}, identity{user: u, token: token, device: kind == "device"})))
+		ctx := context.WithValue(r.Context(), identityKey{}, identity{user: u, token: token, device: kind == "device"})
+		if u.Role != "admin" {
+			ctx = store.WithLibraryViewer(ctx, u.ID)
+		}
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 func current(r *http.Request) identity { return r.Context().Value(identityKey{}).(identity) }

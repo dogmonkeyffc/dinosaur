@@ -87,6 +87,7 @@ func (s *Server) servePoster(w http.ResponseWriter, r *http.Request, key string)
 		fail(w, 404, "not_found", "poster unavailable")
 		return
 	}
+	w.Header().Set("Cache-Control", "private, no-store")
 	w.Header().Set("Content-Type", "image/jpeg")
 	http.ServeContent(w, r, "poster.jpg", info.ModTime(), file)
 }

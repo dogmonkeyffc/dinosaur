@@ -15,7 +15,7 @@ func (s *Store) WorkByID(ctx context.Context, id, userID int64) (television.Work
 		return result, err
 	}
 	defer tx.Rollback()
-	err = tx.QueryRowContext(ctx, `SELECT id,title,library_id FROM works WHERE id=?`, id).Scan(&result.Work.ID, &result.Work.Title, &result.Work.LibraryID)
+	err = tx.QueryRowContext(ctx, `SELECT id,title,library_id FROM works WHERE id=? AND `+libraryVisible("works.library_id"), id, libraryViewer(ctx)).Scan(&result.Work.ID, &result.Work.Title, &result.Work.LibraryID)
 	if err != nil {
 		return result, err
 	}
@@ -60,7 +60,7 @@ func (s *Store) WorkByID(ctx context.Context, id, userID int64) (television.Work
 }
 
 func (s *Store) Works(ctx context.Context, libraryID, userID int64) ([]television.Work, error) {
-	rows, err := s.DB.QueryContext(ctx, `SELECT w.id FROM works w WHERE (?=0 OR w.library_id=?) AND EXISTS(SELECT 1 FROM work_members wm JOIN tv_series s ON s.id=wm.series_id WHERE wm.work_id=w.id AND `+seriesVisible+`) ORDER BY w.title COLLATE NOCASE,w.id`, libraryID, libraryID)
+	rows, err := s.DB.QueryContext(ctx, `SELECT w.id FROM works w WHERE (?=0 OR w.library_id=?) AND `+libraryVisible("w.library_id")+` AND EXISTS(SELECT 1 FROM work_members wm JOIN tv_series s ON s.id=wm.series_id WHERE wm.work_id=w.id AND `+seriesVisible+`) ORDER BY w.title COLLATE NOCASE,w.id`, libraryID, libraryID, libraryViewer(ctx))
 	if err != nil {
 		return nil, err
 	}

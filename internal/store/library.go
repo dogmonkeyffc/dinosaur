@@ -15,7 +15,7 @@ var ErrLibraryPathExists = errors.New("media directory already belongs to a libr
 type Library = library.Library
 
 func (s *Store) Libraries(ctx context.Context) ([]Library, error) {
-	rows, err := s.DB.QueryContext(ctx, `SELECT id,name,type,root_path,created_at,updated_at,(SELECT count(*) FROM media_items WHERE library_id=libraries.id AND missing=0) FROM libraries ORDER BY id`)
+	rows, err := s.DB.QueryContext(ctx, `SELECT id,name,type,root_path,created_at,updated_at,(SELECT count(*) FROM media_items WHERE library_id=libraries.id AND missing=0) FROM libraries WHERE `+libraryVisible("libraries.id")+` ORDER BY id`, libraryViewer(ctx))
 	if err != nil {
 		return nil, err
 	}

@@ -39,13 +39,13 @@ func scanSeries(row interface{ Scan(...any) error }) (television.Series, error) 
 }
 
 func (s *Store) SeriesByID(ctx context.Context, id int64) (television.Series, error) {
-	return scanSeries(s.DB.QueryRowContext(ctx, `SELECT `+seriesColumns+seriesFrom+` WHERE s.id=? AND `+seriesVisible, id))
+	return scanSeries(s.DB.QueryRowContext(ctx, `SELECT `+seriesColumns+seriesFrom+` WHERE s.id=? AND `+seriesVisible+` AND `+libraryVisible("s.library_id"), id, libraryViewer(ctx)))
 }
 
 func (s *Store) RawSeriesPage(ctx context.Context, filter media.Filter, userID int64) (television.Page, error) {
 	page := television.Page{Items: []television.Series{}, Page: filter.Page, PageSize: filter.PageSize}
-	where := ` WHERE ` + seriesVisible
-	args := []any{}
+	where := ` WHERE ` + seriesVisible + ` AND ` + libraryVisible("s.library_id")
+	args := []any{libraryViewer(ctx)}
 	if filter.LibraryID > 0 {
 		where += ` AND s.library_id=?`
 		args = append(args, filter.LibraryID)
@@ -95,7 +95,7 @@ func (s *Store) RawSeriesPage(ctx context.Context, filter media.Filter, userID i
 }
 
 func (s *Store) SeriesEpisodes(ctx context.Context, id, userID int64) ([]media.Item, error) {
-	rows, err := s.DB.QueryContext(ctx, `SELECT `+mediaColumns+mediaFrom+` WHERE ep.series_id=? AND m.missing=0 ORDER BY ep.season_number,ep.episode_number,m.id`, id)
+	rows, err := s.DB.QueryContext(ctx, `SELECT `+mediaColumns+mediaFrom+` WHERE ep.series_id=? AND m.missing=0 AND `+libraryVisible("m.library_id")+` ORDER BY ep.season_number,ep.episode_number,m.id`, id, libraryViewer(ctx))
 	if err != nil {
 		return nil, err
 	}

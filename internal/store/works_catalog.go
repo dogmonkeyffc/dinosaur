@@ -9,7 +9,7 @@ import (
 )
 
 // Group before filtering/pagination so a matching member never exposes siblings as cards.
-const workCatalog = `WITH visible AS (
+var workCatalog = `WITH visible AS (
  SELECT s.id,s.library_id,` + seriesTitle + ` AS title,s.title AS source_title,s.aliases,
  COALESCE(wm.work_id,0) AS work_id,COALESCE(w.title,` + seriesTitle + `) AS card_title,
  CASE WHEN wm.work_id IS NULL THEN 's'||s.id ELSE 'w'||wm.work_id END AS card_key,
@@ -19,7 +19,7 @@ const workCatalog = `WITH visible AS (
  (SELECT count(*) FROM tv_episodes e JOIN media_items m ON m.id=e.media_id JOIN playback_progress p ON p.media_id=m.id WHERE e.series_id=s.id AND m.missing=0 AND p.user_id=? AND p.watched=1) AS watched,
  (SELECT max(p.updated_at) FROM tv_episodes e JOIN media_items m ON m.id=e.media_id JOIN playback_progress p ON p.media_id=m.id WHERE e.series_id=s.id AND m.missing=0 AND p.user_id=? AND (p.position>0 OR p.watched=1)) AS recent
  FROM tv_series s LEFT JOIN work_members wm ON wm.series_id=s.id LEFT JOIN works w ON w.id=wm.work_id
- WHERE ` + seriesVisible + ` AND (?=0 OR s.library_id=?)
+ WHERE ` + seriesVisible + ` AND (?=0 OR s.library_id=?) AND ` + libraryVisible("s.library_id") + `
 ), cards AS (
  SELECT card_key,work_id,card_title,sum(episodes) episodes,sum(seasons) seasons,sum(watched) watched,count(*) members,max(recent) recent,
  (SELECT id FROM visible v2 WHERE v2.card_key=v.card_key ORDER BY position,id LIMIT 1) id
@@ -34,7 +34,7 @@ const workCatalog = `WITH visible AS (
 func (s *Store) SeriesPage(ctx context.Context, filter media.Filter, userID int64) (television.Page, error) {
 	page := television.Page{Items: []television.Series{}, Page: filter.Page, PageSize: filter.PageSize}
 	query := "%" + strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`).Replace(filter.Query) + "%"
-	args := []any{userID, userID, filter.LibraryID, filter.LibraryID, filter.Query, query, query, query, query, query, query, query}
+	args := []any{userID, userID, filter.LibraryID, filter.LibraryID, libraryViewer(ctx), filter.Query, query, query, query, query, query, query, query}
 	tx, err := s.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return page, err

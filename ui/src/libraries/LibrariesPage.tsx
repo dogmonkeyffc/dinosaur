@@ -1,5 +1,5 @@
 import { FormInput } from '../components/FormInput';
-import { Button, Card, IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Button, Card, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
@@ -9,6 +9,8 @@ import { activeJob, scanDescription } from '../lib/format';
 import type { Library } from '../lib/types';
 import { useLibraries } from './LibraryProvider';
 import { DeleteLibrary, LibraryDialog } from './LibraryDialog';
+import { LibraryAccessDialog } from './LibraryAccessDialog';
+import { LibraryCardMenu } from './LibraryCardMenu';
 
 export function LibrariesPage() {
   const { user } = useAuth();
@@ -19,6 +21,7 @@ export function LibrariesPage() {
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<Library | null | undefined>();
   const [deleting, setDeleting] = useState<Library>();
+  const [access, setAccess] = useState<Library>();
   const items = libraries.filter(
     (item) =>
       (filter === 'all' || item.type === filter) &&
@@ -80,7 +83,16 @@ export function LibrariesPage() {
                 <span className={`library-type-icon ${item.type === 'tv' ? 'tv' : ''}`}>
                   <Icon name={item.type === 'tv' ? 'tv' : 'film'} />
                 </span>
-                <span className="type-tag">{item.type === 'tv' ? '电视剧' : '电影'}</span>
+                <div className="card-actions">
+                  <span className="type-tag">{item.type === 'tv' ? '电视剧' : '电影'}</span>
+                  {admin && <LibraryCardMenu
+                    name={item.name}
+                    scanning={scanning}
+                    grant={() => setAccess(item)}
+                    edit={() => setEditing(item)}
+                    remove={() => setDeleting(item)}
+                  />}
+                </div>
               </div>
               <h2>{item.name}</h2>
               {item.root_path && (
@@ -93,26 +105,6 @@ export function LibrariesPage() {
                   <span className="status-dot" />
                   {admin ? (item.available ? '目录可访问' : '目录暂不可用') : '已配置'}
                 </span>
-                {admin && (
-                  <div className="card-actions">
-                    <IconButton
-                      disabled={scanning}
-
-                      onClick={() => setEditing(item)}
-                      aria-label={`编辑 ${item.name}`}
-                    >
-                      <Icon name="edit" />
-                    </IconButton>
-                    <IconButton
-                      disabled={scanning}
-
-                      onClick={() => setDeleting(item)}
-                      aria-label={`移除 ${item.name}`}
-                    >
-                      <Icon name="trash" />
-                    </IconButton>
-                  </div>
-                )}
               </div>
               <div className="library-browse-row">
                 <Link
@@ -150,6 +142,7 @@ export function LibrariesPage() {
       {editing !== undefined && (
         <LibraryDialog item={editing || undefined} close={() => setEditing(undefined)} />
       )}
+      {access && <LibraryAccessDialog item={access} close={() => setAccess(undefined)} />}
       {deleting && <DeleteLibrary item={deleting} close={() => setDeleting(undefined)} />}
     </section>
   );

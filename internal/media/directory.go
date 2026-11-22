@@ -21,6 +21,15 @@ const directoryPageSize = 100
 
 // DirectoryPage lists one level of the live filesystem within the configured root.
 func DirectoryPage(ctx context.Context, root, directory, after string) ([]DirectoryEntry, string, error) {
+	return directoryPage(ctx, root, directory, after, false)
+}
+
+// FolderPage lists only subdirectories in the same safe, paginated traversal.
+func FolderPage(ctx context.Context, root, directory, after string) ([]DirectoryEntry, string, error) {
+	return directoryPage(ctx, root, directory, after, true)
+}
+
+func directoryPage(ctx context.Context, root, directory, after string, foldersOnly bool) ([]DirectoryEntry, string, error) {
 	if directory == "" {
 		directory = "."
 	}
@@ -82,7 +91,7 @@ func DirectoryPage(ctx context.Context, root, directory, after string) ([]Direct
 		}
 		kind := "directory"
 		if !entry.IsDir() {
-			if !entry.Type().IsRegular() || !IsVideo(name) {
+			if foldersOnly || !entry.Type().IsRegular() || !IsVideo(name) {
 				continue
 			}
 			kind = "video"

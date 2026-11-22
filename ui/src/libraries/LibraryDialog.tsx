@@ -5,10 +5,13 @@ import { api } from '../lib/api';
 import { useAction } from '../lib/hooks';
 import type { Library, MediaKind } from '../lib/types';
 import { ErrorMessage, Modal } from '../components/common';
+import { DirectoryPicker } from './DirectoryPicker';
 import { useLibraries } from './LibraryProvider';
 
 export function LibraryDialog({ item, close }: { item?: Library; close: () => void }) {
   const [type, setType] = useState<MediaKind>(item?.type || 'movie');
+  const [path, setPath] = useState(item?.root_path || '');
+  const [browsing, setBrowsing] = useState(false);
   const action = useAction();
   const { reload } = useLibraries();
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -25,53 +28,69 @@ export function LibraryDialog({ item, close }: { item?: Library; close: () => vo
     });
   }
   return (
-    <Modal title={item ? '编辑媒体库' : '添加媒体库'} close={close}>
-      <form id="library-form" onSubmit={submit}>
-        <label>
-          媒体库名称
-          <FormInput
-            className="form-control"
-            name="name"
-            required
-            maxLength={80}
-            defaultValue={item?.name || ''}
-          />
-        </label>
-        <fieldset className="type-fieldset">
-          <legend>内容类型</legend>
-          <RadioGroup
-            name="type"
-            value={type}
-            row
-            onChange={(_, value) => setType(value === 'tv' ? 'tv' : 'movie')}
-          >
-            <FormControlLabel value="movie" control={<Radio />} label="电影" />
-            <FormControlLabel value="tv" control={<Radio />} label="电视剧" />
-          </RadioGroup>
-        </fieldset>
-        <label htmlFor="library-path">
-          媒体目录
-          <FormInput
-            className="form-control path-input"
-            id="library-path"
-            name="path"
-            required
-            maxLength={4096}
-            defaultValue={item?.root_path || ''}
-            placeholder="/mnt/media/movies"
-          />
-        </label>
-        <ErrorMessage error={action.error} />
-        <div className="modal-actions">
-          <Button variant="outlined" type="button" onClick={close}>
-            取消
-          </Button>
-          <Button variant="contained" disabled={action.busy} type="submit">
-            保存媒体库
-          </Button>
-        </div>
-      </form>
-    </Modal>
+    <>
+      <Modal title={item ? '编辑媒体库' : '添加媒体库'} close={close}>
+        <form id="library-form" onSubmit={submit}>
+          <label>
+            媒体库名称
+            <FormInput
+              className="form-control"
+              name="name"
+              required
+              maxLength={80}
+              defaultValue={item?.name || ''}
+            />
+          </label>
+          <fieldset className="type-fieldset">
+            <legend>内容类型</legend>
+            <RadioGroup
+              name="type"
+              value={type}
+              row
+              onChange={(_, value) => setType(value === 'tv' ? 'tv' : 'movie')}
+            >
+              <FormControlLabel value="movie" control={<Radio />} label="电影" />
+              <FormControlLabel value="tv" control={<Radio />} label="电视剧" />
+            </RadioGroup>
+          </fieldset>
+          <label htmlFor="library-path">媒体目录</label>
+          <div className="library-directory-field">
+            <FormInput
+              className="form-control path-input"
+              id="library-path"
+              name="path"
+              required
+              maxLength={4096}
+              value={path}
+              onChange={(event) => setPath(event.target.value)}
+              placeholder="/mnt/media/movies"
+            />
+            <Button variant="outlined" type="button" onClick={() => setBrowsing(true)}>
+              浏览
+            </Button>
+          </div>
+          <ErrorMessage error={action.error} />
+          <div className="modal-actions">
+            <Button variant="outlined" type="button" onClick={close}>
+              取消
+            </Button>
+            <Button variant="contained" disabled={action.busy} type="submit">
+              保存媒体库
+            </Button>
+          </div>
+        </form>
+      </Modal>
+      {browsing && (
+        <DirectoryPicker
+          initial={path}
+          close={() => setBrowsing(false)}
+          select={(directory) => {
+            setPath(directory);
+            setBrowsing(false);
+          }}
+        />
+      )}
+    </>
   );
 }
 

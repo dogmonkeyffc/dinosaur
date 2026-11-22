@@ -25,6 +25,7 @@ export function usePlayback(
   const started = useRef(false);
   const ended = useRef(false);
   const [time, setTime] = useState(start);
+  const [playing, setPlaying] = useState(false);
   const [error, setError] = useState('');
   const queue = useMemo(
     () => new ProgressQueue((value, watched) => client.progress(info.item.id, value, watched)),
@@ -57,6 +58,7 @@ export function usePlayback(
         setTime(position.current);
       }),
       player.addListener('playingChange', ({ isPlaying }) => {
+        if (active) setPlaying(isPlaying);
         if (!isPlaying) save();
       }),
       player.addListener('statusChange', ({ status }) => {
@@ -99,5 +101,5 @@ export function usePlayback(
     if (started.current) await queue.save(position.current);
     else await queue.flush();
   }
-  return { player, time, error, flush, position };
+  return { player, playing, time, error, flush, position };
 }

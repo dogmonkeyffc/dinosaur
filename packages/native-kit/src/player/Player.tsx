@@ -5,6 +5,7 @@ import type { PlaybackInfo } from '@dinosaur/contracts';
 import { Busy, Button, ErrorText } from '../components';
 import { styles } from '../theme';
 import { Stage } from './Stage';
+import { PlayerAction } from './PhoneControls';
 
 export function Player({
   client,
@@ -62,7 +63,7 @@ export function Player({
       <View style={styles.centered}>
         {!error && <Busy />}
         <ErrorText error={error} />
-        <Button onPress={close}>返回</Button>
+        {tv ? <Button onPress={close}>返回</Button> : <PlayerAction label="返回" text="←" press={close} />}
       </View>
     );
   return (

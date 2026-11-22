@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import { Client } from '@dinosaur/client';
 import type { Account, ConnectedServer, TVPairing } from '@dinosaur/contracts';
-import { Button, ErrorText, Screen, saveSingleAccount, styles } from '@dinosaur/native-kit';
+import { Button, ErrorText, saveSingleAccount, styles } from '@dinosaur/native-kit';
+import { Entry } from '../layout/Entry';
+import { tvColors } from '../layout/theme';
 
 export function Pairing({
   server,
@@ -72,10 +74,10 @@ export function Pairing({
   }, [server.id, server.url, revision]);
   const remaining = pairing ? Math.max(0, Math.ceil(pairing.expires_at - now / 1000)) : 0;
   return (
-    <Screen title="登录电视" tv>
-      <View style={[styles.card, { alignItems: 'center', padding: 36 }]}>
-        <Text style={styles.text}>手机 App → 登录电视</Text>
-        <Text selectable style={{ color: '#c2df9e', fontSize: 76, fontWeight: '700', letterSpacing: 14 }}>
+    <Entry title="登录电视">
+      <View style={[styles.card, { alignItems: 'center', padding: 16, backgroundColor: tvColors.container }]}>
+        <Text style={styles.text}>网页「账户安全」或手机 App「登录电视」</Text>
+        <Text selectable style={{ color: tvColors.accent, fontSize: 48, fontWeight: '700', letterSpacing: 8 }}>
           {pairing && remaining > 0 ? pairing.code : pairing ? '已过期' : '••••••'}
         </Text>
         {pairing && remaining > 0 && <Text style={styles.muted}>{remaining} 秒后过期</Text>}
@@ -87,6 +89,6 @@ export function Pairing({
         </Button>
         <Button onPress={() => setRevision((value) => value + 1)}>刷新配对码</Button>
       </View>
-    </Screen>
+    </Entry>
   );
 }

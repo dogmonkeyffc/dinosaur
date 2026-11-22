@@ -17,18 +17,21 @@ export function Screen({
   title,
   tv = false,
   scrollY = 0,
+  backgroundColor,
   scrolled,
 }: {
   children: ReactNode;
   title?: string;
   tv?: boolean;
   scrollY?: number;
+  backgroundColor?: string;
   scrolled?: (offset: number) => void;
 }) {
   return (
     <View
       style={[
         styles.screen,
+        backgroundColor && { backgroundColor },
         { paddingTop: tv ? 0 : Platform.OS === 'android' ? StatusBar.currentHeight : 52 },
       ]}
     >

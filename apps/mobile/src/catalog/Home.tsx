@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Text, View, useWindowDimensions } from 'react-native';
+import { ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import type { Account, MediaKind } from '@dinosaur/contracts';
 import {
   Busy,
@@ -14,6 +14,7 @@ import {
   useMediaPage,
 } from '@dinosaur/native-kit';
 import { Details } from './Details';
+import { HomeHeader, LibraryTabs } from './HomeHeader';
 
 function HomeSession({
   account,
@@ -32,7 +33,7 @@ function HomeSession({
   const [playing, setPlaying] = useState<number>();
   const list = useMediaPage(client, kind, page, query);
   const { width } = useWindowDimensions();
-  const columns = width > 700 ? 4 : 2;
+  const columns = width > 700 ? 4 : width >= 380 ? 3 : 2;
   const posterWidth = Math.floor((width - 48 - 8 * (columns - 1)) / columns);
   return (
     <View style={{ flex: 1 }}>
@@ -51,44 +52,8 @@ function HomeSession({
         </View>
       )}
       {!selected && playing === undefined && (
-        <Screen title="Dinosaur">
-          <View style={styles.row}>
-            <Button onPress={accounts}>切换账号</Button>
-            <Button primary onPress={pair}>
-              登录电视
-            </Button>
-          </View>
-          {list.recent.length > 0 && (
-            <View style={styles.card}>
-              <Text style={styles.subtitle}>继续观看</Text>
-              {list.recent.slice(0, 4).map((item) => (
-                <Button key={item.id} onPress={() => setPlaying(item.id)}>
-                  {item.title}
-                </Button>
-              ))}
-            </View>
-          )}
-          <View style={styles.row}>
-            <Button
-              primary={kind === 'movie'}
-              onPress={() => {
-                setKind('movie');
-                setPage(1);
-              }}
-            >
-              电影
-            </Button>
-            <Button
-              primary={kind === 'tv'}
-              onPress={() => {
-                setKind('tv');
-                setPage(1);
-              }}
-            >
-              电视剧
-            </Button>
-            <Button onPress={list.reload}>刷新</Button>
-          </View>
+        <Screen backgroundColor="#121510">
+          <HomeHeader accounts={accounts} pair={pair} />
           <Input
             accessibilityLabel="搜索媒体"
             placeholder="搜索片名"
@@ -98,6 +63,20 @@ function HomeSession({
               setPage(1);
             }}
           />
+          {list.recent.length > 0 && !query.trim() && (
+            <View style={{ gap: 6 }}>
+              <Text accessibilityRole="header" style={styles.subtitle}>继续观看</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                {list.recent.slice(0, 8).map((item) => (
+                  <Poster key={item.id} item={item} client={client} width={88} press={() => setPlaying(item.id)} />
+                ))}
+              </ScrollView>
+            </View>
+          )}
+          <LibraryTabs kind={kind} select={(next) => {
+            setKind(next);
+            setPage(1);
+          }} refresh={list.reload} />
           <ErrorText error={list.error} />
           {list.loading && <Busy />}
           <View style={[styles.row, { gap: 8, alignItems: 'flex-start' }]}>

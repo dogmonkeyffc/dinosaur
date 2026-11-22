@@ -7,6 +7,7 @@ import { useToast } from '../components/Toast';
 import { api } from '../lib/api';
 import { useAction } from '../lib/hooks';
 import { MobileLogin } from '../devices/MobileLogin';
+import { TVLogin } from '../devices/TVLogin';
 import { Devices } from '../devices/Devices';
 import { AgentKeys } from './AgentKeys';
 
@@ -32,6 +33,7 @@ export function AccountPage() {
     <section id="account-section">
       <Heading title="账户安全" />
       <MobileLogin />
+      <TVLogin />
       <Devices />
       {auth.user?.role === 'admin' && <AgentKeys />}
       <Card className="account-card">

@@ -36,11 +36,11 @@ export function SeriesDetails({ client, id, kind, tv, active, season, lastSeason
   return (
     <Screen key={`${active}:${season}`} tv={tv}
       title={selected ? `${item?.title || ''} · ${season === 0 ? '特别篇' : `第 ${season} 季`}` : item?.title || '媒体详情'}
+      onBack={close}
+      backPreferred={tv && active && (!item || (series && season === undefined && !seasons.length)
+        || (season !== undefined && !selected?.episodes.length))}
       scrollY={scroll.current[scrollKey] || 0}
       scrolled={(value) => { scroll.current[scrollKey] = value; }}>
-      <Button preferred={tv && active && (!item || (series && season === undefined && !seasons.length)
-        || (season !== undefined && !selected?.episodes.length))}
-        onPress={close}>返回</Button>
       <ErrorText error={error} />
       {!item && !error && <Busy />}
       {item && season === undefined && (

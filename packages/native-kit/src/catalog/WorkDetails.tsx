@@ -20,8 +20,8 @@ export function WorkDetails({ client, id, tv, active, member, width, close, sele
   const scroll = useRef(0);
   return (
     <Screen key={String(active)} tv={tv} title={detail?.work.title || '作品详情'}
+      onBack={close} backPreferred={tv && active && !detail?.members.length}
       scrollY={scroll.current} scrolled={(value) => { scroll.current = value; }}>
-      <Button preferred={tv && active && !detail?.members.length} onPress={close}>返回</Button>
       <ErrorText error={error} />
       {error && <Button onPress={reload}>重试</Button>}
       {!detail && !error && <Busy />}

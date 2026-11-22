@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BackHandler, View, useWindowDimensions } from 'react-native';
-import { Button, ErrorText, Screen } from '../components';
+import { ErrorText, Screen } from '../components';
 import type { Client } from '@dinosaur/client';
 import type { MediaKind } from '@dinosaur/contracts';
 import { WorkDetails } from './WorkDetails';
@@ -39,8 +39,7 @@ export function CatalogDetails({ client, id, kind, work = false, tv = false,
   }, [active, season, member, work, close]);
   const showWork = work && member === undefined;
   if (!Number.isSafeInteger(id) || id <= 0) return (
-    <Screen tv={tv} title="媒体详情">
-      <Button preferred={tv && active} onPress={close}>返回</Button>
+    <Screen tv={tv} title="媒体详情" onBack={close} backPreferred={tv && active}>
       <ErrorText error="无效的媒体。" />
     </Screen>
   );

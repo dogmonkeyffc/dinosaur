@@ -18,6 +18,8 @@ export function Screen({
   tv = false,
   scrollY = 0,
   backgroundColor,
+  onBack,
+  backPreferred,
   scrolled,
 }: {
   children: ReactNode;
@@ -25,6 +27,8 @@ export function Screen({
   tv?: boolean;
   scrollY?: number;
   backgroundColor?: string;
+  onBack?: () => void;
+  backPreferred?: boolean;
   scrolled?: (offset: number) => void;
 }) {
   return (
@@ -43,7 +47,14 @@ export function Screen({
         scrollEventThrottle={100}
         contentContainerStyle={[styles.content, tv && { padding: 40 }]}
       >
-        {title && (
+        {onBack ? (
+          <View style={styles.screenHeader}>
+            <BackButton onPress={onBack} preferred={backPreferred} />
+            <Text accessibilityRole="header" style={[styles.title, { flex: 1 }]}>
+              {title}
+            </Text>
+          </View>
+        ) : title && (
           <Text accessibilityRole="header" style={styles.title}>
             {title}
           </Text>
@@ -51,6 +62,27 @@ export function Screen({
         {children}
       </ScrollView>
     </View>
+  );
+}
+
+function BackButton({ onPress, preferred }: { onPress: () => void; preferred?: boolean }) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <Pressable
+      accessibilityLabel="返回"
+      accessibilityRole="button"
+      hasTVPreferredFocus={preferred}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.backButton,
+        focused && styles.backButtonFocused,
+        pressed && { opacity: 0.7 },
+      ]}
+    >
+      <Text style={[styles.backArrow, focused && { color: colors.background }]}>←</Text>
+    </Pressable>
   );
 }
 

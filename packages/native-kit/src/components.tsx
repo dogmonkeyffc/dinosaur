@@ -50,9 +50,11 @@ export function Screen({
         {onBack ? (
           <View style={styles.screenHeader}>
             <BackButton onPress={onBack} preferred={backPreferred} />
-            <Text accessibilityRole="header" style={[styles.title, { flex: 1 }]}>
-              {title}
-            </Text>
+            {title && (
+              <Text accessibilityRole="header" style={[styles.title, { flex: 1 }]}>
+                {title}
+              </Text>
+            )}
           </View>
         ) : title && (
           <Text accessibilityRole="header" style={styles.title}>

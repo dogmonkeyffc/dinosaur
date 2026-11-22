@@ -6,6 +6,7 @@ import { Busy, Button, ErrorText, Screen } from '../components';
 import { useMediaDetail } from '../catalog';
 import { Poster } from '../Poster';
 import { styles } from '../theme';
+import { PhoneMovieDetails } from './PhoneMovieDetails';
 
 export function SeriesDetails({ client, id, kind, tv, active, season, lastSeason,
   width, close, selectSeason, play }: {
@@ -26,16 +27,20 @@ export function SeriesDetails({ client, id, kind, tv, active, season, lastSeason
   const scroll = useRef<Record<string, number>>({});
   const scrollKey = season === undefined ? 'seasons' : `season:${season}`;
   const item = movie || series?.series;
+  const phoneMovie = tv ? undefined : movie;
   const selected = series?.seasons.find((value) => value.number === season);
   const seasons = (series?.seasons || []).filter((value) =>
     Number.isSafeInteger(value.number) && value.number >= 0);
+  const title = selected
+    ? `${item?.title || ''} · ${season === 0 ? '特别篇' : `第 ${season} 季`}`
+    : item?.title || '媒体详情';
   const start = (episode: number) => {
     lastEpisode.current = episode;
     play(episode);
   };
   return (
     <Screen key={`${active}:${season}`} tv={tv}
-      title={selected ? `${item?.title || ''} · ${season === 0 ? '特别篇' : `第 ${season} 季`}` : item?.title || '媒体详情'}
+      title={phoneMovie ? undefined : title}
       onBack={close}
       backPreferred={tv && active && (!item || (series && season === undefined && !seasons.length)
         || (season !== undefined && !selected?.episodes.length))}
@@ -43,7 +48,8 @@ export function SeriesDetails({ client, id, kind, tv, active, season, lastSeason
       scrolled={(value) => { scroll.current[scrollKey] = value; }}>
       <ErrorText error={error} />
       {!item && !error && <Busy />}
-      {item && season === undefined && (
+      {phoneMovie && <PhoneMovieDetails key={phoneMovie.id} movie={phoneMovie} client={client} play={() => start(phoneMovie.id)} />}
+      {!phoneMovie && item && season === undefined && (
         <View style={styles.card}>
           {!!item.year && <Text style={styles.muted}>{item.year}</Text>}
           {!!item.metadata?.overview && <Text style={styles.text}>{item.metadata.overview}</Text>}

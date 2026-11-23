@@ -56,7 +56,7 @@ scripts/build_apps.sh mobile
 scripts/build_apps.sh tv
 ```
 
-产物为 `bin/apps/dinosaur-mobile-preview.apk`、`bin/apps/dinosaur-tv-preview.apk` 及 SHA-256 文件。默认包含 arm64-v8a 和 x86_64，可通过 `DINOSAUR_ANDROID_ABIS` 修改。初版沿用模板调试签名作内部安装，正式发布需要独立签名与版本管理；此 APK 不含 Metro 开发服务器依赖。
+产物按各 App 的 `app.json` 版本号命名为 `bin/apps/dinosaur-mobile-<版本>-preview.apk`、`bin/apps/dinosaur-tv-<版本>-preview.apk`，同时生成对应 SHA-256 文件，校验内容使用相同文件名。例如手机版 0.4.0 为 `dinosaur-mobile-0.4.0-preview.apk`。默认包含 arm64-v8a 和 x86_64，可通过 `DINOSAUR_ANDROID_ABIS` 修改。初版沿用模板调试签名作内部安装，正式发布需要独立签名与版本管理；此 APK 不含 Metro 开发服务器依赖。
 
 Go 服务仍通过根目录 `build.sh` 打包，不需要 Android SDK。App 要求服务端支持 `/api/server`、设备会话及配对 API；旧版 NAS 服务需升级后才能使用这些登录功能。
 

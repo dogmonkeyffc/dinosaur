@@ -36,7 +36,8 @@ for app in mobile tv; do
       --max-workers="${DINOSAUR_ANDROID_BUILD_WORKERS:-2}" \
       -PreactNativeArchitectures="${DINOSAUR_ANDROID_ABIS:-arm64-v8a,x86_64}"
   )
-  artifact="$project_root/bin/apps/dinosaur-$app-preview.apk"
+  version="$(node -p "require('./apps/$app/app.json').expo.version")"
+  artifact="$project_root/bin/apps/dinosaur-$app-$version-preview.apk"
   cp "$project_root/apps/$app/android/app/build/outputs/apk/release/app-release.apk" "$artifact"
   python3 - "$artifact" <<'PY'
 import hashlib

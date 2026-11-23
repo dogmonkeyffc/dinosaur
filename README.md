@@ -1,5 +1,7 @@
 # Dinosaur
 
+观看记录支持站内完播记账、独立观看日记和豆瓣 HAR 导入，手机版第三个 tab 提供时间轴，见 [观看记录说明](docs/watch-history.md)。
+
 使用 Go 开发的自托管媒体服务器，功能目标参考 Jellyfin。目前已完成用户认证、Web 系统设置、媒体库后台扫描、电影与电视剧展示和浏览器播放。电视剧功能见 [使用说明](docs/television.md)，其他规划见 [task.md](task.md)。API 为项目自有协议。
 
 电视端与手机端的目录、共享代码边界及实施顺序见 [App 架构规划](docs/client-app-architecture.md)。

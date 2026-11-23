@@ -5,12 +5,17 @@ export function Icon({
   name,
   color = palette.muted,
 }: {
-  name: 'home' | 'library' | 'search';
+  name: 'home' | 'library' | 'search' | 'history';
   color?: string;
 }) {
   return (
     <View importantForAccessibility="no" style={css.icon}>
-      {name === 'search' ? (
+      {name === 'history' ? (
+        <View style={[css.clock, { borderColor: color }]}>
+          <View style={[css.hour, { backgroundColor: color }]} />
+          <View style={[css.minute, { backgroundColor: color }]} />
+        </View>
+      ) : name === 'search' ? (
         <>
           <View style={[css.lens, { borderColor: color }]} />
           <View style={[css.handle, { backgroundColor: color }]} />
@@ -33,6 +38,9 @@ export function Icon({
 
 const css = StyleSheet.create({
   icon: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center' },
+  clock: { width: 22, height: 22, borderRadius: 11, borderWidth: 2 },
+  hour: { position: 'absolute', width: 2, height: 7, top: 3, left: 8 },
+  minute: { position: 'absolute', width: 6, height: 2, top: 8, left: 8 },
   lens: { width: 16, height: 16, borderRadius: 8, borderWidth: 2, position: 'absolute', left: 2, top: 2 },
   handle: { width: 10, height: 2, position: 'absolute', left: 15, top: 19, transform: [{ rotate: '45deg' }] },
   grid: { width: 22, height: 22, flexDirection: 'row', flexWrap: 'wrap', gap: 4 },

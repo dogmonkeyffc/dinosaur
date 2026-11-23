@@ -4,6 +4,7 @@ import type { Account, MediaKind } from '@dinosaur/contracts';
 import { Player } from '@dinosaur/native-kit';
 import { AccountSettings } from '../settings/AccountSettings';
 import { useHomeVisibility } from '../settings/useHomeVisibility';
+import { HistoryTimeline } from '../history/HistoryTimeline';
 import { Details } from './Details';
 import { HomeHeader, HomeNavigation, LibraryTabs, type HomeTab } from './HomeHeader';
 import type { HomeMedia } from './HomeContent';
@@ -101,7 +102,9 @@ function HomeSession({
       {!selected && playing === undefined && (
         <View style={css.screen}>
           <StatusBar barStyle="light-content" />
-          {tab === 'library' ? (
+          {tab === 'history' ? (
+            <HistoryTimeline client={c.client} username={account.user.username} settings={showSettings} />
+          ) : tab === 'library' ? (
             <LibraryLanding
               key="library"
               catalog={c}

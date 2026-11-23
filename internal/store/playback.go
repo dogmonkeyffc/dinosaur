@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"strings"
-	"time"
 
 	"dinosaur/internal/media"
 	"dinosaur/internal/playback"
@@ -20,8 +19,7 @@ func (s *Store) PlaybackProgress(ctx context.Context, userID, mediaID int64) (pl
 	return p, err
 }
 func (s *Store) SavePlaybackProgress(ctx context.Context, userID int64, p playback.Progress) error {
-	_, err := s.DB.ExecContext(ctx, `INSERT INTO playback_progress(user_id,media_id,position,watched,updated_at) VALUES (?,?,?,?,?) ON CONFLICT(user_id,media_id) DO UPDATE SET position=excluded.position,watched=excluded.watched,updated_at=excluded.updated_at`, userID, p.MediaID, p.Position, p.Watched, time.Now().Unix())
-	return err
+	return s.saveProgressAndHistory(ctx, userID, p)
 }
 func (s *Store) AddPlaybackProgress(ctx context.Context, userID int64, items []media.Item) error {
 	if len(items) == 0 {

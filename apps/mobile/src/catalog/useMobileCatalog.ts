@@ -17,7 +17,7 @@ export function useMobileCatalog(account: Account, tab: HomeTab, hidden: number[
   const available = tab === 'home' ? (ready ? homeLibraries(libraries, hidden) : []) : libraries;
   const library = available.find((item) => item.id === libraryID) ?? available[0];
   const kind = library?.type ?? 'movie';
-  const list = useMediaPage(client, kind, page, query, library?.id ?? null);
+  const list = useMediaPage(client, kind, page, query, tab === 'history' ? null : (library?.id ?? null));
   useEffect(() => {
     let current = true;
     setError('');

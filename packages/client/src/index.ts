@@ -13,6 +13,7 @@ import type {
   TVPairing,
   User,
   WorkDetail,
+  WatchHistoryEntry,
 } from '@dinosaur/contracts';
 import { Transport } from './transport';
 export { ApiError, Transport } from './transport';
@@ -76,6 +77,9 @@ export class Client extends Transport {
   recent() {
     return this.request<{ items: Movie[] }>('/api/playback/continue');
   }
+  history(page = 1) {
+    return this.request<Page<WatchHistoryEntry>>(`/api/history?page=${page}&page_size=24`);
+  }
   playback(id: number, mode = 'original', start = 0, audio?: number, subtitle?: number | 'auto') {
     const query = new URLSearchParams({ mode, start: String(Math.max(0, start)) });
     if (audio !== undefined) query.set('audio', String(audio));
@@ -89,7 +93,6 @@ export class Client extends Transport {
     });
   }
 }
-
 
 function catalogQuery(page: number, q: string, libraryID?: number) {
   const query = `page=${page}&page_size=24&q=${encodeURIComponent(q)}`;

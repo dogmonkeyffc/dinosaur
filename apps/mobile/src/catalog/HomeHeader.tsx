@@ -5,7 +5,7 @@ import { Icon } from './HomeIcons';
 import { AccountButton } from './AccountButton';
 import { homeStyles as css, palette } from './homeStyles';
 
-export type HomeTab = 'home' | 'library' | 'search';
+export type HomeTab = 'home' | 'library' | 'search' | 'history';
 
 export function HomeHeader({
   settings,
@@ -88,7 +88,7 @@ export function HomeNavigation({ tab, select }: { tab: HomeTab; select: (tab: Ho
   const tabs = [
     { id: 'home', label: '首页', icon: 'home' },
     { id: 'library', label: '片库', icon: 'library' },
-    { id: 'search', label: '搜索', icon: 'search' },
+    { id: 'history', label: '记录', icon: 'history' },
   ] as const;
   return (
     <View accessibilityRole="tablist" style={css.navigation}>
@@ -97,18 +97,33 @@ export function HomeNavigation({ tab, select }: { tab: HomeTab; select: (tab: Ho
           key={item.id}
           accessibilityRole="tab"
           accessibilityLabel={item.label}
-          accessibilityState={{ selected: tab === item.id }}
+          accessibilityState={{ selected: tab === item.id || (tab === 'search' && item.id === 'home') }}
           onPress={() => select(item.id)}
           style={css.navItem}
         >
           <View
-            key={tab === item.id ? 'active' : 'inactive'}
+            key={tab === item.id || (tab === 'search' && item.id === 'home') ? 'active' : 'inactive'}
             collapsable={false}
-            style={[css.navIcon, tab === item.id && css.activeIcon]}
+            style={[
+              css.navIcon,
+              (tab === item.id || (tab === 'search' && item.id === 'home')) && css.activeIcon,
+            ]}
           >
-            <Icon name={item.icon} color={tab === item.id ? palette.accent : palette.muted} />
+            <Icon
+              name={item.icon}
+              color={
+                tab === item.id || (tab === 'search' && item.id === 'home') ? palette.accent : palette.muted
+              }
+            />
           </View>
-          <Text style={[css.navLabel, tab === item.id && css.activeText]}>{item.label}</Text>
+          <Text
+            style={[
+              css.navLabel,
+              (tab === item.id || (tab === 'search' && item.id === 'home')) && css.activeText,
+            ]}
+          >
+            {item.label}
+          </Text>
         </Pressable>
       ))}
     </View>

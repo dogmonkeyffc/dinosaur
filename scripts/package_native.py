@@ -65,6 +65,8 @@ def main():
         environment = dict(os.environ, CGO_ENABLED='0', GOOS='linux', GOARCH='amd64')
         subprocess.run(['bash', str(root / 'build.sh'), '--output', str(stage / 'dinosaur')],
                        cwd=root, env=environment, check=True)
+        subprocess.run(['go', 'build', '-trimpath', '-o', str(stage / 'dinosaur-history'),
+                        './cmd/dinosaur-history'], cwd=root, env=environment, check=True)
         copy_ffmpeg(args.ffmpeg_archive, stage)
         for name in ('dinosaur.service', 'dinosaur.env.example', 'install.py'):
             shutil.copy2(root / 'deploy' / 'native' / name, stage / name)

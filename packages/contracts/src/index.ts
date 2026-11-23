@@ -1,3 +1,5 @@
+export * from './history';
+
 export interface User {
   id: number;
   username: string;

@@ -64,6 +64,10 @@ Go 服务仍通过根目录 `build.sh` 打包，不需要 Android SDK。App 要�
 
 新增内嵌字幕功能需要同时升级服务端并重新构建手机/电视 APK；旧的 preview 安装包未包含图片字幕切换与分段续载适配。
 
+## 0.3.1 手机全屏横屏
+
+手机播放器点击原生全屏按钮后固定横屏，退出全屏后返回原播放页面。新版为 0.3.1 / versionCode 4，需要更新手机 APK。
+
 ## 0.3.0 手机配对码登录
 
 手机新版为 0.3.0 / versionCode 3。Web 发码接口 `POST /api/devices/login-code` 仅接受浏览器会话与 CSRF；公开兑换接口 `POST /api/devices/login-code/exchange` 接受 `{code,name}`。数字码只保存 SHA-256，不与电视 6 位码混用，兑换限每 IP 10 次及全局 100 次/15 分钟，包含无效尝试。成功生成独立设备会话，可从 Web 撤销。

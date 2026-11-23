@@ -2,13 +2,13 @@
   "expo": {
     "name": "Dinosaur",
     "slug": "dinosaur-mobile",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "scheme": "dinosaur",
     "orientation": "default",
     "userInterfaceStyle": "dark",
     "android": {
       "package": "com.monkeydog.dinosaur.mobile",
-      "versionCode": 3
+      "versionCode": 4
     },
     "plugins": [
       [

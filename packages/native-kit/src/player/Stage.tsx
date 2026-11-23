@@ -119,6 +119,7 @@ export function Stage({
         <VideoView
           player={playback.player}
           nativeControls
+          fullscreenOptions={{ enable: true, orientation: 'landscape' }}
           focusable
           style={{ flex: 1 }}
           contentFit="contain"

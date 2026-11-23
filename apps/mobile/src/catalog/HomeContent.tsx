@@ -6,7 +6,7 @@ import { homeStyles as css } from './homeStyles';
 
 export type HomeMedia = Movie | Series;
 
-function Artwork({
+export function Artwork({
   item,
   client,
   featured = false,
@@ -75,7 +75,7 @@ function MediaCard({
   );
 }
 
-function Shelf({
+export function Shelf({
   title,
   items,
   client,

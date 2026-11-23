@@ -1,0 +1,46 @@
+import { StyleSheet } from 'react-native';
+import { palette } from '../catalog/homeStyles';
+
+export const settingsStyles = StyleSheet.create({
+  backdrop: { flex: 1, backgroundColor: '#0008', justifyContent: 'flex-end' },
+  panel: {
+    flex: 1,
+    backgroundColor: '#202125',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    overflow: 'hidden',
+  },
+  content: { paddingHorizontal: 18, paddingBottom: 40, gap: 20 },
+  toolbar: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingTop: 8, gap: 8 },
+  server: { flex: 1, textAlign: 'center', color: palette.text, fontSize: 14 },
+  iconButton: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
+  icon: { color: palette.muted, fontSize: 28 },
+  profile: { alignItems: 'center', gap: 18, paddingVertical: 16 },
+  avatarRing: { padding: 5, borderRadius: 52, borderWidth: 2, borderColor: palette.accent },
+  avatar: {
+    width: 82,
+    height: 82,
+    borderRadius: 41,
+    backgroundColor: '#354a40',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  initial: { color: '#c4ead1', fontSize: 38, fontWeight: '600' },
+  username: { color: palette.text, fontSize: 25, textAlign: 'center' },
+  group: { backgroundColor: '#111215', borderRadius: 26, overflow: 'hidden' },
+  row: {
+    minHeight: 66,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 18,
+  },
+  rowBorder: { borderTopWidth: 1, borderColor: '#292a2e' },
+  rowIcon: { width: 26, color: palette.muted, fontSize: 24, textAlign: 'center' },
+  label: { flex: 1, color: palette.text, fontSize: 16 },
+  chevron: { color: palette.muted, fontSize: 22 },
+  title: { color: palette.text, fontSize: 24, paddingVertical: 14, paddingHorizontal: 8 },
+  version: { color: palette.muted, textAlign: 'center', fontSize: 13, paddingTop: 12 },
+  retry: { minHeight: 48, alignItems: 'center', justifyContent: 'center' },
+});

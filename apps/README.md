@@ -58,6 +58,8 @@ scripts/build_apps.sh tv
 
 产物按各 App 的 `app.json` 版本号命名为 `bin/apps/dinosaur-mobile-<版本>-preview.apk`、`bin/apps/dinosaur-tv-<版本>-preview.apk`，同时生成对应 SHA-256 文件，校验内容使用相同文件名。例如手机版 0.4.0 为 `dinosaur-mobile-0.4.0-preview.apk`。默认包含 arm64-v8a 和 x86_64，可通过 `DINOSAUR_ANDROID_ABIS` 修改。初版沿用模板调试签名作内部安装，正式发布需要独立签名与版本管理；此 APK 不含 Metro 开发服务器依赖。
 
+NAS 安装包统一发布到 `/mnt/eight/apks/`（文件管理器中为 `/eight/apks/`），保留版本号与对应 SHA-256 文件。新版手机包发布并校验后，将该目录中的旧版手机包及其校验文件移到 `archive/`，其他 App 安装包保留。
+
 Go 服务仍通过根目录 `build.sh` 打包，不需要 Android SDK。App 要求服务端支持 `/api/server`、设备会话及配对 API；旧版 NAS 服务需升级后才能使用这些登录功能。
 
 `android/` 由已提交的 Expo 配置与插件生成，构建缓存、APK 和本机凭据不提交到 Git。

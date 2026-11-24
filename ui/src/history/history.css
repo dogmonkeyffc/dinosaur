@@ -1,0 +1,118 @@
+.watch-history-actions,
+.watch-history-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.watch-history-content {
+  max-width: 64rem;
+}
+
+.watch-history-month h2 {
+  margin: 1.75rem 0 1rem;
+  color: var(--mui-palette-primary-main);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.watch-history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.watch-history-entry {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.watch-history-day {
+  position: relative;
+  text-align: center;
+  color: var(--mui-palette-text-secondary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding-top: 0.75rem;
+}
+
+.watch-history-day::after {
+  content: '';
+  position: absolute;
+  top: 3rem;
+  bottom: 0.5rem;
+  left: 50%;
+  border-left: 1px solid var(--mui-palette-divider);
+}
+
+.watch-history-card {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  gap: 1.25rem;
+  background: var(--md-surface-container);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 1rem;
+}
+
+.watch-history-artwork {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 2 / 3;
+  align-self: start;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: var(--md-surface-container-high);
+  color: var(--mui-palette-text-secondary);
+}
+
+.watch-history-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.watch-history-info {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.watch-history-info h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  line-height: 1.5;
+}
+
+.watch-history-original {
+  font-size: 0.875rem;
+  margin: 0 0 0.625rem;
+}
+
+.watch-history-meta {
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.watch-history-review {
+  margin: 0.75rem 0 0;
+  white-space: pre-wrap;
+  line-height: 1.75;
+}
+
+@media (max-width: 40rem) {
+  .watch-history-entry {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: 0.5rem;
+  }
+
+  .watch-history-card {
+    grid-template-columns: 3.75rem minmax(0, 1fr);
+    padding: 0.75rem;
+    gap: 0.875rem;
+  }
+}

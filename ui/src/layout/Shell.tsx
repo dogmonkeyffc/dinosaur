@@ -8,7 +8,11 @@ import { useLibraries } from '../libraries/LibraryProvider';
 import { libraryPath } from './navigation';
 
 const mobileQuery = '(max-width:720px), (max-width:1000px) and (max-height:500px) and (pointer:coarse)';
-const managementGroups = [
+const staticGroups = [
+  {
+    label: '我的',
+    entries: [['/history', '观看记录', 'history']],
+  },
   {
     label: '媒体管理',
     entries: [
@@ -48,7 +52,7 @@ export function Shell() {
         library.type === 'movie' ? 'film' : 'tv',
       ]),
     },
-    ...managementGroups,
+    ...staticGroups,
   ].filter((group) => group.entries.length > 0);
   const entries = navigationGroups.flatMap((group) => group.entries);
   const libraryID =
@@ -97,7 +101,13 @@ export function Shell() {
       <a className="skip-link" href="#content-main">
         跳到主要内容
       </a>
-      <Paper component="aside" elevation={0} square ref={sidebar} className={`sidebar${menu ? ' menu-open' : ''}`}>
+      <Paper
+        component="aside"
+        elevation={0}
+        square
+        ref={sidebar}
+        className={`sidebar${menu ? ' menu-open' : ''}`}
+      >
         <Brand />
         <Button
           variant="text"

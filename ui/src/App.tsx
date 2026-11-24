@@ -26,6 +26,9 @@ const ScrapingPage = lazy(() =>
   import('./scraping/ScrapingPage').then((page) => ({ default: page.ScrapingPage })),
 );
 const PlayerPage = lazy(() => import('./playback/PlayerPage').then((page) => ({ default: page.PlayerPage })));
+const HistoryPage = lazy(() =>
+  import('./history/HistoryPage').then((page) => ({ default: page.HistoryPage })),
+);
 function Admin({ children }: { children: ReactNode }) {
   return useAuth().user?.role === 'admin' ? children : <Navigate to="/settings" replace />;
 }
@@ -50,6 +53,7 @@ export function App() {
       <Routes>
         <Route element={<Shell />}>
           <Route index element={<HomePage />} />
+          <Route path="/history" element={<HistoryPage />} />
           <Route path="/settings" element={<LibrariesPage />} />
           <Route path="/settings/account" element={<AccountPage />} />
           <Route

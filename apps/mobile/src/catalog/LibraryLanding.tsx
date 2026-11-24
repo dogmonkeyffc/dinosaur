@@ -17,6 +17,7 @@ import { LibraryTabs } from './HomeHeader';
 import type { MobileCatalog } from './useMobileCatalog';
 import { libraryStyles as css } from './libraryStyles';
 import { homeStyles, palette } from './homeStyles';
+import { dp } from '../ui/density';
 
 export function LibraryLanding({
   catalog: c,
@@ -52,7 +53,7 @@ export function LibraryLanding({
         />
       }
     >
-      <View style={[css.hero, { minHeight: Math.max(300, Math.min(430, height * 0.48)) }]}>
+      <View style={[css.hero, { minHeight: dp(Math.max(300, Math.min(430, height * 0.48))) }]}>
         {!!featured?.poster_url && (
           <Image source={[c.client.resource(featured.poster_url)]} style={css.backdrop} resizeMode="cover" />
         )}
@@ -60,7 +61,7 @@ export function LibraryLanding({
         <View
           style={[
             css.header,
-            { paddingTop: (Platform.OS === 'android' ? (StatusBar.currentHeight ?? 24) : 52) + 12 },
+            { paddingTop: (Platform.OS === 'android' ? (StatusBar.currentHeight ?? 24) : 52) + dp(12) },
           ]}
         >
           <Text accessibilityLabel="Dinosaur" style={css.logo}>
@@ -84,6 +85,7 @@ export function LibraryLanding({
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={`查看${featured.title}`}
+                hitSlop={4}
                 style={css.button}
                 onPress={() => open(featured)}
               >

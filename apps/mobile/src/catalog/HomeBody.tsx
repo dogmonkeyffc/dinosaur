@@ -6,6 +6,7 @@ import { homeRecent } from '../settings/homeVisibility';
 import { HomeFeed, MediaGrid, Pagination, type HomeMedia } from './HomeContent';
 import type { MobileCatalog } from './useMobileCatalog';
 import { homeStyles as css, palette } from './homeStyles';
+import { dp } from '../ui/density';
 
 export function HomeBody({
   catalog: c,
@@ -71,7 +72,7 @@ export function HomeBody({
         )
       ) : (
         <>
-          <Text accessibilityRole="header" style={[css.sectionTitle, { paddingHorizontal: 24 }]}>
+          <Text accessibilityRole="header" style={[css.sectionTitle, { paddingHorizontal: dp(24) }]}>
             {c.query.trim() ? '搜索结果' : '浏览片库'}
           </Text>
           <MediaGrid items={c.list.items} client={c.client} open={open} />

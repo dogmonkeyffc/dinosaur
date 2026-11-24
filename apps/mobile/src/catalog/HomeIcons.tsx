@@ -1,4 +1,5 @@
 import { StyleSheet, View } from 'react-native';
+import { compactStyles } from '../ui/density';
 import { palette } from './homeStyles';
 
 export function Icon({
@@ -36,30 +37,39 @@ export function Icon({
   );
 }
 
-const css = StyleSheet.create({
-  icon: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center' },
-  clock: { width: 22, height: 22, borderRadius: 11, borderWidth: 2 },
-  hour: { position: 'absolute', width: 2, height: 7, top: 3, left: 8 },
-  minute: { position: 'absolute', width: 6, height: 2, top: 8, left: 8 },
-  lens: { width: 16, height: 16, borderRadius: 8, borderWidth: 2, position: 'absolute', left: 2, top: 2 },
-  handle: { width: 10, height: 2, position: 'absolute', left: 15, top: 19, transform: [{ rotate: '45deg' }] },
-  grid: { width: 22, height: 22, flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
-  square: { width: 9, height: 9, borderWidth: 2, borderRadius: 2 },
-  roof: {
-    width: 15,
-    height: 15,
-    borderLeftWidth: 2,
-    borderTopWidth: 2,
-    transform: [{ rotate: '45deg' }],
-    top: -1,
-  },
-  house: {
-    width: 17,
-    height: 14,
-    borderWidth: 2,
-    borderTopWidth: 0,
-    borderRadius: 2,
-    position: 'absolute',
-    bottom: 1,
-  },
-});
+const css = StyleSheet.create(
+  compactStyles({
+    icon: { width: 24, height: 24, alignItems: 'center', justifyContent: 'center' },
+    clock: { width: 22, height: 22, borderRadius: 11, borderWidth: 2 },
+    hour: { position: 'absolute', width: 2, height: 7, top: 3, left: 8 },
+    minute: { position: 'absolute', width: 6, height: 2, top: 8, left: 8 },
+    lens: { width: 16, height: 16, borderRadius: 8, borderWidth: 2, position: 'absolute', left: 2, top: 2 },
+    handle: {
+      width: 10,
+      height: 2,
+      position: 'absolute',
+      left: 15,
+      top: 19,
+      transform: [{ rotate: '45deg' }],
+    },
+    grid: { width: 22, height: 22, flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
+    square: { width: 9, height: 9, borderWidth: 2, borderRadius: 2 },
+    roof: {
+      width: 15,
+      height: 15,
+      borderLeftWidth: 2,
+      borderTopWidth: 2,
+      transform: [{ rotate: '45deg' }],
+      top: -1,
+    },
+    house: {
+      width: 17,
+      height: 14,
+      borderWidth: 2,
+      borderTopWidth: 0,
+      borderRadius: 2,
+      position: 'absolute',
+      bottom: 1,
+    },
+  }),
+);

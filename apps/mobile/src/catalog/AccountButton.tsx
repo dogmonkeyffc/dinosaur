@@ -6,6 +6,7 @@ export function AccountButton({ username, open }: { username: string; open: () =
     <Pressable
       accessibilityLabel="账号与设置"
       accessibilityRole="button"
+      hitSlop={8}
       onPress={open}
       style={css.avatarRing}
     >

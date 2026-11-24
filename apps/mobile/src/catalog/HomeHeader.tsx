@@ -43,6 +43,7 @@ export function HomeHeader({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="清除搜索"
+            hitSlop={8}
             onPress={() => search('')}
             style={css.clear}
           >

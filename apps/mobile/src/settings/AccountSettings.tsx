@@ -6,6 +6,7 @@ import type { useHomeVisibility } from './useHomeVisibility';
 import { settingsStyles as css } from './settingsStyles';
 import { palette } from '../catalog/homeStyles';
 import appConfig from '../../app.json';
+import { dp, uiScale } from '../ui/density';
 
 export function AccountSettings({
   account,
@@ -42,7 +43,7 @@ export function AccountSettings({
       <View
         style={[
           css.backdrop,
-          { paddingTop: (Platform.OS === 'android' ? (StatusBar.currentHeight ?? 24) : 52) + 10 },
+          { paddingTop: (Platform.OS === 'android' ? (StatusBar.currentHeight ?? 24) : 52) + dp(10) },
         ]}
       >
         <View accessibilityViewIsModal style={css.panel}>
@@ -51,6 +52,7 @@ export function AccountSettings({
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="返回账号设置"
+                hitSlop={4}
                 style={css.iconButton}
                 onPress={back}
               >
@@ -65,6 +67,7 @@ export function AccountSettings({
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="关闭设置"
+              hitSlop={4}
               style={css.iconButton}
               onPress={close}
             >
@@ -118,6 +121,7 @@ export function AccountSettings({
                     <View key={library.id} style={[css.row, index > 0 && css.rowBorder]}>
                       <Text style={css.label}>{library.name}</Text>
                       <Switch
+                        style={{ transform: [{ scale: uiScale }] }}
                         accessibilityLabel={`首页显示${library.name}`}
                         disabled={!visibility.ready || visibility.busy}
                         value={!visibility.hidden.includes(library.id)}

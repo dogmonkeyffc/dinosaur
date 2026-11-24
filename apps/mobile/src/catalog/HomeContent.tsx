@@ -3,6 +3,7 @@ import { Image, Pressable, ScrollView, Text, View, useWindowDimensions } from 'r
 import type { Client } from '@dinosaur/client';
 import type { Movie, Series } from '@dinosaur/contracts';
 import { homeStyles as css } from './homeStyles';
+import { dp } from '../ui/density';
 
 export type HomeMedia = Movie | Series;
 
@@ -22,7 +23,7 @@ export function Artwork({
       <View style={css.featureImage}>
         <Image
           source={[client.resource(item.poster_url)]}
-          blurRadius={18}
+          blurRadius={dp(18)}
           style={css.featureBackdrop}
           resizeMode="cover"
         />
@@ -89,7 +90,7 @@ export function Shelf({
   more?: () => void;
 }) {
   const { width } = useWindowDimensions();
-  const cardWidth = Math.min(150, Math.max(100, (width - 64) / 3.1));
+  const cardWidth = dp(Math.min(150, Math.max(100, (width - 64) / 3.1)));
   if (!items.length) return null;
   return (
     <View style={css.section}>
@@ -101,6 +102,7 @@ export function Shelf({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`查看全部${title}`}
+            hitSlop={8}
             onPress={more}
             style={css.more}
           >
@@ -175,7 +177,7 @@ export function MediaGrid({
 }) {
   const { width } = useWindowDimensions();
   const columns = width > 700 ? 5 : width >= 360 ? 3 : 2;
-  const cardWidth = Math.floor((width - 48 - 14 * (columns - 1)) / columns);
+  const cardWidth = Math.floor((width - dp(48) - dp(14) * (columns - 1)) / columns);
   return (
     <View style={css.grid}>
       {items.map((item) => (
@@ -213,6 +215,7 @@ export function Pagination({
             key={delta}
             accessibilityRole="button"
             accessibilityLabel={delta < 0 ? '上一页' : '下一页'}
+            hitSlop={4}
             disabled={disabled}
             accessibilityState={{ disabled }}
             onPress={() => change(page + delta)}

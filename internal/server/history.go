@@ -23,7 +23,7 @@ func (s *Server) mountHistory(mux *http.ServeMux) {
 }
 
 func historyURLs(e *history.Entry) {
-	if history.ValidPosterKey(e.PosterKey) || (e.Source == "local" && e.MediaID != nil) {
+	if history.ValidPosterKey(e.PosterKey) || (e.Source == "local" && (e.MediaID != nil || e.SeriesID != nil || e.WorkID != nil)) {
 		e.PosterURL = "/api/history/" + strconv.FormatInt(e.ID, 10) + "/poster"
 	}
 	if e.Source == "douban" {
@@ -119,13 +119,8 @@ func (s *Server) historyPoster(w http.ResponseWriter, r *http.Request) {
 		s.historyError(w, r, err)
 		return
 	}
-	if e.Source == "local" && e.MediaID != nil {
-		item, err := s.store.MediaByID(r.Context(), *e.MediaID)
-		if err != nil {
-			fail(w, 404, "not_found", "poster unavailable")
-			return
-		}
-		s.servePoster(w, r, item.PosterKey)
+	if e.Source == "local" && (e.MediaID != nil || e.SeriesID != nil || e.WorkID != nil) {
+		s.servePoster(w, r, s.localHistoryPoster(r, e))
 		return
 	}
 	f, err := historyassets.Open(filepath.Join(s.config.DataDir, "history-posters"), e.PosterKey)
@@ -142,6 +137,32 @@ func (s *Server) historyPoster(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "private, no-store")
 	w.Header().Del("Content-Type")
 	http.ServeContent(w, r, e.PosterKey, info.ModTime(), f)
+}
+
+func (s *Server) localHistoryPoster(r *http.Request, e history.Entry) string {
+	ctx := r.Context()
+	switch {
+	case e.SeriesID != nil:
+		series, err := s.store.SeriesByID(ctx, *e.SeriesID)
+		if err == nil {
+			return series.PosterKey
+		}
+	case e.WorkID != nil:
+		work, err := s.store.WorkByID(ctx, *e.WorkID, current(r).user.ID)
+		if err == nil {
+			for _, member := range work.Members {
+				if member.PosterKey != "" {
+					return member.PosterKey
+				}
+			}
+		}
+	case e.MediaID != nil:
+		item, err := s.store.MediaByID(ctx, *e.MediaID)
+		if err == nil {
+			return item.PosterKey
+		}
+	}
+	return ""
 }
 
 func (s *Server) historyError(w http.ResponseWriter, r *http.Request, err error) {

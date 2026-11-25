@@ -16,6 +16,8 @@ var key = regexp.MustCompile(`^[a-f0-9]{64}\.(webp|jpg|png)$`)
 type Entry struct {
 	ID            int64  `json:"id"`
 	MediaID       *int64 `json:"media_id,omitempty"`
+	SeriesID      *int64 `json:"series_id,omitempty"`
+	WorkID        *int64 `json:"work_id,omitempty"`
 	Title         string `json:"title"`
 	OriginalTitle string `json:"original_title"`
 	Year          int    `json:"year"`

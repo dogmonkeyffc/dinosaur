@@ -101,7 +101,7 @@ func TestPlaybackCompletionCreatesHistoryOnce(t *testing.T) {
 	if page.Total != 0 {
 		t.Fatal("unfinished viewing logged")
 	}
-	p.Watched = true
+	p.Watched, p.Completed = true, true
 	for range 3 {
 		if err := db.SavePlaybackProgress(ctx, user, p); err != nil {
 			t.Fatal(err)
@@ -111,11 +111,11 @@ func TestPlaybackCompletionCreatesHistoryOnce(t *testing.T) {
 	if page.Total != 1 || page.Items[0].Title != "Movie" {
 		t.Fatalf("wrong completion: %+v", page)
 	}
-	p.Watched = false
+	p.Watched, p.Completed = false, false
 	if err := db.SavePlaybackProgress(ctx, user, p); err != nil {
 		t.Fatal(err)
 	}
-	p.Watched = true
+	p.Watched, p.Completed = true, true
 	if err := db.SavePlaybackProgress(ctx, user, p); err != nil {
 		t.Fatal(err)
 	}

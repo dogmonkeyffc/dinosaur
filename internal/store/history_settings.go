@@ -46,7 +46,10 @@ func (s *Store) SetHistoryLibrarySetting(ctx context.Context, userID, libraryID 
 		if _, err := tx.ExecContext(ctx, `DELETE FROM playback_progress WHERE user_id=? AND media_id IN (SELECT id FROM media_items WHERE library_id=?)`, userID, libraryID); err != nil {
 			return err
 		}
-		if _, err := tx.ExecContext(ctx, `DELETE FROM watch_history WHERE user_id=? AND source='local' AND media_id IN (SELECT id FROM media_items WHERE library_id=?)`, userID, libraryID); err != nil {
+		if _, err := tx.ExecContext(ctx, `DELETE FROM watch_history WHERE user_id=? AND source='local' AND (
+ media_id IN (SELECT id FROM media_items WHERE library_id=?) OR
+ series_id IN (SELECT id FROM tv_series WHERE library_id=?) OR
+ work_id IN (SELECT id FROM works WHERE library_id=?))`, userID, libraryID, libraryID, libraryID); err != nil {
 			return err
 		}
 	}

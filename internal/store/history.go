@@ -10,11 +10,11 @@ import (
 	"modernc.org/sqlite"
 )
 
-const historyColumns = `id,media_id,title,original_title,year,watched_on,rating,review,source,source_id,poster_key`
+const historyColumns = `id,media_id,series_id,work_id,title,original_title,year,watched_on,rating,review,source,source_id,poster_key`
 
 func scanHistory(row interface{ Scan(...any) error }) (history.Entry, error) {
 	var e history.Entry
-	err := row.Scan(&e.ID, &e.MediaID, &e.Title, &e.OriginalTitle, &e.Year, &e.WatchedOn, &e.Rating, &e.Review, &e.Source, &e.SourceID, &e.PosterKey)
+	err := row.Scan(&e.ID, &e.MediaID, &e.SeriesID, &e.WorkID, &e.Title, &e.OriginalTitle, &e.Year, &e.WatchedOn, &e.Rating, &e.Review, &e.Source, &e.SourceID, &e.PosterKey)
 	return e, err
 }
 
@@ -57,11 +57,11 @@ func (s *Store) HistoryPage(ctx context.Context, userID int64, page, size int) (
 	return result, tx.Commit()
 }
 
-const insertHistory = `INSERT INTO watch_history(user_id,media_id,title,original_title,year,watched_on,rating,review,source,source_id,poster_key,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)`
+const insertHistory = `INSERT INTO watch_history(user_id,media_id,series_id,work_id,title,original_title,year,watched_on,rating,review,source,source_id,poster_key,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
 
 func historyArgs(userID int64, e history.Entry) []any {
 	now := time.Now().Unix()
-	return []any{userID, e.MediaID, e.Title, e.OriginalTitle, e.Year, e.WatchedOn, e.Rating, e.Review, e.Source, e.SourceID, e.PosterKey, now, now}
+	return []any{userID, e.MediaID, e.SeriesID, e.WorkID, e.Title, e.OriginalTitle, e.Year, e.WatchedOn, e.Rating, e.Review, e.Source, e.SourceID, e.PosterKey, now, now}
 }
 
 func historyWriteError(err error) error {

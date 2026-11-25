@@ -14,6 +14,7 @@ type Progress struct {
 	Duration  float64 `json:"duration"`
 	Watched   bool    `json:"watched"`
 	UpdatedAt int64   `json:"updated_at"`
+	Completed bool    `json:"-"`
 }
 
 func UpdateProgress(previous Progress, duration float64, position *float64, watched *bool) (Progress, error) {
@@ -26,10 +27,11 @@ func UpdateProgress(previous Progress, duration float64, position *float64, watc
 	previous.Duration = duration
 	if duration > 0 {
 		previous.Position = min(previous.Position, duration)
-		if previous.Position >= duration*.9 {
-			previous.Watched = true
-		}
 	}
+	// Players send the final position with an explicit end event. The Android
+	// player reports milliseconds, so allow for rounding when comparing lengths.
+	previous.Completed = watched != nil && *watched && position != nil &&
+		(duration <= 0 || *position >= duration-.001)
 	if watched != nil {
 		previous.Watched = *watched
 		if *watched && duration > 0 {

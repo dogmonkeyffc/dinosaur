@@ -28,7 +28,12 @@ func TestHistoryMigrationPreservesExistingWatchedProgress(t *testing.T) {
 		t.Fatal(err)
 	}
 	stamp := time.Date(2024, 4, 20, 17, 0, 0, 0, time.UTC).Unix()
-	for _, query := range []string{`DROP TABLE watch_history`, `DELETE FROM schema_migrations WHERE version='020_watch_history.sql'`} {
+	for _, query := range []string{
+		`DROP TABLE watch_history`,
+		`DROP VIEW history_episode_catalog`,
+		`ALTER TABLE playback_progress DROP COLUMN completed_at`,
+		`DELETE FROM schema_migrations WHERE version IN ('020_watch_history.sql','026_work_watch_history.sql')`,
+	} {
 		if _, err := db.DB.Exec(query); err != nil {
 			t.Fatal(err)
 		}

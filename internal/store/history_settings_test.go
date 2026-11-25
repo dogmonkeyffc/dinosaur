@@ -14,12 +14,12 @@ import (
 func TestHistoryRecordingSettingsArePerAccountAndSuppressProgress(t *testing.T) {
 	db, admin, viewer := historyFixture(t)
 	ctx := context.Background()
-	for _, kind := range []string{"movie", "tv"} {
-		lib, err := db.SaveLibrary(ctx, Library{Name: kind, Type: kind, RootPath: t.TempDir()})
+	for _, name := range []string{"Movies", "Other movies"} {
+		lib, err := db.SaveLibrary(ctx, Library{Name: name, Type: "movie", RootPath: t.TempDir()})
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := db.SaveMedia(ctx, media.Item{LibraryID: lib.ID, RelativePath: "video.mp4", Title: kind, Duration: 100}, 1); err != nil {
+		if err := db.SaveMedia(ctx, media.Item{LibraryID: lib.ID, RelativePath: "video.mp4", Title: name, Duration: 100}, 1); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -30,7 +30,7 @@ func TestHistoryRecordingSettingsArePerAccountAndSuppressProgress(t *testing.T) 
 	if err := db.SetHistoryLibrarySetting(ctx, admin, 1, false); err != nil {
 		t.Fatal(err)
 	}
-	p := playback.Progress{MediaID: 1, Position: 100, Watched: true}
+	p := playback.Progress{MediaID: 1, Position: 100, Watched: true, Completed: true}
 	if err := db.SavePlaybackProgress(ctx, admin, p); err != nil {
 		t.Fatal(err)
 	}
@@ -69,11 +69,11 @@ func TestHistoryRecordingSettingsArePerAccountAndSuppressProgress(t *testing.T) 
 		t.Fatal("enabling history backfilled suppressed events")
 	}
 	p.MediaID = 1
-	p.Watched = false
+	p.Watched, p.Completed = false, false
 	if err := db.SavePlaybackProgress(ctx, admin, p); err != nil {
 		t.Fatal(err)
 	}
-	p.Watched = true
+	p.Watched, p.Completed = true, true
 	if err := db.SavePlaybackProgress(ctx, admin, p); err != nil {
 		t.Fatal(err)
 	}

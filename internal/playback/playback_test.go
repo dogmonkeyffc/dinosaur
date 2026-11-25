@@ -40,10 +40,20 @@ func TestProgress(t *testing.T) {
 	}
 	nearEnd := 950.0
 	state, err = UpdateProgress(state, 1000, &nearEnd, nil)
-	if err != nil || !state.Watched || state.ResumePosition() != 0 {
-		t.Fatal("completion not detected")
+	if err != nil || state.Watched || state.Completed || state.ResumePosition() != nearEnd {
+		t.Fatal("near-end progress was treated as completion")
 	}
-	watched := false
+	watched := true
+	state, err = UpdateProgress(state, 1000, nil, &watched)
+	if err != nil || !state.Watched || state.Completed {
+		t.Fatal("manual mark was treated as playback completion")
+	}
+	end := 1000.0
+	state, err = UpdateProgress(state, 1000, &end, &watched)
+	if err != nil || !state.Completed {
+		t.Fatal("playback completion not detected")
+	}
+	watched = false
 	state, err = UpdateProgress(state, 1000, nil, &watched)
 	if err != nil || state.Watched || state.Position != 0 {
 		t.Fatal("unwatched did not reset progress")

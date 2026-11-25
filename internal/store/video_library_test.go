@@ -36,7 +36,7 @@ func TestVideoLibraryMigrationPreservesReferencesAndEnforcement(t *testing.T) {
 	if err := db.SaveMedia(ctx, media.Item{LibraryID: lib.ID, RelativePath: "keep.mp4", Title: "Keep", Duration: 100}, 1); err != nil {
 		t.Fatal(err)
 	}
-	if err := db.SavePlaybackProgress(ctx, u.ID, playback.Progress{MediaID: 1, Position: 100, Watched: true}); err != nil {
+	if err := db.SavePlaybackProgress(ctx, u.ID, playback.Progress{MediaID: 1, Position: 100, Watched: true, Completed: true}); err != nil {
 		t.Fatal(err)
 	}
 	if err := db.SetHistoryLibrarySetting(ctx, u.ID, lib.ID, true); err != nil {

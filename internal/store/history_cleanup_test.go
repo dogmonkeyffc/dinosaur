@@ -24,7 +24,7 @@ func cleanupFixture(t *testing.T) (*Store, int64, int64) {
 	}
 	for _, owner := range []int64{user, other} {
 		for _, id := range []int64{1, 2} {
-			if err := db.SavePlaybackProgress(ctx, owner, playback.Progress{MediaID: id, Position: 100, Watched: true}); err != nil {
+			if err := db.SavePlaybackProgress(ctx, owner, playback.Progress{MediaID: id, Position: 100, Watched: true, Completed: true}); err != nil {
 				t.Fatal(err)
 			}
 		}

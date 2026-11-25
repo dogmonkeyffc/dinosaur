@@ -83,3 +83,25 @@ func TestHistoryPostersAreLocalAndOwnerProtected(t *testing.T) {
 		t.Fatal("poster cache is public")
 	}
 }
+
+func TestMovieHistoryRequiresPlaybackEnd(t *testing.T) {
+	s, _, admin, _ := playbackFixture(t)
+	for _, step := range []struct {
+		body  map[string]any
+		total int
+	}{
+		{map[string]any{"position": 950}, 0},
+		{map[string]any{"watched": true}, 0},
+		{map[string]any{"position": 1000}, 0},
+		{map[string]any{"position": 1000, "watched": true}, 1},
+		{map[string]any{"position": 1000, "watched": true}, 1},
+	} {
+		status(t, request(t, s, "PUT", "/api/playback/1/progress", step.body, &admin, nil), 200)
+		w := request(t, s, "GET", "/api/history", nil, &admin, nil)
+		status(t, w, 200)
+		var page history.Page
+		if err := json.Unmarshal(w.Body.Bytes(), &page); err != nil || page.Total != step.total {
+			t.Fatalf("step %+v: %s %v", step, w.Body.String(), err)
+		}
+	}
+}

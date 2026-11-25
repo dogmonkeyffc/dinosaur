@@ -1,4 +1,4 @@
-package com.monkeydog.dinosaur.mobile
+package com.monkeydog.dinosaur.android
 
 import android.net.Uri
 import org.json.JSONArray
@@ -27,13 +27,16 @@ internal fun serverOrigin(raw: String): String {
         url.rawQuery == null && url.rawFragment == null && url.path in listOf("", "/") &&
         (url.port == -1 || url.port in 1..65535)) { "服务器地址无效" }
     if (scheme == "http") {
-        val ip = host.split('.').mapNotNull(String::toIntOrNull)
-        val local = ip.size == 4 && ip.all { it in 0..255 } &&
+        val parts = host.split('.')
+        val ip = parts.mapNotNull(String::toIntOrNull)
+        val local = parts.size == 4 && ip.size == 4 && ip.all { it in 0..255 } &&
             (ip[0] in listOf(10, 127) || ip[0] == 192 && ip[1] == 168 || ip[0] == 172 && ip[1] in 16..31)
         require(local || host == "localhost" || host.endsWith(".local")) { "公网服务器请使用 HTTPS" }
     }
     return URI(scheme, null, host, url.port, null, null, null).toString()
 }
+
+internal class ApiFailure(val status: Int, message: String) : IllegalStateException(message)
 
 internal class Api(val origin: String, private val token: String = "") {
     companion object {
@@ -59,6 +62,15 @@ internal class Api(val origin: String, private val token: String = "") {
 
     fun text(path: String): String = exchange(path, "GET", null)
 
+    fun stream(path: String, offset: Long): Uri {
+        val uri = resource(path)
+        val target = uri.buildUpon().clearQuery()
+        uri.queryParameterNames.filter { it != "start" }.forEach { name ->
+            uri.getQueryParameters(name).forEach { target.appendQueryParameter(name, it) }
+        }
+        return target.appendQueryParameter("start", (offset / 1000.0).toString()).build()
+    }
+
     private fun exchange(path: String, method: String, body: JSONObject?): String {
         val payload = if (body != null || method in listOf("POST", "PUT", "PATCH"))
             (body?.toString() ?: "{}").toRequestBody(jsonType) else null
@@ -66,11 +78,11 @@ internal class Api(val origin: String, private val token: String = "") {
         headers.forEach { (name, value) -> request.header(name, value) }
         return http.newCall(request.build()).execute().use { response ->
             val status = response.code
-            if (status == 401) error("登录已过期，请重新登录")
-            if (status == 403) error("当前账号没有操作权限")
+            if (status == 401) throw ApiFailure(status, "登录已过期，请重新登录")
+            if (status == 403) throw ApiFailure(status, "当前账号没有操作权限")
             if (status !in 200..299) {
                 val message = runCatching { JSONObject(response.body?.string().orEmpty()).optJSONObject("error")?.optString("message") }.getOrNull()
-                error(message?.takeIf(String::isNotBlank) ?: "请求失败（$status）")
+                throw ApiFailure(status, message?.takeIf(String::isNotBlank) ?: "请求失败（$status）")
             }
             if (status == 204) return ""
             response.body?.string().orEmpty()

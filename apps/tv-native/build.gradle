@@ -1,0 +1,42 @@
+plugins {
+    id 'com.android.application' version '8.12.0'
+    id 'org.jetbrains.kotlin.android' version '2.1.20'
+}
+android {
+    namespace 'com.monkeydog.dinosaur.tv'
+    compileSdk 36
+    sourceSets.main.java.srcDir rootProject.file('../android-common/src/main/kotlin')
+    defaultConfig {
+        applicationId 'com.monkeydog.dinosaur.tv'
+        minSdk 24
+        targetSdk 35
+        versionCode 3
+        versionName '1.0.0'
+    }
+    signingConfigs {
+        preview {
+            if (System.getenv('DINOSAUR_TV_KEYSTORE')) {
+                storeFile file(System.getenv('DINOSAUR_TV_KEYSTORE'))
+                storePassword System.getenv('DINOSAUR_TV_STORE_PASSWORD') ?: 'android'
+                keyAlias System.getenv('DINOSAUR_TV_KEY_ALIAS') ?: 'androiddebugkey'
+                keyPassword System.getenv('DINOSAUR_TV_KEY_PASSWORD') ?: 'android'
+            }
+        }
+    }
+    buildTypes {
+        release {
+            if (System.getenv('DINOSAUR_TV_KEYSTORE')) signingConfig signingConfigs.preview
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+kotlin { jvmToolchain(17) }
+dependencies {
+    implementation 'androidx.media3:media3-exoplayer:1.9.0'
+    implementation 'androidx.media3:media3-ui:1.9.0'
+    implementation 'androidx.media3:media3-datasource-okhttp:1.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+}

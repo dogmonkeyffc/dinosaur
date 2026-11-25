@@ -1,5 +1,7 @@
 package com.monkeydog.dinosaur.mobile
 
+import com.monkeydog.dinosaur.android.Api
+import com.monkeydog.dinosaur.android.rows
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.view.View

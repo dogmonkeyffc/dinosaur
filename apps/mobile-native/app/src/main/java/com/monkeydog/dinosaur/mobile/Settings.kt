@@ -1,5 +1,7 @@
 package com.monkeydog.dinosaur.mobile
 
+import com.monkeydog.dinosaur.android.json
+import com.monkeydog.dinosaur.android.rows
 import org.json.JSONArray
 
 internal class Settings(private val activity: MainActivity) {

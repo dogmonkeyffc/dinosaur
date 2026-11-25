@@ -5,6 +5,7 @@ plugins {
 android {
     namespace 'com.monkeydog.dinosaur.mobile'
     compileSdk 36
+    sourceSets.main.java.srcDir rootProject.file('../android-common/src/main/kotlin')
     defaultConfig {
         applicationId 'com.monkeydog.dinosaur.mobile'
         minSdk 26

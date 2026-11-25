@@ -17,3 +17,5 @@ dependencyResolutionManagement {
 }
 rootProject.name = 'DinosaurMobile'
 include ':app'
+include ':tv'
+project(':tv').projectDir = file('../tv-native')

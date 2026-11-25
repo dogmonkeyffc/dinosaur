@@ -17,7 +17,7 @@
     "test:client": "tsx --test packages/client/test/*.test.ts packages/playback-core/test/*.test.ts",
     "test:mobile": "tsx --test apps/mobile/test/*.test.ts",
     "mobile": "bash scripts/build_apps.sh mobile",
-    "tv": "npm run start --workspace @dinosaur/tv"
+    "tv": "bash scripts/build_apps.sh tv"
   },
   "devDependencies": {
     "@types/node": "24.10.1",

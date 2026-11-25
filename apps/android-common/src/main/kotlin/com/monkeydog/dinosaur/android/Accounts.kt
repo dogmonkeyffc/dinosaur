@@ -1,4 +1,4 @@
-package com.monkeydog.dinosaur.mobile
+package com.monkeydog.dinosaur.android
 
 import android.content.Context
 import android.security.keystore.KeyGenParameterSpec

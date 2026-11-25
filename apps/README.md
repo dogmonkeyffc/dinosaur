@@ -1,6 +1,6 @@
 # Dinosaur App
 
-Android 手机版从 1.0.0 起由 `apps/mobile-native` 的 Kotlin 工程构建，使用 Android 原生界面和 Media3。电视版由 `apps/tv` 的 Expo 工程构建。Web 工程在 `ui/`。
+Android 手机版与电视版使用 Kotlin 原生界面和 Media3。手机模块在 `apps/mobile-native/app`，电视模块在 `apps/tv-native`，共享网络、设备会话和字幕解析代码在 `apps/android-common`。Web 工程在 `ui/`。
 
 当前版本交付 Android 手机和 Android TV / Google TV 两个客户端。三星 Tizen、LG webOS 不能安装 Android TV APK。
 
@@ -14,7 +14,7 @@ Android 手机版从 1.0.0 起由 `apps/mobile-native` 的 Kotlin 工程构建�
 
 电视刷新配对码或退出配对页时会撤销旧请求。手机和电视离线退出会先清除本机账号；未能联系服务器时，原设备会话仍可从 Web 撤销或等待到期。
 
-手机和电视均支持电影/剧集浏览、搜索、选集、原片播放、兼容模式、观看进度、下一集、音轨与字幕选择。内嵌文字字幕由服务端分段转换，PGS 等图片字幕通过兼容转码显示；ASS 字体与特效不保留。进入影片时自动选择中文，其次英语；手动切换或关闭后保留当前影片的选择，下一集重新自动选择。手机版使用 Media3 ExoPlayer，电视版使用 Expo Video。
+手机和电视均支持电影、剧集和普通视频浏览、搜索、选集、原片播放、兼容模式、观看进度、下一集、音轨与字幕选择。内嵌文字字幕由服务端分段转换，PGS 等图片字幕通过兼容转码显示。ASS 字体与特效不保留。进入影片时自动选择中文，其次英语，下一集重新自动选择字幕。
 
 Web“已登录设备”可单独退出手机或电视；改密和禁用账号撤销其全部会话。电视授权使用手机当前账号，客户端不能指定任意用户 ID 或提升角色。
 
@@ -28,28 +28,18 @@ HTTPS 必须使用设备信任的证书。局域网测试可直接使用 `http:/
 
 ## 开发
 
-手机开发使用 JDK 17、Android SDK Platform 36 和工程自带的 Gradle Wrapper。在 `apps/mobile-native` 中运行 `./gradlew :app:assembleDebug`。测试从 0.9.0 覆盖升级时使用相同签名的 release 包。
-
-Android TV 工程使用 Expo SDK 56 与 `react-native-tvos` 0.85 系列。历史手机 Expo 工程保留在 `apps/mobile`，用于追溯旧版和测试兼容性。
+原生客户端开发使用 JDK 17、Android SDK Platform 36 和工程自带的 Gradle Wrapper。在 `apps/mobile-native` 中运行：
 
 ```sh
-npm ci
-npm run typecheck
-npm run test:client
-npm run tv       # 电视开发服务
+./gradlew :app:assembleDebug
+./gradlew :tv:assembleDebug
 ```
 
-使用 development build 或实际原生构建；Expo Go 不包含电视发现模块。首次生成原生项目必须使用匹配的模板：
-
-```sh
-cd apps/tv
-npx expo prebuild --platform android --no-install --template expo-template-bare-minimum@56.0.38
-npx expo run:android
-```
+历史 Expo 源码保留在 `apps/mobile` 和 `apps/tv`，用于追溯旧版并测试覆盖安装。覆盖安装应使用与旧版相同签名的 release 包。
 
 ## Android 安装包
 
-手机构建需要 JDK 17、Python 3 与 Android SDK Platform 36。设置 `ANDROID_HOME`，并通过 `DINOSAUR_ANDROID_KEYSTORE` 指定已有手机签名。电视构建额外需要 Node.js 和 Expo Android 工具链。
+构建需要 JDK 17、Python 3 与 Android SDK Platform 36。设置 `ANDROID_HOME`，并通过 `DINOSAUR_ANDROID_KEYSTORE` 或 `DINOSAUR_TV_KEYSTORE` 指定相应用途的已有签名密钥。
 
 ```sh
 scripts/build_apps.sh all
@@ -57,13 +47,13 @@ scripts/build_apps.sh mobile
 scripts/build_apps.sh tv
 ```
 
-手机安装包版本取自 `apps/mobile-native/app/build.gradle`，电视安装包版本取自 `apps/tv/app.json`。安装包与 SHA-256 文件输出到 `bin/apps/`。
+手机安装包版本取自 `apps/mobile-native/app/build.gradle`，电视安装包版本取自 `apps/tv-native/build.gradle`。安装包与 SHA-256 文件输出到 `bin/apps/`。
 
-NAS 安装包统一发布到 `/mnt/eight/apks/`（文件管理器中为 `/eight/apks/`），保留版本号与对应 SHA-256 文件。新版手机包发布并校验后，将该目录中的旧版手机包及其校验文件移到 `archive/`，其他 App 安装包保留。
+NAS 安装包统一发布到 `/mnt/eight/apks/`（文件管理器中为 `/eight/apks/`），保留版本号与对应 SHA-256 文件。新版发布并校验后，将同一客户端旧版安装包及其校验文件移到 `archive/`。
 
 Go 服务仍通过根目录 `build.sh` 打包，不需要 Android SDK。App 要求服务端支持 `/api/server`、设备会话及配对 API；旧版 NAS 服务需升级后才能使用这些登录功能。
 
-电视端的 `android/` 由已提交的 Expo 配置与插件生成。构建缓存、APK 和本机凭据不提交到 Git。
+构建缓存、APK 和本机凭据不提交到 Git。
 
 新增内嵌字幕功能需要同时升级服务端并重新构建手机/电视 APK；旧的 preview 安装包未包含图片字幕切换与分段续载适配。
 

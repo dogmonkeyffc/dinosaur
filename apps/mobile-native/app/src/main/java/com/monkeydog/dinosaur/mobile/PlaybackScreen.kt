@@ -1,5 +1,8 @@
 package com.monkeydog.dinosaur.mobile
 
+import com.monkeydog.dinosaur.android.Api
+import com.monkeydog.dinosaur.android.json
+import com.monkeydog.dinosaur.android.rows
 import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.os.Handler
@@ -94,13 +97,7 @@ internal class PlaybackScreen(private val activity: MainActivity, private val ap
             subtitle = if (result.isNull("selected_subtitle")) null else result.getInt("selected_subtitle")
             autoSubtitle = false
         }
-        val original = api.resource(result.getString("stream_url"))
-        val stream = original.buildUpon().clearQuery()
-        original.queryParameterNames.filter { it != "start" }.forEach { name ->
-            original.getQueryParameters(name).forEach { stream.appendQueryParameter(name, it) }
-        }
-        stream.appendQueryParameter("start", (offset / 1000.0).toString())
-        val source = MediaItem.Builder().setUri(stream.build())
+        val source = MediaItem.Builder().setUri(api.stream(result.getString("stream_url"), offset))
         val http = OkHttpDataSource.Factory(Api.http).setDefaultRequestProperties(api.headers)
         val current = ExoPlayer.Builder(activity).setMediaSourceFactory(DefaultMediaSourceFactory(http)).build()
         player = current

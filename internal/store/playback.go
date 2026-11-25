@@ -12,7 +12,7 @@ import (
 
 func (s *Store) PlaybackProgress(ctx context.Context, userID, mediaID int64) (playback.Progress, error) {
 	p := playback.Progress{MediaID: mediaID}
-	err := s.DB.QueryRowContext(ctx, `SELECT p.position,p.watched,p.updated_at,m.duration FROM playback_progress p JOIN media_items m ON m.id=p.media_id WHERE p.user_id=? AND p.media_id=?`, userID, mediaID).Scan(&p.Position, &p.Watched, &p.UpdatedAt, &p.Duration)
+	err := s.DB.QueryRowContext(ctx, `SELECT p.position,p.watched,p.updated_at,m.duration FROM visible_playback_progress p JOIN media_items m ON m.id=p.media_id WHERE p.user_id=? AND p.media_id=?`, userID, mediaID).Scan(&p.Position, &p.Watched, &p.UpdatedAt, &p.Duration)
 	if errors.Is(err, sql.ErrNoRows) {
 		return p, nil
 	}
@@ -30,11 +30,12 @@ func (s *Store) AddPlaybackProgress(ctx context.Context, userID int64, items []m
 	args[0] = userID
 	positions := make(map[int64]int, len(items))
 	for index, item := range items {
+		items[index].Position, items[index].Watched, items[index].LastPlayedAt = 0, false, 0
 		placeholders[index] = "?"
 		args = append(args, item.ID)
 		positions[item.ID] = index
 	}
-	rows, err := s.DB.QueryContext(ctx, `SELECT media_id,position,watched,updated_at FROM playback_progress WHERE user_id=? AND media_id IN (`+strings.Join(placeholders, ",")+`)`, args...)
+	rows, err := s.DB.QueryContext(ctx, `SELECT media_id,position,watched,updated_at FROM visible_playback_progress WHERE user_id=? AND media_id IN (`+strings.Join(placeholders, ",")+`)`, args...)
 	if err != nil {
 		return err
 	}
@@ -54,7 +55,7 @@ func (s *Store) AddPlaybackProgress(ctx context.Context, userID int64, items []m
 	return rows.Err()
 }
 func (s *Store) ContinueWatching(ctx context.Context, userID int64) ([]media.Item, error) {
-	rows, err := s.DB.QueryContext(ctx, `SELECT `+mediaColumns+mediaFrom+` JOIN playback_progress p ON p.media_id=m.id WHERE p.user_id=? AND p.position>0 AND p.watched=0 AND m.missing=0 AND l.type='movie' AND `+libraryVisible("m.library_id")+` ORDER BY p.updated_at DESC,p.media_id DESC LIMIT 12`, userID, libraryViewer(ctx))
+	rows, err := s.DB.QueryContext(ctx, `SELECT `+mediaColumns+mediaFrom+` JOIN visible_playback_progress p ON p.media_id=m.id WHERE p.user_id=? AND p.position>0 AND p.watched=0 AND m.missing=0 AND l.type='movie' AND `+libraryVisible("m.library_id")+` ORDER BY p.updated_at DESC,p.media_id DESC LIMIT 12`, userID, libraryViewer(ctx))
 	if err != nil {
 		return nil, err
 	}

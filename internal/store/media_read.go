@@ -69,7 +69,7 @@ func (s *Store) MediaPage(ctx context.Context, filter media.Filter) (media.Page,
 	}
 	queryArgs := append(append([]any{}, args...), filter.ViewerID, filter.PageSize, (filter.Page-1)*filter.PageSize)
 	rows, err := tx.QueryContext(ctx, `SELECT `+mediaColumns+mediaFrom+` WHERE `+where+` ORDER BY
- (SELECT p.updated_at FROM playback_progress p WHERE p.media_id=m.id AND p.user_id=? AND (p.position>0 OR p.watched=1)) DESC,
+ (SELECT p.updated_at FROM visible_playback_progress p WHERE p.media_id=m.id AND p.user_id=? AND (p.position>0 OR p.watched=1)) DESC,
  `+displayTitle+` COLLATE NOCASE,m.id LIMIT ? OFFSET ?`, queryArgs...)
 	if err != nil {
 		return result, err

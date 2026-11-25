@@ -11,7 +11,7 @@ import (
 	"dinosaur/internal/playback"
 )
 
-func TestHistoryRecordingSettingsArePerAccountAndPreserveProgress(t *testing.T) {
+func TestHistoryRecordingSettingsArePerAccountAndSuppressProgress(t *testing.T) {
 	db, admin, viewer := historyFixture(t)
 	ctx := context.Background()
 	for _, kind := range []string{"movie", "tv"} {
@@ -35,8 +35,12 @@ func TestHistoryRecordingSettingsArePerAccountAndPreserveProgress(t *testing.T) 
 		t.Fatal(err)
 	}
 	progress, err := db.PlaybackProgress(ctx, admin, 1)
-	if err != nil || !progress.Watched || progress.Position != 100 {
-		t.Fatal("disabling history broke progress")
+	if err != nil || progress.Watched || progress.Position != 0 {
+		t.Fatal("disabled library exposed progress")
+	}
+	var saved int
+	if err := db.DB.QueryRow(`SELECT count(*) FROM playback_progress WHERE user_id=? AND media_id=1`, admin).Scan(&saved); err != nil || saved != 0 {
+		t.Fatal("disabled library persisted progress", err)
 	}
 	page, _ := db.HistoryPage(ctx, admin, 1, 24)
 	if page.Total != 0 {
@@ -60,14 +64,11 @@ func TestHistoryRecordingSettingsArePerAccountAndPreserveProgress(t *testing.T) 
 	if err := db.SetHistoryLibrarySetting(ctx, admin, 1, true); err != nil {
 		t.Fatal(err)
 	}
-	p.MediaID = 1
-	if err := db.SavePlaybackProgress(ctx, admin, p); err != nil {
-		t.Fatal(err)
-	}
 	page, _ = db.HistoryPage(ctx, admin, 1, 24)
 	if page.Total != 1 {
 		t.Fatal("enabling history backfilled suppressed events")
 	}
+	p.MediaID = 1
 	p.Watched = false
 	if err := db.SavePlaybackProgress(ctx, admin, p); err != nil {
 		t.Fatal(err)

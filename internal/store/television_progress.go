@@ -27,7 +27,7 @@ func (s *Store) NextEpisode(ctx context.Context, item media.Item) (*media.Item, 
 
 func (s *Store) ContinueSeries(ctx context.Context, userID int64) ([]media.Item, error) {
 	rows, err := s.DB.QueryContext(ctx, `SELECT e.series_id FROM tv_episodes e JOIN media_items m ON m.id=e.media_id
- JOIN playback_progress p ON p.media_id=m.id WHERE m.missing=0 AND p.user_id=? AND (p.position>0 OR p.watched=1) AND `+libraryVisible("m.library_id")+`
+ JOIN visible_playback_progress p ON p.media_id=m.id WHERE m.missing=0 AND p.user_id=? AND (p.position>0 OR p.watched=1) AND `+libraryVisible("m.library_id")+`
  GROUP BY e.series_id ORDER BY max(p.updated_at) DESC,e.series_id DESC LIMIT 12`, userID, libraryViewer(ctx))
 	if err != nil {
 		return nil, err

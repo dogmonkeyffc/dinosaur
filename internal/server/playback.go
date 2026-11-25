@@ -88,6 +88,11 @@ func (s *Server) savePlaybackProgress(w http.ResponseWriter, r *http.Request) {
 		s.internal(w, r, err)
 		return
 	}
+	progress, err = s.store.PlaybackProgress(r.Context(), current(r).user.ID, id)
+	if err != nil {
+		s.internal(w, r, err)
+		return
+	}
 	writeJSON(w, 200, map[string]any{"progress": progress})
 }
 func (s *Server) continueWatching(w http.ResponseWriter, r *http.Request) {

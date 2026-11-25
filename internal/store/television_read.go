@@ -66,7 +66,7 @@ func (s *Store) RawSeriesPage(ctx context.Context, filter media.Filter, userID i
 	args = append(args, userID, filter.PageSize, (filter.Page-1)*filter.PageSize)
 	rows, err := tx.QueryContext(ctx, `SELECT `+seriesColumns+seriesFrom+where+` ORDER BY
  (SELECT max(p.updated_at) FROM tv_episodes e JOIN media_items m ON m.id=e.media_id
- JOIN playback_progress p ON p.media_id=m.id WHERE e.series_id=s.id AND m.missing=0 AND p.user_id=? AND (p.position>0 OR p.watched=1)) DESC,
+ JOIN visible_playback_progress p ON p.media_id=m.id WHERE e.series_id=s.id AND m.missing=0 AND p.user_id=? AND (p.position>0 OR p.watched=1)) DESC,
  `+seriesTitle+` COLLATE NOCASE,s.id LIMIT ? OFFSET ?`, args...)
 	if err != nil {
 		return page, err
@@ -86,7 +86,7 @@ func (s *Store) RawSeriesPage(ctx context.Context, filter media.Filter, userID i
 	}
 	for i := range page.Items {
 		err := tx.QueryRowContext(ctx, `SELECT count(*) FROM tv_episodes e JOIN media_items m ON m.id=e.media_id
-   JOIN playback_progress p ON p.media_id=m.id WHERE e.series_id=? AND m.missing=0 AND p.user_id=? AND p.watched=1`, page.Items[i].ID, userID).Scan(&page.Items[i].WatchedCount)
+   JOIN visible_playback_progress p ON p.media_id=m.id WHERE e.series_id=? AND m.missing=0 AND p.user_id=? AND p.watched=1`, page.Items[i].ID, userID).Scan(&page.Items[i].WatchedCount)
 		if err != nil {
 			return page, err
 		}

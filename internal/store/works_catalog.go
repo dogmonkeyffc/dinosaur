@@ -16,8 +16,8 @@ var workCatalog = `WITH visible AS (
  COALESCE(wm.position,0) AS position,
  (SELECT count(*) FROM tv_episodes e JOIN media_items m ON m.id=e.media_id WHERE e.series_id=s.id AND m.missing=0) AS episodes,
  (SELECT count(DISTINCT e.season_number) FROM tv_episodes e JOIN media_items m ON m.id=e.media_id WHERE e.series_id=s.id AND m.missing=0) AS seasons,
- (SELECT count(*) FROM tv_episodes e JOIN media_items m ON m.id=e.media_id JOIN playback_progress p ON p.media_id=m.id WHERE e.series_id=s.id AND m.missing=0 AND p.user_id=? AND p.watched=1) AS watched,
- (SELECT max(p.updated_at) FROM tv_episodes e JOIN media_items m ON m.id=e.media_id JOIN playback_progress p ON p.media_id=m.id WHERE e.series_id=s.id AND m.missing=0 AND p.user_id=? AND (p.position>0 OR p.watched=1)) AS recent
+ (SELECT count(*) FROM tv_episodes e JOIN media_items m ON m.id=e.media_id JOIN visible_playback_progress p ON p.media_id=m.id WHERE e.series_id=s.id AND m.missing=0 AND p.user_id=? AND p.watched=1) AS watched,
+ (SELECT max(p.updated_at) FROM tv_episodes e JOIN media_items m ON m.id=e.media_id JOIN visible_playback_progress p ON p.media_id=m.id WHERE e.series_id=s.id AND m.missing=0 AND p.user_id=? AND (p.position>0 OR p.watched=1)) AS recent
  FROM tv_series s LEFT JOIN work_members wm ON wm.series_id=s.id LEFT JOIN works w ON w.id=wm.work_id
  WHERE ` + seriesVisible + ` AND (?=0 OR s.library_id=?) AND ` + libraryVisible("s.library_id") + `
 ), cards AS (

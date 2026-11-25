@@ -43,7 +43,7 @@ func (s *Store) WorkByID(ctx context.Context, id, userID int64) (television.Work
 
 	for i := range result.AllMembers {
 		item := &result.AllMembers[i]
-		err := tx.QueryRowContext(ctx, `SELECT count(*) FROM tv_episodes e JOIN media_items m ON m.id=e.media_id JOIN playback_progress p ON p.media_id=m.id WHERE e.series_id=? AND m.missing=0 AND p.user_id=? AND p.watched=1`, item.ID, userID).Scan(&item.WatchedCount)
+		err := tx.QueryRowContext(ctx, `SELECT count(*) FROM tv_episodes e JOIN media_items m ON m.id=e.media_id JOIN visible_playback_progress p ON p.media_id=m.id WHERE e.series_id=? AND m.missing=0 AND p.user_id=? AND p.watched=1`, item.ID, userID).Scan(&item.WatchedCount)
 		if err != nil {
 			return result, err
 		}

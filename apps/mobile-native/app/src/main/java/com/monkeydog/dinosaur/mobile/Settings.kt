@@ -1,13 +1,15 @@
 package com.monkeydog.dinosaur.mobile
 
-import com.monkeydog.dinosaur.android.json
-import com.monkeydog.dinosaur.android.rows
-import android.view.Gravity
 import android.os.Build
+import android.view.Gravity
+import android.view.View
 import android.view.WindowInsets
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
+import com.monkeydog.dinosaur.android.json
+import com.monkeydog.dinosaur.android.rows
 import org.json.JSONArray
 
 internal class Settings(private val activity: MainActivity) {
@@ -37,22 +39,31 @@ internal class Settings(private val activity: MainActivity) {
             }, LinearLayout.LayoutParams(ui(96), ui(96)))
             addWithGap(phoneText(username, 25), ui(18), -2)
         })
-        content.addWithGap(group().apply { addView(settingRow("⇄", "切换账号") { showAccounts(null) }) }, ui(20))
+        content.addWithGap(group().apply {
+            addView(settingRow(R.drawable.settings_switch_account, "切换账号") { showAccounts(null) })
+        }, ui(20))
         val links = group()
-        links.addView(settingRow("▣", "登录电视") { PairTv(activity) { catalog.show() }.show() })
-        links.separator()
-        links.addView(settingRow("⚙", "首页显示") { libraries(false) })
-        links.separator()
-        links.addView(settingRow("◷", "记录观看") { libraries(true) })
+        renderLinks(links, canManage = false)
         content.addWithGap(links, ui(20))
         val version = packageManager.getPackageInfo(packageName, 0).versionName
         content.addWithGap(phoneText("Dinosaur $version", 13, PHONE_MUTED).apply { gravity = Gravity.CENTER }, ui(32))
         val client = api
         task({ client.request("/api/auth/me").getJSONObject("user") }, { }) { user ->
-            if (user.getString("role") == "admin") {
-                links.addView(settingRow("⚙", "管理") { admin.show() }, 1)
-                links.addView(divider(), 2)
-            }
+            if (user.getString("role") == "admin") renderLinks(links, canManage = true)
+        }
+    }
+
+    private fun MainActivity.renderLinks(links: LinearLayout, canManage: Boolean) {
+        links.removeAllViews()
+        val rows = buildList {
+            add(settingRow(R.drawable.settings_tv, "登录电视") { PairTv(activity) { catalog.show() }.show() })
+            if (canManage) add(settingRow(R.drawable.settings_manage, "管理") { admin.show() })
+            add(settingRow(R.drawable.settings_home, "首页显示") { libraries(false) })
+            add(settingRow(R.drawable.settings_history, "记录观看") { libraries(true) })
+        }
+        rows.forEachIndexed { index, row ->
+            if (index > 0) links.separator()
+            links.addView(row)
         }
     }
 
@@ -101,18 +112,23 @@ internal class Settings(private val activity: MainActivity) {
         clipToOutline = true
     }
 
-    private fun MainActivity.divider() = android.view.View(this).apply {
+    private fun MainActivity.divider() = View(this).apply {
         setBackgroundColor(0xff292a2e.toInt())
         layoutParams = LinearLayout.LayoutParams(-1, ui(1))
     }
 
     private fun LinearLayout.separator() = addView(activity.divider())
 
-    private fun MainActivity.settingRow(icon: String, title: String, action: () -> Unit) =
+    private fun MainActivity.settingRow(icon: Int, title: String, action: () -> Unit) =
         phoneRow().apply {
             minimumHeight = ui(66)
             setPadding(ui(20), ui(12), ui(20), ui(12))
-            addView(phoneText(icon, 24, PHONE_MUTED).apply { gravity = Gravity.CENTER }, LinearLayout.LayoutParams(ui(26), -2))
+            addView(ImageView(this@settingRow).apply {
+                setImageResource(icon)
+                setColorFilter(PHONE_MUTED)
+                scaleType = ImageView.ScaleType.FIT_CENTER
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            }, LinearLayout.LayoutParams(ui(24), ui(24)))
             addView(phoneText(title, 16), LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = ui(18) })
             addView(phoneText("›", 22, PHONE_MUTED))
             contentDescription = title

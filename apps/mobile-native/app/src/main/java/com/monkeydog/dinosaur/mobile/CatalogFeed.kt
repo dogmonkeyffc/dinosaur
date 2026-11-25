@@ -14,35 +14,25 @@ import kotlin.math.roundToInt
 internal class CatalogFeed(private val activity: MainActivity, private val artwork: PhoneArtwork) {
     fun home(
         body: LinearLayout, title: String, items: List<JSONObject>, recent: List<JSONObject>, api: Api,
-        browse: () -> Unit, open: (JSONObject) -> Unit, play: (JSONObject) -> Unit,
+        open: (JSONObject) -> Unit, play: (JSONObject) -> Unit,
     ) = with(activity) {
         body.setPadding(0, ui(22), 0, ui(22))
-        if (recent.isNotEmpty()) body.addWithGap(shelf("继续观看", recent.take(8), api, null, play), ui(28))
-        if (items.isNotEmpty()) body.addWithGap(shelf(title, items.take(10), api, browse, open), ui(28))
+        if (recent.isNotEmpty()) body.addWithGap(shelf("继续观看", recent.take(8), api, play), ui(28))
+        if (items.isNotEmpty()) body.addWithGap(shelf(title, items.take(10), api, open), ui(28))
         items.firstOrNull { it.optString("poster_url").let { url -> url.isNotBlank() && url != "null" } }?.let { item ->
             body.addView(feature(item, api, open), LinearLayout.LayoutParams(-1, -2).apply {
                 setMargins(ui(24), ui(28), ui(24), 0)
             })
         }
-        if (items.size > 10) body.addWithGap(shelf("更多内容", items.drop(10), api, browse, open), ui(28))
+        if (items.size > 10) body.addWithGap(shelf("更多内容", items.drop(10), api, open), ui(28))
     }
 
     private fun shelf(
-        title: String, items: List<JSONObject>, api: Api, more: (() -> Unit)?, open: (JSONObject) -> Unit,
+        title: String, items: List<JSONObject>, api: Api, open: (JSONObject) -> Unit,
     ) = with(activity) {
         column().apply {
-            addView(phoneRow().apply {
+            addView(phoneText(title, 21, bold = true).apply {
                 setPadding(ui(24), 0, ui(24), 0)
-                addView(phoneText(title, 21, bold = true), LinearLayout.LayoutParams(0, -2, 1f))
-                more?.let {
-                    val arrow = phoneText("→", 24).apply {
-                        gravity = Gravity.CENTER
-                        background = panel(0xff232427.toInt(), 20)
-                        contentDescription = "查看全部$title"
-                        onTap(it)
-                    }
-                    addView(arrow, LinearLayout.LayoutParams(ui(40), ui(40)))
-                }
             })
             val width = ui(((resources.configuration.screenWidthDp - 64) / 3.1).coerceIn(100.0, 150.0))
             addWithGap(HorizontalScrollView(this@with).apply {
@@ -103,14 +93,10 @@ internal class CatalogFeed(private val activity: MainActivity, private val artwo
                 addView(artwork.poster(item, api, 8), FrameLayout.LayoutParams(ui(134), ui(200), Gravity.TOP or Gravity.CENTER_HORIZONTAL)
                     .apply { topMargin = ui(10) })
             }, LinearLayout.LayoutParams(-1, ui(220)))
-            addView(phoneRow().apply {
+            addView(phoneText(title, 20, 0xffe0e7ff.toInt(), true).apply {
                 setPadding(ui(18), ui(18), ui(18), ui(18))
-                addView(phoneText(title, 20, 0xffe0e7ff.toInt(), true).apply { maxLines = 2 },
-                    LinearLayout.LayoutParams(0, -2, 1f))
-                addView(phoneText("→", 24).apply {
-                    background = panel(0xff3f517a.toInt(), 22)
-                    gravity = Gravity.CENTER
-                }, LinearLayout.LayoutParams(ui(44), ui(44)).apply { leftMargin = ui(14) })
+                maxLines = 2
+                ellipsize = TextUtils.TruncateAt.END
             })
             onTap { open(item) }
             contentDescription = title

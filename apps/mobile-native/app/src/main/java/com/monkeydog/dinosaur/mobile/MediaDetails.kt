@@ -134,16 +134,18 @@ internal class MediaDetails(
     }
 
     private fun season(id: Long, title: String, number: Int, back: () -> Unit, offset: Int = 0): Unit = with(activity) {
-        page("$title · ${seasonName(number)}", back)
+        page(seasonName(number), back)
         val client = api
-        task({ client.request("/api/series/$id").rows("seasons").firstOrNull { it.optInt("number") == number } }) { selected ->
+        task({ client.request("/api/series/$id") }) { data ->
+            val series = data.getJSONObject("series")
+            val selected = data.rows("seasons").firstOrNull { it.optInt("number") == number }
             val episodes = selected?.rows("episodes").orEmpty()
+            content.addView(seasonSummary(series, title, episodes, artwork, client))
             episodes.forEach { item ->
-                val marker = if (item.optBoolean("watched")) "✓ " else ""
-                content.addWithGap(phoneAction(marker + item.getString("title"), {
+                content.addWithGap(episodeRow(item) {
                     val position = detailScroll().scrollY
                     play(item.getLong("id")) { season(id, title, number, back, position) }
-                }, color = PHONE_TEXT), dp(12), -2)
+                }, ui(10))
             }
             if (episodes.isEmpty()) label("暂无分集")
             restoreDetailScroll(offset)

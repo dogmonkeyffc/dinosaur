@@ -161,12 +161,7 @@ internal class Catalog(private val activity: MainActivity) {
             } else {
                 toolbar.addView(libraryTabs(result.libraries, id, select))
                 if (search) feed.search(body, items, client, typed.isNotEmpty(), open)
-                else if (result.selected != null) feed.home(body, result.selected.optString("name"), items, result.recent, client, {
-                    tab = 1
-                    reset()
-                    selectedIds[1] = id
-                    showChrome()
-                }, open, {
+                else if (result.selected != null) feed.home(body, result.selected.optString("name"), items, result.recent, client, open, {
                     savedScroll = chrome.scroller.scrollY
                     play(it.getLong("id")) { showChrome() }
                 })

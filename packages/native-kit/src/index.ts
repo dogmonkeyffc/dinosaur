@@ -4,5 +4,6 @@ export * from './hooks';
 export * from './accounts';
 export * from './catalog';
 export * from './player/Player';
+export * from './player/PlaybackIcon';
 export * from './Poster';
 export * from './catalog/CatalogDetails';

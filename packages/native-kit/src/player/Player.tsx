@@ -24,6 +24,7 @@ export function Player({
   const burnID = useRef<number | undefined>(undefined);
   const [revision, setRevision] = useState(0);
   const [mode, setMode] = useState('original');
+  const [quality, setQuality] = useState('auto');
   const [target, setTarget] = useState<number>();
   const [source, setSource] = useState<{ info: PlaybackInfo; start: number }>();
   const [error, setError] = useState('');
@@ -39,6 +40,7 @@ export function Player({
         target || 0,
         undefined,
         burnID.current ?? (subtitle === undefined ? 'auto' : undefined),
+        quality,
       )
       .then((info) => {
         if (active) {
@@ -59,23 +61,29 @@ export function Player({
     return () => {
       active = false;
     };
-  }, [client, currentID, mode, target, revision]);
+  }, [client, currentID, mode, target, revision, quality]);
   if (!source)
     return (
       <View style={[styles.centered, !tv && { backgroundColor: '#111113' }]}>
         {!error && <Busy />}
         <ErrorText error={error} />
-        {tv ? <Button onPress={close}>返回</Button> : <PlayerAction label="返回" text="←" press={close} />}
+        {tv ? <Button onPress={close}>返回</Button> : <PlayerAction label="返回" icon="back" press={close} />}
       </View>
     );
   return (
     <Stage
-      key={`${currentID}:${mode}:${target}`}
+      key={`${currentID}:${mode}:${target}:${quality}`}
       client={client}
       info={source.info}
       start={source.start}
       tv={tv}
       fullscreen={fullscreen}
+      quality={quality}
+      selectQuality={(value, position) => {
+        setSource(undefined);
+        setQuality(value);
+        setTarget(position);
+      }}
       track={subtitle ?? undefined}
       selectSubtitle={(id, position) => {
         const selected = source.info.subtitles.find((value) => value.id === id);
@@ -92,6 +100,7 @@ export function Player({
         setSource(undefined);
         if (burnID.current === undefined) setMode(compatible ? 'compatible' : 'original');
         setTarget(position);
+        setRevision((value) => value + 1);
       }}
       next={() => {
         if (source.info.next_episode) {

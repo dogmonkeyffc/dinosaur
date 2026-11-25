@@ -1,10 +1,11 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { BackHandler, Platform, Pressable, StatusBar, Text, View } from 'react-native';
+import { BackHandler, Platform, Pressable, StatusBar, Text, View, useWindowDimensions } from 'react-native';
 import type { PlaybackInfo } from '@dinosaur/contracts';
-import type { VideoPlayer } from 'expo-video';
-import { VideoView } from 'expo-video';
+import { VideoView, type VideoPlayer } from 'expo-video';
+import { LinearGradient } from 'expo-linear-gradient';
 import { SeekBar } from './SeekBar';
 import { PhoneTransport, PlayerAction } from './PhoneControls';
+import { PlayerMenu, type PlayerSetting } from './PlayerMenu';
 import { phoneStyles as css } from './phoneStyles';
 
 export function PhonePlayer({
@@ -16,9 +17,7 @@ export function PhonePlayer({
   seek,
   toggle,
   next,
-  audio,
-  subtitle,
-  compatible,
+  settings,
   children,
   error,
   fullscreen: rotation,
@@ -31,9 +30,7 @@ export function PhonePlayer({
   seek: (delta: number) => void;
   toggle: () => void;
   next?: () => void;
-  audio: { label: string; press: () => void };
-  subtitle?: { label: string; press: () => void };
-  compatible?: () => void;
+  settings: PlayerSetting[];
   children: ReactNode;
   error: string;
   fullscreen: { fullscreen: boolean; toggle: () => Promise<void> };
@@ -41,37 +38,33 @@ export function PhonePlayer({
   const { fullscreen, toggle: rotate } = rotation;
   const [visible, setVisible] = useState(true);
   const [seeking, setSeeking] = useState(false);
+  const [menu, setMenu] = useState<number>();
+  const { width } = useWindowDimensions();
   useEffect(() => {
-    if (!fullscreen || !playing || !visible || seeking) return;
+    if (!fullscreen || !playing || !visible || seeking || menu !== undefined) return;
     const timer = setTimeout(() => setVisible(false), 5000);
     return () => clearTimeout(timer);
-  }, [fullscreen, playing, visible, seeking]);
+  }, [fullscreen, playing, visible, seeking, menu]);
   useEffect(() => {
     const handler = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (fullscreen) void rotate();
+      if (menu !== undefined) setMenu(undefined);
+      else if (fullscreen) void rotate();
       else close();
       return true;
     });
     return () => handler.remove();
-  }, [fullscreen, rotate, close]);
-  const show = !fullscreen || visible || !playing || !!error;
+  }, [fullscreen, rotate, close, menu]);
+  const show = !fullscreen || visible || !playing || !!error || menu !== undefined;
+  const title = info.item.series_title ? `${info.item.series_title} · ${info.item.title}` : info.item.title;
   return (
     <View
       style={[
         css.screen,
-        fullscreen
-          ? css.fullscreen
-          : { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 52 },
+        !fullscreen && { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 52 },
       ]}
     >
       <StatusBar hidden={fullscreen} barStyle="light-content" />
-      <View style={[css.header, fullscreen && css.floatingHeader, fullscreen && !show && css.hidden]}>
-        <PlayerAction label="返回" text="←" press={() => (fullscreen ? void rotate() : close())} />
-        <Text numberOfLines={1} style={css.title}>
-          {info.item.title}
-        </Text>
-      </View>
-      <View style={[css.frame, fullscreen ? css.fullFrame : css.portraitFrame]}>
+      <View style={css.stage}>
         <VideoView
           player={player}
           nativeControls={false}
@@ -86,31 +79,57 @@ export function PhonePlayer({
           style={css.tapArea}
           onPress={() => setVisible((value) => !value)}
         />
-      </View>
-      <View style={[css.controls, fullscreen && css.floatingControls, fullscreen && !show && css.hidden]}>
-        <PhoneTransport playing={playing} toggle={toggle} seek={seek} next={next} />
-        <SeekBar time={time} duration={info.item.duration} seek={seek} touching={setSeeking} />
-        <View style={css.options}>
-          {info.audio_tracks.length > 1 && (
-            <PlayerAction label={`切换音轨，${audio.label}`} text={audio.label} press={audio.press} />
-          )}
-          {subtitle && (
-            <PlayerAction
-              label={`切换字幕，${subtitle.label}`}
-              text={subtitle.label}
-              press={subtitle.press}
+        {show && (
+          <>
+            <LinearGradient colors={['#000b', 'transparent']} style={css.header}>
+              <PlayerAction label="返回" icon="back" press={() => (fullscreen ? void rotate() : close())} />
+              <Text numberOfLines={1} style={css.title}>
+                {title}
+              </Text>
+            </LinearGradient>
+            <LinearGradient colors={['transparent', '#000b', '#000e']} style={css.controls}>
+              <SeekBar time={time} duration={info.item.duration} seek={seek} touching={setSeeking} />
+              <View style={css.controlRow}>
+                <PhoneTransport
+                  playing={playing}
+                  toggle={toggle}
+                  seek={seek}
+                  next={next}
+                  wide={width > 720}
+                />
+                <View style={css.spacer} />
+                {settings.map((setting, index) => (
+                  <PlayerAction
+                    key={setting.label}
+                    label={setting.label}
+                    icon={setting.icon}
+                    disabled={setting.disabled}
+                    press={() => setMenu((value) => (value === index ? undefined : index))}
+                  />
+                ))}
+                <PlayerAction
+                  label={fullscreen ? '退出全屏' : '全屏'}
+                  icon={fullscreen ? 'collapse' : 'fullscreen'}
+                  press={() => {
+                    setVisible(true);
+                    void rotate();
+                  }}
+                />
+              </View>
+            </LinearGradient>
+          </>
+        )}
+        {menu !== undefined && (
+          <>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="关闭播放设置"
+              style={css.menuBackdrop}
+              onPress={() => setMenu(undefined)}
             />
-          )}
-          {compatible && <PlayerAction label="兼容播放" text="兼容播放" press={compatible} />}
-          <PlayerAction
-            label={fullscreen ? '退出全屏' : '全屏'}
-            text={fullscreen ? '退出全屏 ⛶' : '全屏 ⛶'}
-            press={() => {
-              setVisible(true);
-              void rotate();
-            }}
-          />
-        </View>
+            <PlayerMenu setting={settings[menu]} close={() => setMenu(undefined)} />
+          </>
+        )}
         {!!error && (
           <Text accessibilityRole="alert" style={css.error}>
             {error}

@@ -12,6 +12,7 @@ import {
   type RefreshControlProps,
 } from 'react-native';
 import { colors, styles } from './theme';
+import { PlaybackIcon } from './player/PlaybackIcon';
 
 export function Screen({
   children,
@@ -53,17 +54,19 @@ export function Screen({
       >
         {onBack ? (
           <View style={styles.screenHeader}>
-            <BackButton onPress={onBack} preferred={backPreferred} />
+            <BackButton onPress={onBack} preferred={backPreferred} tv={tv} />
             {title && (
               <Text accessibilityRole="header" style={[styles.title, { flex: 1 }]}>
                 {title}
               </Text>
             )}
           </View>
-        ) : title && (
-          <Text accessibilityRole="header" style={styles.title}>
-            {title}
-          </Text>
+        ) : (
+          title && (
+            <Text accessibilityRole="header" style={styles.title}>
+              {title}
+            </Text>
+          )
         )}
         {children}
       </ScrollView>
@@ -71,7 +74,7 @@ export function Screen({
   );
 }
 
-function BackButton({ onPress, preferred }: { onPress: () => void; preferred?: boolean }) {
+function BackButton({ onPress, preferred, tv }: { onPress: () => void; preferred?: boolean; tv: boolean }) {
   const [focused, setFocused] = useState(false);
   return (
     <Pressable
@@ -83,11 +86,12 @@ function BackButton({ onPress, preferred }: { onPress: () => void; preferred?: b
       onPress={onPress}
       style={({ pressed }) => [
         styles.backButton,
+        tv && { width: 48, height: 48, borderRadius: 24, borderWidth: 2 },
         focused && styles.backButtonFocused,
         pressed && { opacity: 0.7 },
       ]}
     >
-      <Text style={[styles.backArrow, focused && { color: colors.background }]}>←</Text>
+      <PlaybackIcon name="back" color={focused ? colors.background : colors.text} />
     </Pressable>
   );
 }

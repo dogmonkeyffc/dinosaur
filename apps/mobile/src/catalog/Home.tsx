@@ -12,6 +12,7 @@ import { HomeBody } from './HomeBody';
 import { LibraryLanding } from './LibraryLanding';
 import { useMobileCatalog } from './useMobileCatalog';
 import { homeStyles as css } from './homeStyles';
+import { AdminPanel } from '../admin/AdminPanel';
 
 function HomeSession({
   account,
@@ -24,6 +25,7 @@ function HomeSession({
 }) {
   const [tab, setTab] = useState<HomeTab>('home');
   const [settings, setSettings] = useState(false);
+  const [admin, setAdmin] = useState(false);
   const [selected, setSelected] = useState<{ id: number; work: boolean; kind: MediaKind }>();
   const [playing, setPlaying] = useState<number>();
   const visibility = useHomeVisibility(account.key);
@@ -38,13 +40,13 @@ function HomeSession({
     }
   }, [tab]);
   useEffect(() => {
-    if (selected || playing !== undefined || settings || tab === 'home') return;
+    if (selected || playing !== undefined || settings || admin || tab === 'home') return;
     const listener = BackHandler.addEventListener('hardwareBackPress', () => {
       navigate('home');
       return true;
     });
     return () => listener.remove();
-  }, [tab, selected, playing, settings]);
+  }, [tab, selected, playing, settings, admin]);
   function navigate(next: HomeTab) {
     searchRequested.current = next === 'search';
     if (next === 'search') searchInput.current?.focus();
@@ -72,6 +74,16 @@ function HomeSession({
   }
   return (
     <View style={css.screen}>
+      {admin && (
+        <AdminPanel
+          account={account}
+          client={c.client}
+          close={() => {
+            setAdmin(false);
+            c.refresh();
+          }}
+        />
+      )}
       {playing !== undefined && (
         <Player
           client={c.client}
@@ -99,7 +111,7 @@ function HomeSession({
           />
         </View>
       )}
-      {!selected && playing === undefined && (
+      {!admin && !selected && playing === undefined && (
         <View style={css.screen}>
           <StatusBar barStyle="light-content" />
           {tab === 'history' ? (
@@ -161,6 +173,7 @@ function HomeSession({
           }}
           accounts={accounts}
           pair={pair}
+          admin={() => setAdmin(true)}
           loading={c.loading}
           error={c.error}
           retry={c.refresh}

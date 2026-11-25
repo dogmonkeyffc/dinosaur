@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Platform, Pressable, ScrollView, StatusBar, Text, View } from 'react-native';
 import { pageStyles as css } from './pageStyles';
+import { PlaybackIcon } from '@dinosaur/native-kit';
 
 export function MobilePage({
   title,
@@ -17,7 +18,7 @@ export function MobilePage({
       <View style={css.toolbar}>
         {close ? (
           <Pressable accessibilityRole="button" accessibilityLabel="返回" onPress={close} style={css.back}>
-            <Text style={css.backIcon}>←</Text>
+            <PlaybackIcon name="back" />
           </Pressable>
         ) : (
           <View style={css.back} />

@@ -18,6 +18,13 @@ import './styles/player-controls.css';
 import './styles/auth.css';
 
 const systemAppearance = window.matchMedia('(prefers-color-scheme: dark)');
+function mobileAdminAppearance() {
+  try {
+    return sessionStorage.getItem('dinosaur-mobile-admin') === '1';
+  } catch {
+    return false;
+  }
+}
 
 function subscribeAppearance(update: () => void) {
   systemAppearance.addEventListener('change', update);
@@ -25,7 +32,10 @@ function subscribeAppearance(update: () => void) {
 }
 
 function Appearance({ children }: { children: ReactNode }) {
-  const dark = useSyncExternalStore(subscribeAppearance, () => systemAppearance.matches);
+  const dark = useSyncExternalStore(
+    subscribeAppearance,
+    () => mobileAdminAppearance() || systemAppearance.matches,
+  );
   return (
     <ThemeProvider theme={dark ? darkTheme : lightTheme}>
       <CssBaseline enableColorScheme />

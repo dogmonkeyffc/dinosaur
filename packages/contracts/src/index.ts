@@ -112,7 +112,13 @@ export interface PlaybackInfo {
   selected_subtitle?: number | null;
   item: Movie;
   next_episode?: Movie;
-  plan: { mode: 'direct' | 'remux' | 'transcode'; audio: number; start: number; subtitle?: number };
+  plan: {
+    mode: 'direct' | 'remux' | 'transcode';
+    audio: number;
+    start: number;
+    subtitle?: number;
+    quality?: string;
+  };
   stream_url: string;
   resume_position: number;
   audio_tracks: Track[];

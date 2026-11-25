@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Modal, Platform, Pressable, ScrollView, StatusBar, Switch, Text, View } from 'react-native';
 import type { Account, MediaLibrary } from '@dinosaur/contracts';
-import { Busy, ErrorText } from '@dinosaur/native-kit';
+import { Busy, ErrorText, PlaybackIcon } from '@dinosaur/native-kit';
 import type { useHomeVisibility } from './useHomeVisibility';
 import { settingsStyles as css } from './settingsStyles';
 import { palette } from '../catalog/homeStyles';
@@ -18,6 +18,7 @@ export function AccountSettings({
   close,
   accounts,
   pair,
+  admin,
   loading,
   error,
   retry,
@@ -29,6 +30,7 @@ export function AccountSettings({
   close: () => void;
   accounts: () => void;
   pair: () => void;
+  admin: () => void;
   loading: boolean;
   error: string;
   retry: () => void;
@@ -60,7 +62,7 @@ export function AccountSettings({
                 style={css.iconButton}
                 onPress={back}
               >
-                <Text style={css.icon}>←</Text>
+                <PlaybackIcon name="back" />
               </Pressable>
             ) : (
               <View style={css.iconButton} />
@@ -96,6 +98,9 @@ export function AccountSettings({
                 </View>
                 <View style={css.group}>
                   <SettingsRow icon="▣" title="登录电视" press={() => choose(pair)} />
+                  {account.user.role === 'admin' && (
+                    <SettingsRow icon="⚙" title="管理" border press={() => choose(admin)} />
+                  )}
                   <SettingsRow icon="⚙" title="首页显示" border press={() => setPage('libraries')} />
                   <SettingsRow icon="◷" title="记录观看" border press={() => setPage('history')} />
                 </View>

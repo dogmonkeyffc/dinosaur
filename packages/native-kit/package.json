@@ -10,10 +10,12 @@
     "@dinosaur/playback-core": "0.1.0",
     "expo-secure-store": "56.0.4",
     "expo-video": "56.1.4",
-    "expo-screen-orientation": "56.0.5"
+    "expo-screen-orientation": "56.0.5",
+    "react-native-svg": "15.15.4",
+    "expo-linear-gradient": "56.0.4"
   },
   "peerDependencies": {
     "react": "19.2.3",
-    "react-native": "*"
+    "react-native": "0.85.3-3"
   }
 }

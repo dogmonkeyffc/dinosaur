@@ -10,6 +10,9 @@ import (
 )
 
 func (s *Server) mountDevices(mux *http.ServeMux) {
+	mux.Handle("POST /api/devices/admin-web", s.require(true, http.HandlerFunc(s.createMobileAdminGrant)))
+	mux.Handle("POST /api/devices/admin-web/close", s.require(true, http.HandlerFunc(s.closeMobileAdminSessions)))
+	mux.HandleFunc("POST /api/devices/admin-web/exchange", s.exchangeMobileAdminGrant)
 	mux.HandleFunc("GET /api/server", s.serverInfo)
 	mux.Handle("POST /api/devices/login-code", s.require(false, browserOnly(s.createLoginCode)))
 	mux.HandleFunc("POST /api/devices/login-code/exchange", s.exchangeLoginCode)

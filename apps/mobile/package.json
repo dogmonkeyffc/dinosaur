@@ -18,7 +18,8 @@
     "expo-video": "56.1.4",
     "react": "19.2.3",
     "react-native": "npm:react-native-tvos@0.85.3-3",
-    "react-native-zeroconf": "0.17.6"
+    "react-native-zeroconf": "0.17.6",
+    "react-native-webview": "13.16.1"
   },
   "expo": {
     "install": {

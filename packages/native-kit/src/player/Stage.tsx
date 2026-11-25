@@ -9,6 +9,7 @@ import { styles } from '../theme';
 import { usePlayback } from './usePlayback';
 import { Subtitles } from './Subtitles';
 import { PhonePlayer } from './PhonePlayer';
+import { usePlayerSettings } from './usePlayerSettings';
 
 export function Stage({
   client,
@@ -21,6 +22,8 @@ export function Stage({
   track,
   selectSubtitle,
   fullscreen,
+  quality,
+  selectQuality,
 }: {
   client: Client;
   info: PlaybackInfo;
@@ -32,6 +35,8 @@ export function Stage({
   track?: number;
   selectSubtitle: (track: number | undefined, position: number) => void;
   fullscreen: { fullscreen: boolean; toggle: () => Promise<void> };
+  quality: string;
+  selectQuality: (value: string, position: number) => void;
 }) {
   const [error, setError] = useState('');
   const [audio, setAudio] = useState('音轨');
@@ -107,6 +112,16 @@ export function Stage({
       failed={setError}
     />
   );
+  const settings = usePlayerSettings({
+    player: playback.player,
+    info,
+    track,
+    position: () => playback.position.current,
+    selectSubtitle,
+    restart,
+    quality,
+    selectQuality,
+  });
   if (!tv)
     return (
       <PhonePlayer
@@ -119,11 +134,7 @@ export function Stage({
         seek={seek}
         fullscreen={fullscreen}
         next={info.next_episode ? nextEpisode : undefined}
-        audio={{ label: audio, press: audioTrack }}
-        subtitle={
-          info.subtitles.length ? { label: selected?.label || '字幕 · 关', press: subtitle } : undefined
-        }
-        compatible={!compatible ? useCompatible : undefined}
+        settings={settings}
         error={error || playback.error}
       >
         {subtitles}

@@ -51,6 +51,12 @@ export class Client extends Transport {
   devices() {
     return this.request<{ devices: Device[] }>('/api/devices');
   }
+  adminWebLogin() {
+    return this.request<{ code: string }>('/api/devices/admin-web', 'POST', {});
+  }
+  closeAdminWeb() {
+    return this.request('/api/devices/admin-web/close', 'POST', {});
+  }
   revoke(id: string) {
     return this.request('/api/devices/' + encodeURIComponent(id), 'DELETE');
   }
@@ -87,10 +93,18 @@ export class Client extends Transport {
   setHistoryRecording(id: number, record_history: boolean) {
     return this.request(`/api/history/settings/${id}`, 'PUT', { record_history });
   }
-  playback(id: number, mode = 'original', start = 0, audio?: number, subtitle?: number | 'auto') {
+  playback(
+    id: number,
+    mode = 'original',
+    start = 0,
+    audio?: number,
+    subtitle?: number | 'auto',
+    quality = 'auto',
+  ) {
     const query = new URLSearchParams({ mode, start: String(Math.max(0, start)) });
     if (audio !== undefined) query.set('audio', String(audio));
     if (subtitle !== undefined) query.set('subtitle', String(subtitle));
+    query.set('quality', quality);
     return this.request<PlaybackInfo>(`/api/playback/${id}?${query}`);
   }
   progress(id: number, position: number, watched?: boolean) {

@@ -20,7 +20,9 @@ export function SeekBar({
   const position = Math.max(0, Math.min(preview ?? time, duration));
   return (
     <View style={css.timeline}>
-      <Text style={css.time}>{clock(preview ?? time)}</Text>
+      <Text style={css.time}>
+        {clock(preview ?? time)} / {clock(duration)}
+      </Text>
       <View
         accessible
         accessibilityRole="adjustable"
@@ -53,7 +55,6 @@ export function SeekBar({
           <View style={[css.fill, { width: `${duration > 0 ? (position / duration) * 100 : 0}%` }]} />
         </View>
       </View>
-      <Text style={css.time}>{clock(duration)}</Text>
     </View>
   );
 }

@@ -36,17 +36,16 @@ func TestDisabledLibraryHidesSavedMovieProgressAndIgnoresWrites(t *testing.T) {
 	if err := db.SavePlaybackProgress(ctx, user, playback.Progress{MediaID: id, Position: 100, Watched: true}); err != nil {
 		t.Fatal(err)
 	}
-	var position float64
-	var watched bool
-	if err := db.DB.QueryRow(`SELECT position,watched FROM playback_progress WHERE user_id=? AND media_id=?`, user, id).Scan(&position, &watched); err != nil || position != 40 || watched {
-		t.Fatal("disabled write changed stored progress", err)
+	var count int
+	if err := db.DB.QueryRow(`SELECT count(*) FROM playback_progress WHERE user_id=? AND media_id=?`, user, id).Scan(&count); err != nil || count != 0 {
+		t.Fatal("disabled library retained progress", err)
 	}
 	if err := db.SetHistoryLibrarySetting(ctx, user, items[0].LibraryID, true); err != nil {
 		t.Fatal(err)
 	}
 	progress, err = db.PlaybackProgress(ctx, user, id)
-	if err != nil || progress.Position != 40 {
-		t.Fatal("original progress was lost")
+	if err != nil || progress.Position != 0 {
+		t.Fatal("cleared progress returned after enabling")
 	}
 }
 

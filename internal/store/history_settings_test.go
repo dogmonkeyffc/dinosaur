@@ -85,8 +85,8 @@ func TestHistoryRecordingSettingsArePerAccountAndSuppressProgress(t *testing.T) 
 		t.Fatal(err)
 	}
 	page, _ = db.HistoryPage(ctx, admin, 1, 24)
-	if page.Total != 3 {
-		t.Fatal("setting removed existing history or blocked explicit import")
+	if page.Total != 2 {
+		t.Fatal("setting did not clear local history selectively or blocked explicit import")
 	}
 	var seq int
 	var name, path string

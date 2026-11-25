@@ -27,12 +27,28 @@ func (s *Store) HistoryLibrarySettings(ctx context.Context, userID int64) ([]his
 }
 
 func (s *Store) SetHistoryLibrarySetting(ctx context.Context, userID, libraryID int64, record bool) error {
-	result, err := s.DB.ExecContext(ctx, `INSERT INTO history_library_settings(user_id,library_id,record_history,updated_at)
+	tx, err := s.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	result, err := tx.ExecContext(ctx, `INSERT INTO history_library_settings(user_id,library_id,record_history,updated_at)
  SELECT ?,l.id,?,? FROM libraries l WHERE l.id=? AND `+libraryVisible("l.id")+`
  ON CONFLICT(user_id,library_id) DO UPDATE SET record_history=excluded.record_history,updated_at=excluded.updated_at`,
 		userID, record, time.Now().Unix(), libraryID, libraryViewer(ctx))
 	if err != nil {
 		return err
 	}
-	return historyAffected(result)
+	if err := historyAffected(result); err != nil {
+		return err
+	}
+	if !record {
+		if _, err := tx.ExecContext(ctx, `DELETE FROM playback_progress WHERE user_id=? AND media_id IN (SELECT id FROM media_items WHERE library_id=?)`, userID, libraryID); err != nil {
+			return err
+		}
+		if _, err := tx.ExecContext(ctx, `DELETE FROM watch_history WHERE user_id=? AND source='local' AND media_id IN (SELECT id FROM media_items WHERE library_id=?)`, userID, libraryID); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
 }

@@ -36,8 +36,8 @@ func TestDisabledRecordingReturnsNoProgress(t *testing.T) {
 			t.Fatalf("progress leaked in %s: %s", method, w.Body)
 		}
 	}
-	var stored float64
-	if err := db.DB.QueryRow(`SELECT position FROM playback_progress WHERE user_id=? AND media_id=1`, user.ID).Scan(&stored); err != nil || stored != 120 {
-		t.Fatal("disabled progress saved", stored, err)
+	var stored int
+	if err := db.DB.QueryRow(`SELECT count(*) FROM playback_progress WHERE user_id=? AND media_id=1`, user.ID).Scan(&stored); err != nil || stored != 0 {
+		t.Fatal("disabled progress retained", stored, err)
 	}
 }

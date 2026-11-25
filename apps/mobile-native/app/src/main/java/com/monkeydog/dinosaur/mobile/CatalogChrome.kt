@@ -142,7 +142,7 @@ private fun MainActivity.navigation(tab: Int, navigate: (Int) -> Unit) = phoneRo
     }
 }
 
-private class CatalogIcon(activity: MainActivity, private val name: String, color: Int) : View(activity) {
+internal class CatalogIcon(activity: MainActivity, private val name: String, color: Int) : View(activity) {
     private val pen = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         this.color = color
         style = Paint.Style.STROKE

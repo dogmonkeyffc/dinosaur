@@ -9,7 +9,7 @@ internal class Admin(private val activity: MainActivity) {
     private val client get() = activity.api
 
     fun show() = with(activity) {
-        page("管理", { catalog.show() }, { catalog.show() })
+        page("管理", { catalog.show() })
         val api = client
         task({ api.request("/api/auth/me").getJSONObject("user") }) { user ->
             if (user.getString("role") != "admin") {
@@ -21,10 +21,10 @@ internal class Admin(private val activity: MainActivity) {
     }
 
     private fun libraries(): Unit = with(activity) {
-        adminPage({ catalog.show() }, ::destinations)
+        page("管理", { catalog.show() }, toolbarAction = adminMenuButton(::destinations))
         content.addView(phoneRow().apply {
-            addView(phoneText("媒体库", 32, ADMIN_TEXT), android.widget.LinearLayout.LayoutParams(0, -2, 1f))
-            addView(adminAction("＋ 添加媒体库", { editLibrary(null) }, true))
+            addView(phoneText("媒体库", 24, bold = true), android.widget.LinearLayout.LayoutParams(0, -2, 1f))
+            addView(phoneAction("添加媒体库", { editLibrary(null) }, color = PHONE_SELECTED, fill = PHONE_ACCENT))
         })
         val api = client
         task({ api.request("/api/admin/libraries").rows("libraries") }) { rows ->

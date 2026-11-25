@@ -2,11 +2,14 @@ package com.monkeydog.dinosaur.mobile
 
 import android.app.AlertDialog
 import android.content.res.ColorStateList
+import android.view.View
 import android.widget.*
 
 internal fun MainActivity.dp(value: Int) = (value * resources.displayMetrics.density + 0.5f).toInt()
 
-internal fun MainActivity.page(title: String, previous: (() -> Unit)? = null, close: (() -> Unit)? = null) {
+internal fun MainActivity.page(
+    title: String, previous: (() -> Unit)? = null, close: (() -> Unit)? = null, toolbarAction: View? = null,
+) {
     generation++
     back = previous
     val root = LinearLayout(this).apply {
@@ -20,6 +23,7 @@ internal fun MainActivity.page(title: String, previous: (() -> Unit)? = null, cl
     }
     heading.addView(phoneText(title, 24, bold = true), LinearLayout.LayoutParams(0, -2, 1f)
         .apply { leftMargin = if (previous == null) ui(10) else ui(8) })
+    toolbarAction?.let { heading.addView(it, LinearLayout.LayoutParams(ui(48), ui(48))) }
     close?.let { action ->
         heading.addView(phoneAction("×", action, size = 26, color = PHONE_TEXT, fill = 0).apply {
             contentDescription = "关闭$title"

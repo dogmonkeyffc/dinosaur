@@ -3,14 +3,10 @@ package com.monkeydog.dinosaur.mobile
 import com.monkeydog.dinosaur.android.Api
 import com.monkeydog.dinosaur.android.json
 import com.monkeydog.dinosaur.android.rows
-import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
-import android.view.View
-import android.view.WindowInsets
-import android.view.WindowInsetsController
 import android.widget.*
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -39,10 +35,7 @@ internal class PlaybackScreen(private val activity: MainActivity, private val ap
     private var revision = 0
     private var info = JSONObject()
     private var lastSave = 0L
-    private lateinit var status: TextView
-    private lateinit var transport: LinearLayout
-    private lateinit var header: LinearLayout
-    private lateinit var scrubber: SeekBar
+    private var chrome: PlaybackChrome? = null
     private lateinit var caption: TextView
     private val captions = PlaybackCaptions(activity, api)
     private val tick = object : Runnable {
@@ -50,8 +43,7 @@ internal class PlaybackScreen(private val activity: MainActivity, private val ap
             val current = player ?: return
             val position = position()
             caption.updateText(captions.at(id, subtitle, info, position))
-            if (!scrubber.isPressed) scrubber.progress = position.coerceAtMost(duration).toInt()
-            status.updateText("${clock(position)} / ${clock(duration)}")
+            chrome?.tick(position, duration)
             if (current.isPlaying && System.currentTimeMillis() - lastSave >= 10000) save()
             handler.postDelayed(this, 500)
         }
@@ -78,7 +70,7 @@ internal class PlaybackScreen(private val activity: MainActivity, private val ap
         }
         render()
         task({ api.request("/api/playback/$mediaId?$parameters") }, {
-            if (load == revision) status.text = it.message ?: "无法播放"
+            if (load == revision) chrome?.fail(it.message ?: "无法播放")
         }) { result ->
             if (load == revision) prepare(result, start)
         }
@@ -103,6 +95,8 @@ internal class PlaybackScreen(private val activity: MainActivity, private val ap
         player = current
         render()
         current.addListener(object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) { chrome?.setPlaying(isPlaying) }
+
             override fun onPlaybackStateChanged(state: Int) {
                 if (state != Player.STATE_ENDED || completed) return
                 val observed = maxOf(current.currentPosition, current.duration.coerceAtLeast(0)) + offset
@@ -128,54 +122,38 @@ internal class PlaybackScreen(private val activity: MainActivity, private val ap
         if (mode == "original") {
             mode = "compatible"
             open(id, position())
-        } else status.text = "播放失败"
+        } else chrome?.fail("播放失败")
     }
 
     private fun render(): Unit = with(activity) {
         generation++
         back = { if (fullscreen) rotate() else exit() }
-        val root = FrameLayout(this).apply { setBackgroundColor(Color.BLACK); fitsSystemWindows = true }
+        chrome?.close()
+        val root = playbackRoot { fullscreen }
         root.addView((layoutInflater.inflate(R.layout.video_surface, root, false) as PlayerView).apply {
             useController = false
             player = this@PlaybackScreen.player
-            setOnClickListener {
-                val show = if (transport.visibility == View.VISIBLE) View.GONE else View.VISIBLE
-                transport.visibility = show
-                header.visibility = show
-            }
+            contentDescription = "显示播放控制"
+            setOnClickListener { chrome?.tap() }
         }, FrameLayout.LayoutParams(-1, -1))
-        header = LinearLayout(this).apply {
-            background = playerShade(true)
-            addView(playerControl("←", "返回") { exit() })
-            addView(TextView(context).apply { text = info.optJSONObject("item")?.optString("title").orEmpty(); textSize = 16f })
-        }
-        root.addView(header, FrameLayout.LayoutParams(-1, -2, Gravity.TOP))
         caption = TextView(this).apply { gravity = Gravity.CENTER; textSize = 18f; setTextColor(Color.WHITE) }
         root.addView(caption, FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM).apply { bottomMargin = dp(100) })
-        transport = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; background = playerShade(false) }
-        status = TextView(this).apply { text = "正在准备"; setPadding(dp(12), 0, 0, 0) }
-        transport.addView(status)
-        scrubber = SeekBar(this).apply {
-            max = duration.toInt().coerceAtLeast(1)
-            contentDescription = "播放进度"
-            progressTintList = android.content.res.ColorStateList.valueOf(0xffc2df9e.toInt())
-            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(bar: SeekBar, value: Int, user: Boolean) = Unit
-                override fun onStartTrackingTouch(bar: SeekBar) = Unit
-                override fun onStopTrackingTouch(bar: SeekBar) {
-                    val target = bar.progress.toLong()
-                    if (info.optJSONObject("plan")?.optString("mode") == "direct") player?.seekTo(target)
-                    else open(this@PlaybackScreen.id, target)
-                }
-            })
+        val item = info.optJSONObject("item")
+        val title = listOf(item?.optString("series_title"), item?.optString("title"))
+            .filterNotNull().filter(String::isNotBlank).joinToString(" · ")
+        val advance = if (next > 0) ({ save(); open(next, 0L, true) }) else null
+        chrome = PlaybackChrome(this, root, title, if (player == null) 0 else duration, advance,
+            { if (fullscreen) rotate() else exit() }, ::toggle, ::rotate, ::seek, settings()).apply {
+            setFullscreen(fullscreen)
         }
-        transport.addView(scrubber)
-        transport.addView(playbackControls(
-            fullscreen, next > 0, ::toggle, { save(); open(next, 0L, true) }, ::rotate,
-            { audioMenu() }, { subtitleMenu() }, { modeMenu() }, { qualityMenu() }, { rateMenu() }
-        ))
-        root.addView(transport, FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM))
         setContentView(root)
+    }
+
+    private fun seek(position: Long) {
+        if (duration <= 0 || player == null) return
+        val target = position.coerceIn(0, duration)
+        if (info.optJSONObject("plan")?.optString("mode") == "direct") player?.seekTo(target)
+        else open(id, target)
     }
 
     private fun toggle() {
@@ -185,49 +163,57 @@ internal class PlaybackScreen(private val activity: MainActivity, private val ap
         else current.play()
     }
 
-    private fun audioMenu() = with(activity) {
+    private fun settings(): List<PlayerSetting> {
         val tracks = info.rows("audio_tracks")
-        choose("音轨", tracks.map { it.optString("title").ifBlank { it.optString("language").ifBlank { "音轨 ${it.getInt("index")}" } } }) {
-            audio = tracks[it].getInt("index")
-            mode = "compatible"
-            open(id, position())
-        }
+        val subtitles = info.rows("subtitles")
+        val available = player != null
+        return listOf(
+            PlayerSetting(PlayerIcon.AUDIO, "音轨", available && tracks.isNotEmpty()) {
+                val selected = audio ?: info.optInt("selected_audio", -1).takeIf { it >= 0 }
+                    ?: tracks.firstOrNull()?.optInt("index")
+                tracks.map { track ->
+                    val index = track.getInt("index")
+                    val name = track.optString("title").ifBlank { track.optString("language").ifBlank { "音轨 $index" } }
+                    PlayerOption(name, index == selected) { audio = index; mode = "compatible"; open(id, position()) }
+                }
+            },
+            PlayerSetting(PlayerIcon.SUBTITLE, "字幕", available && subtitles.isNotEmpty()) {
+                listOf(PlayerOption("关闭字幕", subtitle == null) { changeSubtitle(null) }) +
+                    subtitles.map { track ->
+                        val key = track.getInt("id")
+                        PlayerOption(track.optString("label"), subtitle == key) { changeSubtitle(key) }
+                    }
+            },
+            PlayerSetting(PlayerIcon.MODE, "播放方式", available) {
+                listOf(
+                    PlayerOption("自动选择", mode == "original") { mode = "original"; open(id, position()) },
+                    PlayerOption("兼容模式", mode == "compatible") { mode = "compatible"; open(id, position()) },
+                )
+            },
+            PlayerSetting(PlayerIcon.QUALITY, "分辨率", available) {
+                listOf("auto" to "自动", "original" to "原分辨率", "1080" to "1080p", "720" to "720p", "480" to "480p")
+                    .map { (value, label) ->
+                        PlayerOption(label, quality == value) { quality = value; open(id, position()) }
+                    }
+            },
+            PlayerSetting(PlayerIcon.RATE, "倍速", available) {
+                listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f).map { value ->
+                    PlayerOption("${value}×", rate == value) { rate = value; player?.setPlaybackSpeed(value) }
+                }
+            },
+        )
     }
 
-    private fun subtitleMenu() = with(activity) {
-        val tracks = info.rows("subtitles")
-        choose("字幕", listOf("关闭字幕") + tracks.map { it.optString("label") }) {
-            subtitle = tracks.getOrNull(it - 1)?.getInt("id")
-            autoSubtitle = false
-            open(id, position())
-        }
-    }
-
-    private fun modeMenu() = activity.choose("播放方式", listOf("原片", "兼容播放")) {
-        mode = if (it == 0) "original" else "compatible"
+    private fun changeSubtitle(track: Int?) {
+        subtitle = track
+        autoSubtitle = false
         open(id, position())
-    }
-
-    private fun qualityMenu() = activity.choose("分辨率", listOf("自动","原分辨率","1080p","720p","480p")) {
-        quality = listOf("auto","original","1080","720","480")[it]
-        open(id, position())
-    }
-
-    private fun rateMenu() {
-        val values = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
-        activity.choose("倍速", values.map { "${it}×" }) { rate = values[it]; player?.setPlaybackSpeed(rate) }
     }
 
     private fun rotate() {
         fullscreen = !fullscreen
-        activity.requestedOrientation = if (fullscreen) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-        if (android.os.Build.VERSION.SDK_INT >= 30) {
-            activity.window.insetsController?.apply {
-                systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                if (fullscreen) hide(WindowInsets.Type.systemBars()) else show(WindowInsets.Type.systemBars())
-            }
-        }
-        transport.findViewWithTag<TextView>("fullscreen")?.contentDescription = if (fullscreen) "退出全屏" else "全屏"
+        activity.setPlaybackFullscreen(fullscreen)
+        chrome?.setFullscreen(fullscreen)
     }
 
     private fun position() = offset + (player?.currentPosition ?: 0)
@@ -241,6 +227,6 @@ internal class PlaybackScreen(private val activity: MainActivity, private val ap
     }
     fun pause() { player?.pause(); save() }
     private fun detach() { handler.removeCallbacks(tick); player?.release(); player = null }
-    fun release() { revision++; pause(); detach(); if (fullscreen) rotate() }
+    fun release() { revision++; pause(); detach(); chrome?.close(); if (fullscreen) rotate() }
     private fun exit() { release(); activity.playback = null; close() }
 }

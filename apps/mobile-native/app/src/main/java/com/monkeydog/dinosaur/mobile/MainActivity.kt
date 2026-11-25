@@ -7,7 +7,6 @@ import com.monkeydog.dinosaur.android.json
 import com.monkeydog.dinosaur.android.serverOrigin
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.widget.LinearLayout
@@ -23,14 +22,17 @@ class MainActivity : Activity() {
     internal var back: (() -> Unit)? = null
     internal var generation = 0
     internal var playback: PlaybackScreen? = null
+    private var accountReturn: (() -> Unit)? = null
+    private var signingOut = false
     internal val catalog by lazy { Catalog(this) }
     internal val settings by lazy { Settings(this) }
     internal val admin by lazy { Admin(this) }
 
     override fun onCreate(state: Bundle?) {
         super.onCreate(state)
-        window.statusBarColor = Color.BLACK
-        window.navigationBarColor = Color.BLACK
+        window.statusBarColor = PHONE_BG
+        window.navigationBarColor = PHONE_BG
+        if (android.os.Build.VERSION.SDK_INT >= 29) window.isNavigationBarContrastEnforced = false
         vault = Accounts(this)
         accounts = runCatching { vault.load() }.getOrElse {
             message("无法读取已保存的账号，请重新登录")
@@ -58,42 +60,68 @@ class MainActivity : Activity() {
         }
     }
 
-    internal fun showAccounts() {
-        page("切换账号", account?.let { { catalog.show() } })
+    internal fun showAccounts(returnTo: (() -> Unit)? = accountReturn) {
+        accountReturn = returnTo
+        accountPage(if (accounts.isEmpty()) "登录 Dinosaur" else "切换账号", account?.let { { leaveAccounts() } })
         accounts.forEach { item ->
-            button(item.user.getString("username") + " · " + item.server.optString("name")) {
-                account = item
-                vault.active = item.key
-                catalog.show()
-            }
-        }
-        account?.let { active ->
-            button("退出当前账号") {
-                confirm("退出当前账号？") {
-                    val remaining = accounts.filter { it.key != active.key }
-                    task({
-                        vault.save(remaining)
-                        runCatching { active.api.request("/api/auth/logout", "POST") }
-                    }) {
-                        accounts = remaining
-                        account = remaining.firstOrNull()
-                        vault.active = account?.key
-                        showAccounts()
+            content.addWithGap(phoneCard().apply {
+                addView(accountRow(item, selected = item.key == account?.key).apply {
+                    onTap {
+                        if (!signingOut) {
+                            account = item
+                            vault.active = item.key
+                            leaveAccounts()
+                        }
                     }
+                })
+                addWithGap(phoneAction("退出账号", { signOut(item) }, color = PHONE_TEXT), ui(20), -2)
+            }, ui(22))
+        }
+        content.addWithGap(phoneCard().apply {
+            addView(phoneAction("配对码登录", {
+                if (!signingOut) ServerPicker(this@MainActivity).show({ showAccounts() }) { origin ->
+                    form("配对码登录", listOf("八位配对码")) { fields -> signIn(origin, fields[0], false) }
                 }
+            }, color = 0xff14233b.toInt(), fill = PHONE_ACCENT))
+            addWithGap(phoneAction("扫描 Web 登录二维码", {
+                if (!signingOut) {
+                    if (checkSelfPermission(android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED) scanQr()
+                    else requestPermissions(arrayOf(android.Manifest.permission.CAMERA), 41)
+                }
+            }, color = PHONE_TEXT), ui(20))
+            addWithGap(phoneAction("二维码登录链接", {
+                if (!signingOut) form("二维码登录链接", listOf("登录链接")) { fields -> handleLink(Uri.parse(fields[0])) }
+            }, color = PHONE_TEXT), ui(20))
+        }, ui(22))
+    }
+
+    private fun leaveAccounts() {
+        if (signingOut) return
+        val destination = accountReturn
+        accountReturn = null
+        if (destination != null) destination() else catalog.show()
+    }
+
+    private fun signOut(item: Account) {
+        if (signingOut) return
+        confirm("退出 ${item.user.getString("username")}？") {
+            val remaining = accounts.filter { it.key != item.key }
+            val active = account?.takeUnless { it.key == item.key } ?: remaining.firstOrNull()
+            signingOut = true
+            task({
+                vault.save(remaining)
+                runCatching { item.api.request("/api/auth/logout", "POST") }
+            }, {
+                signingOut = false
+                message(it.message ?: "退出失败")
+            }) {
+                signingOut = false
+                accounts = remaining
+                account = active
+                vault.active = active?.key
+                if (active == null) accountReturn = null
+                showAccounts()
             }
-        }
-        button("配对码登录") {
-            ServerPicker(this).show({ showAccounts() }) { origin ->
-                form("配对码登录", listOf("八位配对码")) { fields -> signIn(origin, fields[0], false) }
-            }
-        }
-        button("二维码登录链接") {
-            form("二维码登录链接", listOf("登录链接")) { fields -> handleLink(Uri.parse(fields[0])) }
-        }
-        button("扫描登录二维码") {
-            if (checkSelfPermission(android.Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED) scanQr()
-            else requestPermissions(arrayOf(android.Manifest.permission.CAMERA), 41)
         }
     }
 
@@ -110,7 +138,7 @@ class MainActivity : Activity() {
     }
 
     private fun handleLink(link: Uri?) {
-        if (link == null) return
+        if (link == null || signingOut) return
         try {
             require(link.scheme == "dinosaur" && link.authority == "login" &&
                 link.path.orEmpty() in listOf("", "/") && link.fragment == null) { "登录链接无效" }
@@ -147,6 +175,7 @@ class MainActivity : Activity() {
             accounts = it
             account = it.first()
             vault.active = account?.key
+            accountReturn = null
             catalog.show()
         }
     }

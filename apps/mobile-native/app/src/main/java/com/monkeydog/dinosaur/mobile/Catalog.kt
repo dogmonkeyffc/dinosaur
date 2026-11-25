@@ -1,194 +1,203 @@
 package com.monkeydog.dinosaur.mobile
 
+import android.os.Handler
+import android.os.Looper
+import android.view.inputmethod.InputMethodManager
+import android.widget.LinearLayout
 import com.monkeydog.dinosaur.android.Api
 import com.monkeydog.dinosaur.android.rows
-import android.graphics.BitmapFactory
-import android.graphics.Color
-import android.view.View
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
 import java.net.URLEncoder
-import java.util.concurrent.Executors
 
 internal class Catalog(private val activity: MainActivity) {
-    private val artwork = Executors.newFixedThreadPool(2)
-    private var currentTab = 0
-    private var currentLibrary = 0L
+    private val artwork = PhoneArtwork(activity)
+    private val feed = CatalogFeed(activity, artwork)
+    private val timeline = HistoryTimeline(activity, artwork)
+    private val details = MediaDetails(activity, artwork, ::play)
+    private val handler = Handler(Looper.getMainLooper())
+    private var pendingSearch: Runnable? = null
+    private var owner: String? = null
+    private var tab = 0
+    private var query = ""
+    private var searching = false
+    private var pageNumber = 1
+    private var savedScroll = 0
+    private val selectedIds = LongArray(3)
+    private var request = 0
 
-    fun show(tab: Int = currentTab, library: Long = currentLibrary, query: String = "", page: Int = 1): Unit = with(activity) {
-        currentTab = tab
-        currentLibrary = library
-        page(listOf("首页", "片库", "观看记录")[tab], if (tab == 0) null else ({ show(0) }))
-        button("头像与设置") { settings.show() }
-        val tabs = LinearLayout(this)
-        listOf("首页", "片库", "记录").forEachIndexed { index, title ->
-            tabs.addView(android.widget.Button(this).apply {
-                text = title
-                isEnabled = index != tab
-                setOnClickListener { show(index, if (index == 1) 0 else currentLibrary) }
-            }, LinearLayout.LayoutParams(0, -2, 1f))
+    fun browseLibrary(id: Long) {
+        selectedIds[1] = id
+        tab = 1
+        reset()
+        show()
+    }
+
+    fun show(destination: Int = tab): Unit = with(activity) {
+        val accountKey = requireNotNull(account).key
+        if (accountKey != owner) {
+            owner = accountKey
+            tab = 0
+            selectedIds.fill(0)
+            reset()
+            showChrome()
+            return@with
         }
-        content.addView(tabs)
+        if (destination != tab) {
+            tab = destination
+            reset()
+        }
+        showChrome()
+    }
+
+    private fun reset() {
+        query = ""
+        searching = false
+        pageNumber = 1
+        savedScroll = 0
+    }
+
+    private fun showChrome(): Unit = with(activity) {
+        pendingSearch?.let(handler::removeCallbacks)
+        val chrome = CatalogChrome(this, tab) { destination ->
+            getSystemService(InputMethodManager::class.java).hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+            tab = destination
+            reset()
+            showChrome()
+        }
         val client = api
         if (tab == 2) {
-            task({ client.request("/api/history?page=$page&page_size=24") }) { data ->
-                var previous = ""
-                data.rows("items").forEach { item ->
-                    val date = item.getString("watched_on")
-                    val month = date.take(7)
-                    if (previous != month) label(month)
-                    previous = month
-                    card(item, client, date) {
-                        labelHistory(item)
-                    }
-                }
-                pagination(data, page) { show(2, library, query, it) }
+            timeline.show(chrome, client)
+            return@with
+        }
+        val toolbar = column()
+        if (tab == 0) {
+            val (heading, input) = searchHeading(query, {
+                savedScroll = chrome.scroller.scrollY
+                settings.show()
+            }) { value ->
+                query = value
+                pageNumber = 1
+                savedScroll = 0
+                val screen = generation
+                request++
+                pendingSearch?.let(handler::removeCallbacks)
+                pendingSearch = Runnable { if (screen == generation) catalog(chrome, toolbar, client) }
+                    .also { handler.postDelayed(it, 250) }
             }
-        } else {
-            task({ client.request("/api/libraries").rows("libraries") }) { libraries ->
-                val options = libraries.filter { tab == 1 || !settings.hidden(it.getLong("id")) }
-                val selected = options.firstOrNull { it.getLong("id") == library } ?: options.firstOrNull()
-                if (selected == null) {
-                    label("暂无媒体库")
-                } else {
-                    val id = selected.getLong("id")
-                    currentLibrary = id
-                    button(selected.getString("name")) {
-                        choose("媒体库", options.map { it.getString("name") }) { show(tab, options[it].getLong("id")) }
-                    }
-                    button(if (query.isBlank()) "搜索媒体" else "搜索：$query") {
-                        form("搜索媒体", listOf("片名"), listOf(query)) { show(tab, id, it.first()) }
-                    }
-                    val kind = selected.getString("type")
-                    val encoded = URLEncoder.encode(query, "UTF-8")
-                    val route = if (kind == "tv") "series" else "media"
-                    task({
-                        val data = client.request("/api/$route?type=$kind&library_id=$id&page=$page&page_size=24&q=$encoded")
-                        val recent = if (tab == 0 && query.isBlank() && page == 1) {
-                            client.request("/api/playback/continue?type=$kind").rows("items")
-                                .filter { it.optLong("library_id") == id }
-                        } else emptyList()
-                        data to recent
-                    }) { (data, recent) ->
-                        if (recent.isNotEmpty()) label("继续观看")
-                        recent.forEach { item -> card(item, client) { play(item.getLong("id")) } }
-                        if (recent.isNotEmpty()) label(selected.getString("name"))
-                        data.rows("items").forEach { item ->
-                            card(item, client) {
-                                if (kind == "tv") {
-                                    val work = item.optLong("work_id")
-                                    if (work > 0) work(work) else series(item.getLong("id"), { show() })
-                                } else movie(item.getLong("id"))
-                            }
-                        }
-                        pagination(data, page) { show(tab, id, query, it) }
-                    }
+            input.setOnFocusChangeListener { _, active ->
+                if (active && !searching) {
+                    searching = true
+                    pageNumber = 1
+                    savedScroll = 0
+                    back = { reset(); showChrome() }
+                    catalog(chrome, toolbar, client)
                 }
             }
+            input.setOnEditorActionListener { field, _, _ ->
+                getSystemService(InputMethodManager::class.java).hideSoftInputFromWindow(field.windowToken, 0)
+                true
+            }
+            chrome.header.addView(heading)
+            chrome.header.addView(toolbar)
+            if (searching) back = { reset(); showChrome() }
+        }
+        chrome.scroller.refresh = { savedScroll = 0; catalog(chrome, toolbar, client) }
+        catalog(chrome, toolbar, client)
+    }
+
+    private fun catalog(chrome: CatalogChrome, toolbar: LinearLayout, client: Api): Unit = with(activity) {
+        val revision = ++request
+        val destination = tab
+        val search = searching
+        val selection = if (search) 2 else destination
+        val wanted = selectedIds[selection].takeIf { it > 0 } ?: selectedIds[0]
+        val typed = query.trim()
+        val page = pageNumber
+        val body = chrome.body
+        body.removeAllViews()
+        body.addView(loading())
+        task({
+            val libraries = client.request("/api/libraries").rows("libraries")
+            val visible = if (destination == 0 && !search) libraries.filterNot { settings.hidden(it.getLong("id")) } else libraries
+            val selected = visible.firstOrNull { it.optLong("id") == wanted } ?: visible.firstOrNull()
+            val id = selected?.getLong("id") ?: 0
+            val kind = selected?.optString("type").orEmpty()
+            val route = if (kind == "tv") "series" else "media"
+            val encoded = URLEncoder.encode(typed, "UTF-8")
+            val data = if (selected == null) JSONObject() else
+                client.request("/api/$route?type=$kind&library_id=$id&page=$page&page_size=24&q=$encoded")
+            val recent = if (destination == 0 && !search && selected != null) {
+                val ids = visible.map { it.getLong("id") }.toSet()
+                runCatching { client.request("/api/playback/continue?type=$kind").rows("items") }
+                    .getOrDefault(emptyList()).filter { it.optLong("library_id") in ids }
+            } else emptyList()
+            CatalogPage(visible, selected, data, recent, kind)
+        }, { error ->
+            if (revision == request) feedback(body, error.message ?: "无法加载片库") { catalog(chrome, toolbar, client) }
+        }) { result ->
+            if (revision != request) return@task
+            val id = result.selected?.optLong("id") ?: 0L
+            if (id > 0) selectedIds[selection] = id
+            val select = { next: Long ->
+                selectedIds[selection] = next
+                pageNumber = 1
+                savedScroll = 0
+                catalog(chrome, toolbar, client)
+            }
+            val open: (JSONObject) -> Unit = { item ->
+                savedScroll = chrome.scroller.scrollY
+                getSystemService(InputMethodManager::class.java).hideSoftInputFromWindow(chrome.scroller.windowToken, 0)
+                details.open(item, result.kind) { showChrome() }
+            }
+            toolbar.removeAllViews()
+            body.removeAllViews()
+            body.setPadding(0, 0, 0, ui(28))
+            val items = result.data.rows("items")
+            if (destination == 1) {
+                feed.library(body, result.selected, result.libraries, items, client, chrome.topInset, select, {
+                    savedScroll = chrome.scroller.scrollY
+                    settings.show()
+                }, open)
+            } else {
+                toolbar.addView(libraryTabs(result.libraries, id, select))
+                if (search) feed.search(body, items, client, typed.isNotEmpty(), open)
+                else if (result.selected != null) feed.home(body, result.selected.optString("name"), items, result.recent, client, {
+                    tab = 1
+                    reset()
+                    selectedIds[1] = id
+                    showChrome()
+                }, open, {
+                    savedScroll = chrome.scroller.scrollY
+                    play(it.getLong("id")) { showChrome() }
+                })
+            }
+            if (items.isEmpty()) body.addView(status(when {
+                result.selected == null && destination == 0 && !search -> "暂无首页媒体库"
+                result.selected == null -> "暂无媒体库"
+                typed.isNotEmpty() -> "没有找到相关媒体"
+                else -> "暂无媒体"
+            }))
+            if (destination == 1 || search) feed.pagination(body, result.data.optInt("total"), page) {
+                pageNumber = it
+                savedScroll = 0
+                catalog(chrome, toolbar, client)
+            }
+            chrome.scroller.post { chrome.scroller.scrollTo(0, savedScroll) }
         }
     }
 
-    private fun MainActivity.labelHistory(item: JSONObject) {
-        android.app.AlertDialog.Builder(this).setTitle(item.getString("title"))
-            .setMessage(listOf(item.optString("watched_on"), item.optInt("rating").takeIf { it > 0 }?.let { "★".repeat(it.coerceAtMost(5)) }.orEmpty(),
-                item.optString("review")).filter(String::isNotBlank).joinToString("\n"))
-            .setPositiveButton("关闭", null).show()
-    }
-
-    private fun MainActivity.pagination(data: JSONObject, page: Int, move: (Int) -> Unit) {
-        if (data.optInt("total") == 0) label("暂无内容")
-        if (page > 1) button("上一页") { move(page - 1) }
-        if (page * 24 < data.optInt("total")) button("下一页") { move(page + 1) }
-    }
-
-    private fun movie(id: Long): Unit = with(activity) {
-        page("详情", { show() })
-        val client = api
-        task({ client.request("/api/media/$id").getJSONObject("item") }) { item ->
-            card(item, client) { play(id, { movie(id) }) }
-            button(if (item.optDouble("position", 0.0) > 0 && !item.optBoolean("watched")) "继续观看" else "播放") {
-                play(id, { movie(id) })
-            }
-            item.optJSONObject("metadata")?.optString("overview")?.takeIf(String::isNotBlank)?.let { label(it) }
-        }
-    }
-
-    private fun work(id: Long): Unit = with(activity) {
-        page("剧集合集", { show() })
-        val client = api
-        task({ client.request("/api/works/$id") }) { data ->
-            data.rows("members").forEach { item ->
-                card(item, client) { series(item.getLong("id")) { work(id) } }
-            }
-        }
-    }
-
-    private fun series(id: Long, previous: () -> Unit): Unit = with(activity) {
-        page("剧集", previous)
-        val client = api
-        task({ client.request("/api/series/$id") }) { data ->
-            label(data.getJSONObject("series").getString("title"))
-            data.optJSONObject("resume")?.let { item ->
-                button("播放 · " + item.getString("title")) { play(item.getLong("id")) { series(id, previous) } }
-            }
-            data.rows("seasons").forEach { season ->
-                label("第 ${season.getInt("number")} 季")
-                season.rows("episodes").forEach { item ->
-                    button((if (item.optBoolean("watched")) "✓ " else "") + item.getString("title")) {
-                        play(item.getLong("id")) { series(id, previous) }
-                    }
-                }
-            }
-        }
-    }
-
-    private fun play(id: Long, close: () -> Unit = { show() }) {
+    private fun play(id: Long, close: () -> Unit) {
         activity.playback?.release()
         activity.playback = PlaybackScreen(activity, activity.api, close).apply { open(id) }
     }
 
-    private fun MainActivity.card(item: JSONObject, client: Api, detail: String = "", open: () -> Unit) {
-        val row = LinearLayout(this).apply {
-            gravity = android.view.Gravity.CENTER_VERTICAL
-            setPadding(dp(12), dp(8), dp(12), dp(8))
-            setBackgroundColor(Color.rgb(38, 39, 44))
-            isClickable = true
-            isFocusable = true
-            setOnClickListener { open() }
-        }
-        val text = TextView(this).apply {
-            setTextColor(Color.WHITE)
-            textSize = 16f
-            text = listOf(item.getString("title"), detail).filter(String::isNotBlank).joinToString("\n")
-            setPadding(dp(12), 0, 0, 0)
-        }
-        val poster = item.optString("poster_url").takeIf(String::isNotBlank)
-        if (poster != null) {
-            val image = ImageView(this).apply { scaleType = ImageView.ScaleType.CENTER_CROP }
-            row.addView(image, LinearLayout.LayoutParams(dp(54), dp(72)))
-            artwork.execute {
-                val bitmap = runCatching {
-                    val connection = URL(client.resource(poster).toString()).openConnection() as HttpURLConnection
-                    try {
-                        connection.instanceFollowRedirects = false
-                        connection.connectTimeout = 5000
-                        connection.readTimeout = 5000
-                        client.headers.forEach(connection::setRequestProperty)
-                        if (connection.responseCode == 200) {
-                            connection.inputStream.use { BitmapFactory.decodeStream(it, null, BitmapFactory.Options().apply { inSampleSize = 2 }) }
-                        } else null
-                    } finally { connection.disconnect() }
-                }.getOrNull()
-                runOnUiThread { if (image.isAttachedToWindow) image.setImageBitmap(bitmap) }
-            }
-        }
-        row.addView(text, LinearLayout.LayoutParams(0, -2, 1f))
-        content.addView(row, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(6) })
+    fun dispose() {
+        pendingSearch?.let(handler::removeCallbacks)
+        artwork.close()
     }
 
-    fun dispose() { artwork.shutdownNow() }
+    private data class CatalogPage(
+        val libraries: List<JSONObject>, val selected: JSONObject?, val data: JSONObject,
+        val recent: List<JSONObject>, val kind: String,
+    )
 }

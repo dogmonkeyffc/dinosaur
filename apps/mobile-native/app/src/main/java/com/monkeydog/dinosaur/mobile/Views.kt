@@ -1,67 +1,64 @@
 package com.monkeydog.dinosaur.mobile
 
 import android.app.AlertDialog
-import android.graphics.Color
+import android.content.res.ColorStateList
 import android.widget.*
 
 internal fun MainActivity.dp(value: Int) = (value * resources.displayMetrics.density + 0.5f).toInt()
 
-internal fun MainActivity.page(title: String, previous: (() -> Unit)? = null) {
+internal fun MainActivity.page(title: String, previous: (() -> Unit)? = null, close: (() -> Unit)? = null) {
     generation++
     back = previous
     val root = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL
-        setBackgroundColor(Color.rgb(17, 17, 19))
+        setBackgroundColor(PHONE_BG)
         fitsSystemWindows = true
     }
-    val heading = LinearLayout(this).apply { gravity = android.view.Gravity.CENTER_VERTICAL }
+    val heading = phoneRow().apply { setPadding(ui(12), ui(8), ui(12), ui(8)) }
     previous?.let { action ->
-        heading.addView(Button(this).apply {
-            text = "‹"
-            contentDescription = "返回"
-            setOnClickListener { action() }
-        })
+        heading.addView(PlayerAction(this, PlayerIcon.BACK, "返回", action), LinearLayout.LayoutParams(ui(48), ui(48)))
     }
-    heading.addView(TextView(this).apply {
-        text = title
-        textSize = 22f
-        setTextColor(Color.WHITE)
-        setPadding(dp(16), dp(16), dp(16), dp(16))
-    })
+    heading.addView(phoneText(title, 24, bold = true), LinearLayout.LayoutParams(0, -2, 1f)
+        .apply { leftMargin = if (previous == null) ui(10) else ui(8) })
+    close?.let { action ->
+        heading.addView(phoneAction("×", action, size = 26, color = PHONE_TEXT, fill = 0).apply {
+            contentDescription = "关闭$title"
+        }, LinearLayout.LayoutParams(ui(48), ui(48)))
+    }
     root.addView(heading)
     content = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL
-        setPadding(dp(16), 0, dp(16), dp(24))
+        setPadding(ui(22), ui(6), ui(22), ui(40))
     }
     root.addView(ScrollView(this).apply { addView(content) }, LinearLayout.LayoutParams(-1, 0, 1f))
     setContentView(root)
 }
 
-internal fun MainActivity.label(value: String) {
-    content.addView(TextView(this).apply {
-        text = value
-        textSize = 16f
-        setTextColor(Color.rgb(230, 230, 236))
-        setPadding(0, dp(10), 0, dp(10))
-    })
-}
+internal fun MainActivity.label(value: String) = content.addView(phoneText(value, 18).apply {
+    setPadding(0, ui(10), 0, ui(10))
+})
 
-internal fun MainActivity.button(title: String, action: () -> Unit) {
-    content.addView(Button(this).apply {
-        text = title
-        isAllCaps = false
-        setOnClickListener { action() }
-    })
-}
+internal fun MainActivity.button(title: String, action: () -> Unit) =
+    content.addWithGap(phoneAction(title, action, color = PHONE_TEXT, fill = 0xff303136.toInt()), ui(8))
 
-internal fun MainActivity.rowSwitch(title: String, value: Boolean, change: (Boolean, Switch) -> Unit) {
-    content.addView(Switch(this).apply {
+internal fun MainActivity.rowSwitch(title: String, value: Boolean, change: (Boolean, Switch) -> Unit) =
+    content.addView(switchControl(title, value, change))
+
+internal fun MainActivity.switchControl(title: String, value: Boolean, change: (Boolean, Switch) -> Unit) =
+    Switch(this).apply {
         text = title
         isChecked = value
-        setPadding(0, dp(10), 0, dp(10))
+        setTextColor(PHONE_TEXT)
+        textSize = 16 * .85f
+        thumbTintList = ColorStateList.valueOf(PHONE_ACCENT)
+        trackTintList = ColorStateList(
+            arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf()),
+            intArrayOf(0xff4c638b.toInt(), 0xff44464e.toInt()),
+        )
+        minHeight = ui(66)
+        setPadding(ui(18), ui(10), ui(18), ui(10))
         setOnClickListener { change(isChecked, this) }
-    })
-}
+    }
 
 internal fun MainActivity.message(value: String) = Toast.makeText(this, value, Toast.LENGTH_LONG).show()
 

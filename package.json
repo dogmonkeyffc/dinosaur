@@ -16,7 +16,7 @@
     "typecheck": "tsc --noEmit",
     "test:client": "tsx --test packages/client/test/*.test.ts packages/playback-core/test/*.test.ts",
     "test:mobile": "tsx --test apps/mobile/test/*.test.ts",
-    "mobile": "npm run start --workspace @dinosaur/mobile",
+    "mobile": "bash scripts/build_apps.sh mobile",
     "tv": "npm run start --workspace @dinosaur/tv"
   },
   "devDependencies": {

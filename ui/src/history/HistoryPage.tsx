@@ -1,5 +1,5 @@
 import { Button } from '@mui/material';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ErrorMessage, Heading, Loading, Pagination } from '../components/common';
 import { useResource } from '../lib/hooks';
@@ -7,8 +7,10 @@ import type { Page } from '../lib/types';
 import { HistoryEntry } from './HistoryEntry';
 import type { HistoryEntry as Entry } from './types';
 import './history.css';
+import { HistoryRecordingSettings } from './HistoryRecordingSettings';
 
 export function HistoryPage() {
+  const [settings, setSettings] = useState(false);
   const [params, setParams] = useSearchParams();
   const requested = Number(params.get('page') ?? 1);
   const page = Number.isSafeInteger(requested) && requested > 0 && requested <= 1000000 ? requested : 1;
@@ -32,6 +34,9 @@ export function HistoryPage() {
     <section className="watch-history-page" aria-busy={loading}>
       <Heading title="观看记录">
         <div className="watch-history-actions">
+          <Button variant="outlined" onClick={() => setSettings(true)}>
+            记录设置
+          </Button>
           {data && (
             <span className="muted" role="status">
               {data.total} 条
@@ -65,6 +70,7 @@ export function HistoryPage() {
         ))}
       </div>
       {data && <Pagination page={page} total={data.total} size={24} onChange={changePage} />}
+      {settings && <HistoryRecordingSettings close={() => setSettings(false)} />}
     </section>
   );
 }

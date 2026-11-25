@@ -1,3 +1,10 @@
+export interface HistoryLibrarySetting {
+  id: number;
+  name: string;
+  type: string;
+  record_history: boolean;
+}
+
 export interface WatchHistoryEntry {
   id: number;
   media_id?: number;

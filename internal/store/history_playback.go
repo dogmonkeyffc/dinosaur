@@ -27,6 +27,14 @@ func (s *Store) saveProgressAndHistory(ctx context.Context, userID int64, p play
 		return err
 	}
 	if p.Watched && !watched {
+		var record bool
+		err = tx.QueryRowContext(ctx, `SELECT COALESCE((SELECT record_history FROM history_library_settings WHERE user_id=? AND library_id=m.library_id),1) FROM media_items m WHERE m.id=?`, userID, p.MediaID).Scan(&record)
+		if err != nil {
+			return err
+		}
+		if !record {
+			return tx.Commit()
+		}
 		e := history.Entry{MediaID: &p.MediaID, Source: "local", WatchedOn: history.Day(now)}
 		e.SourceID = strconv.FormatInt(p.MediaID, 10) + ":" + e.WatchedOn
 		err = tx.QueryRowContext(ctx, `SELECT `+displayTitle+`,COALESCE(NULLIF(md.year,0),m.year)`+mediaFrom+` WHERE m.id=?`, p.MediaID).Scan(&e.Title, &e.Year)

@@ -13,6 +13,8 @@ import (
 )
 
 func (s *Server) mountHistory(mux *http.ServeMux) {
+	mux.Handle("GET /api/history/settings", s.require(false, http.HandlerFunc(s.listHistorySettings)))
+	mux.Handle("PUT /api/history/settings/{id}", s.require(false, http.HandlerFunc(s.updateHistorySetting)))
 	mux.Handle("GET /api/history", s.require(false, http.HandlerFunc(s.listHistory)))
 	mux.Handle("POST /api/history", s.require(false, http.HandlerFunc(s.createHistory)))
 	mux.Handle("PUT /api/history/{id}", s.require(false, http.HandlerFunc(s.updateHistory)))

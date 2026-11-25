@@ -152,6 +152,7 @@ function HomeSession({
       {settings && (
         <AccountSettings
           account={account}
+          client={c.client}
           libraries={c.libraries}
           visibility={visibility}
           close={() => setSettings(false)}

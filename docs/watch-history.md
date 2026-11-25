@@ -8,6 +8,8 @@ Web 侧栏“我的 → 观看记录”打开 `/history`，按月份展示当前
 
 ## API
 
+每个账号可按媒体库关闭自动记录，默认开启。App「账号与设置 → 记录观看」与 Web「观看记录 → 记录设置」共用服务器配置，与首页显示开关独立。关闭后仍保存播放进度及已看状态，不删除已有记录，也不影响手动添加或豆瓣导入；重新开启不会补记关闭期间的观看。
+
 | 方法 | 路径 | 用途 |
 | --- | --- | --- |
 | GET | `/api/history?page=1&page_size=24` | 当前账号的时间轴，日期倒序；每页 1–100 条 |
@@ -15,6 +17,8 @@ Web 侧栏“我的 → 观看记录”打开 `/history`，按月份展示当前
 | PUT | `/api/history/{id}` | 修改自己的记录，不改变导入来源或绑定关系 |
 | DELETE | `/api/history/{id}` | 删除自己的记录，不修改播放进度 |
 | GET | `/api/history/{id}/poster` | 读取自己的记录海报 |
+| GET | `/api/history/settings` | 当前账号可见媒体库的自动记录开关 |
+| PUT | `/api/history/settings/{id}` | 保存当前账号的 `record_history` 布尔值 |
 
 新增与修改使用 JSON：`title`、`original_title`、`year`、`watched_on`（`YYYY-MM-DD`）、`rating`（0–5）、`review`。必需字段为片名与有效日期。Browser 会话写操作需要 CSRF；手机使用独立 Bearer 会话。不接受请求中的用户 ID，管理员也不能通过这些接口读取其他账号的记录。记录海报同样鉴权。
 

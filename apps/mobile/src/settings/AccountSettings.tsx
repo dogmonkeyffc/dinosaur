@@ -7,9 +7,12 @@ import { settingsStyles as css } from './settingsStyles';
 import { palette } from '../catalog/homeStyles';
 import appConfig from '../../app.json';
 import { dp, uiScale } from '../ui/density';
+import type { Client } from '@dinosaur/client';
+import { HistoryRecordingSettings } from './HistoryRecordingSettings';
 
 export function AccountSettings({
   account,
+  client,
   libraries,
   visibility,
   close,
@@ -20,6 +23,7 @@ export function AccountSettings({
   retry,
 }: {
   account: Account;
+  client: Client;
   libraries: MediaLibrary[];
   visibility: ReturnType<typeof useHomeVisibility>;
   close: () => void;
@@ -29,9 +33,9 @@ export function AccountSettings({
   error: string;
   retry: () => void;
 }) {
-  const [page, setPage] = useState<'account' | 'libraries'>('account');
+  const [page, setPage] = useState<'account' | 'libraries' | 'history'>('account');
   function back() {
-    if (page === 'libraries') setPage('account');
+    if (page !== 'account') setPage('account');
     else close();
   }
   function choose(action: () => void) {
@@ -48,7 +52,7 @@ export function AccountSettings({
       >
         <View accessibilityViewIsModal style={css.panel}>
           <View style={css.toolbar}>
-            {page === 'libraries' ? (
+            {page !== 'account' ? (
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="返回账号设置"
@@ -93,9 +97,12 @@ export function AccountSettings({
                 <View style={css.group}>
                   <SettingsRow icon="▣" title="登录电视" press={() => choose(pair)} />
                   <SettingsRow icon="⚙" title="首页显示" border press={() => setPage('libraries')} />
+                  <SettingsRow icon="◷" title="记录观看" border press={() => setPage('history')} />
                 </View>
                 <Text style={css.version}>Dinosaur {appConfig.expo.version}</Text>
               </>
+            ) : page === 'history' ? (
+              <HistoryRecordingSettings client={client} />
             ) : (
               <>
                 <Text accessibilityRole="header" style={css.title}>

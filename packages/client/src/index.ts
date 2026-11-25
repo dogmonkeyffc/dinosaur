@@ -14,6 +14,7 @@ import type {
   User,
   WorkDetail,
   WatchHistoryEntry,
+  HistoryLibrarySetting,
 } from '@dinosaur/contracts';
 import { Transport } from './transport';
 export { ApiError, Transport } from './transport';
@@ -79,6 +80,12 @@ export class Client extends Transport {
   }
   history(page = 1) {
     return this.request<Page<WatchHistoryEntry>>(`/api/history?page=${page}&page_size=24`);
+  }
+  historySettings() {
+    return this.request<{ libraries: HistoryLibrarySetting[] }>('/api/history/settings');
+  }
+  setHistoryRecording(id: number, record_history: boolean) {
+    return this.request(`/api/history/settings/${id}`, 'PUT', { record_history });
   }
   playback(id: number, mode = 'original', start = 0, audio?: number, subtitle?: number | 'auto') {
     const query = new URLSearchParams({ mode, start: String(Math.max(0, start)) });

@@ -29,7 +29,7 @@ export function HomeHeader({
         <TextInput
           ref={inputRef}
           accessibilityLabel="搜索媒体"
-          placeholder="搜索电影、剧集"
+          placeholder="搜索媒体"
           placeholderTextColor={palette.muted}
           value={query}
           onFocus={focusSearch}

@@ -60,8 +60,8 @@ export class Client extends Transport {
   libraries() {
     return this.request<{ libraries: MediaLibrary[] }>('/api/libraries');
   }
-  movies(page = 1, q = '', libraryID?: number) {
-    return this.request<Page<Movie>>(`/api/media?${catalogQuery(page, q, libraryID)}`);
+  movies(page = 1, q = '', libraryID?: number, kind: 'movie' | 'video' = 'movie') {
+    return this.request<Page<Movie>>(`/api/media?${catalogQuery(page, q, libraryID)}&type=${kind}`);
   }
   series(page = 1, q = '', libraryID?: number) {
     return this.request<Page<Series>>(`/api/series?${catalogQuery(page, q, libraryID)}`);
@@ -75,8 +75,8 @@ export class Client extends Transport {
   work(id: number) {
     return this.request<WorkDetail>(`/api/works/${id}`);
   }
-  recent() {
-    return this.request<{ items: Movie[] }>('/api/playback/continue');
+  recent(kind: 'movie' | 'tv' | 'video' = 'movie') {
+    return this.request<{ items: Movie[] }>(`/api/playback/continue?type=${kind}`);
   }
   history(page = 1) {
     return this.request<Page<WatchHistoryEntry>>(`/api/history?page=${page}&page_size=24`);

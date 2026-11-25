@@ -44,8 +44,12 @@ func (s *Store) MediaByID(ctx context.Context, id int64) (media.Item, error) {
 }
 func (s *Store) MediaPage(ctx context.Context, filter media.Filter) (media.Page, error) {
 	result := media.Page{Items: make([]media.Item, 0), Page: filter.Page, PageSize: filter.PageSize}
-	conditions := []string{"m.missing=0", "l.type='movie'", libraryVisible("m.library_id")}
-	args := []any{libraryViewer(ctx)}
+	kind := filter.Type
+	if kind == "" {
+		kind = "movie"
+	}
+	conditions := []string{"m.missing=0", "l.type=?", libraryVisible("m.library_id")}
+	args := []any{kind, libraryViewer(ctx)}
 	if filter.LibraryID > 0 {
 		conditions = append(conditions, "m.library_id=?")
 		args = append(args, filter.LibraryID)

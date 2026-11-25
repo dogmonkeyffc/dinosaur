@@ -37,7 +37,7 @@ func (s *Server) mountWeb(mux *http.ServeMux) error {
 		meta := []byte(`<meta name="dinosaur-style-nonce" content="` + nonce + `"></head>`)
 		_, _ = w.Write(bytes.Replace(page, []byte("</head>"), meta, 1))
 	}
-	for _, path := range []string{"GET /{$}", "GET /login", "GET /setup", "GET /history", "GET /settings", "GET /settings/account", "GET /settings/metadata", "GET /settings/scraping", "GET /settings/system", "GET /settings/playback", "GET /movies", "GET /movies/{id}", "GET /series", "GET /series/{id}", "GET /works/{id}", "GET /watch/{id}"} {
+	for _, path := range []string{"GET /{$}", "GET /login", "GET /setup", "GET /history", "GET /settings", "GET /settings/account", "GET /settings/metadata", "GET /settings/scraping", "GET /settings/system", "GET /settings/playback", "GET /movies", "GET /videos", "GET /movies/{id}", "GET /series", "GET /series/{id}", "GET /works/{id}", "GET /watch/{id}"} {
 		mux.HandleFunc(path, render)
 	}
 	mux.HandleFunc("GET /assets/{asset...}", func(w http.ResponseWriter, r *http.Request) { serveAsset(w, r, assets) })

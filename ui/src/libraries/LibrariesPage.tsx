@@ -11,6 +11,7 @@ import { useLibraries } from './LibraryProvider';
 import { DeleteLibrary, LibraryDialog } from './LibraryDialog';
 import { LibraryAccessDialog } from './LibraryAccessDialog';
 import { LibraryCardMenu } from './LibraryCardMenu';
+import { libraryPath } from '../layout/navigation';
 
 export function LibrariesPage() {
   const { user } = useAuth();
@@ -54,6 +55,7 @@ export function LibrariesPage() {
           <ToggleButton value="all">全部 {libraries.length}</ToggleButton>
           <ToggleButton value="movie">电影</ToggleButton>
           <ToggleButton value="tv">电视剧</ToggleButton>
+          <ToggleButton value="video">普通视频</ToggleButton>
         </ToggleButtonGroup>
         <label className="search-field">
           <FormInput
@@ -84,14 +86,18 @@ export function LibrariesPage() {
                   <Icon name={item.type === 'tv' ? 'tv' : 'film'} />
                 </span>
                 <div className="card-actions">
-                  <span className="type-tag">{item.type === 'tv' ? '电视剧' : '电影'}</span>
-                  {admin && <LibraryCardMenu
-                    name={item.name}
-                    scanning={scanning}
-                    grant={() => setAccess(item)}
-                    edit={() => setEditing(item)}
-                    remove={() => setDeleting(item)}
-                  />}
+                  <span className="type-tag">
+                    {item.type === 'tv' ? '电视剧' : item.type === 'video' ? '普通视频' : '电影'}
+                  </span>
+                  {admin && (
+                    <LibraryCardMenu
+                      name={item.name}
+                      scanning={scanning}
+                      grant={() => setAccess(item)}
+                      edit={() => setEditing(item)}
+                      remove={() => setDeleting(item)}
+                    />
+                  )}
                 </div>
               </div>
               <h2>{item.name}</h2>
@@ -107,11 +113,9 @@ export function LibrariesPage() {
                 </span>
               </div>
               <div className="library-browse-row">
-                <Link
-                  className="text-button"
-                  to={`/${item.type === 'tv' ? 'series' : 'movies'}?library_id=${item.id}`}
-                >
-                  {item.type === 'tv' ? '查看剧集' : '查看电影'} <span>{item.media_count || 0}</span>
+                <Link className="text-button" to={libraryPath(item)}>
+                  {item.type === 'tv' ? '查看剧集' : item.type === 'video' ? '查看视频' : '查看电影'}{' '}
+                  <span>{item.media_count || 0}</span>
                 </Link>
                 {admin && (
                   <Button

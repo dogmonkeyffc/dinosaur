@@ -47,10 +47,11 @@ export function LibraryDialog({ item, close }: { item?: Library; close: () => vo
               name="type"
               value={type}
               row
-              onChange={(_, value) => setType(value === 'tv' ? 'tv' : 'movie')}
+              onChange={(_, value) => setType(value === 'tv' ? 'tv' : value === 'video' ? 'video' : 'movie')}
             >
               <FormControlLabel value="movie" control={<Radio />} label="电影" />
               <FormControlLabel value="tv" control={<Radio />} label="电视剧" />
+              <FormControlLabel value="video" control={<Radio />} label="普通视频" />
             </RadioGroup>
           </fieldset>
           <label htmlFor="library-path">媒体目录</label>

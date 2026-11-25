@@ -53,13 +53,18 @@ export default function App() {
   }, []);
   useEffect(() => {
     const listener = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (route === 'home' || route === 'accounts') return false;
+      if (route === 'home') return false;
+      if (route === 'accounts') {
+        if (!accounts.some(item => item.key === active)) return false;
+        setRoute(returnTo);
+        return true;
+      }
       setInitialQR(undefined);
       setRoute(accounts.length ? 'home' : 'accounts');
       return true;
     });
     return () => listener.remove();
-  }, [route, accounts.length]);
+  }, [route, accounts, active, returnTo]);
   function choose(account: Account) {
     setActive(account.key);
     setRoute(returnTo);
@@ -138,13 +143,14 @@ export default function App() {
   return (
     <View style={styles.screen}>
       <Accounts
+        activeKey={active}
         accounts={accounts}
         select={choose}
         scan={scan}
         codeLogin={() => setRoute('code')}
         logout={(item) => task.run(() => logout(item))}
         busy={task.busy}
-        close={account ? () => setRoute('home') : undefined}
+        close={account ? () => setRoute(returnTo) : undefined}
       />
       <ErrorText error={task.error} />
     </View>

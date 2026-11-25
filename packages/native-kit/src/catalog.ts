@@ -2,7 +2,13 @@ import { useEffect, useState } from 'react';
 import type { Movie, Series, SeriesDetail, MediaKind } from '@dinosaur/contracts';
 import type { Client } from '@dinosaur/client';
 
-export function useMediaPage(client: Client, kind: MediaKind, page: number, query: string, libraryID?: number | null) {
+export function useMediaPage(
+  client: Client,
+  kind: MediaKind,
+  page: number,
+  query: string,
+  libraryID?: number | null,
+) {
   const scope = `${kind}:${libraryID}`;
   const [loadedScope, setLoadedScope] = useState<string>();
   const [items, setItems] = useState<(Movie | Series)[]>([]);
@@ -20,8 +26,10 @@ export function useMediaPage(client: Client, kind: MediaKind, page: number, quer
       async () => {
         try {
           const [list, progress] = await Promise.all([
-            kind === 'tv' ? client.series(page, query, libraryID) : client.movies(page, query, libraryID),
-            client.recent(),
+            kind === 'tv'
+              ? client.series(page, query, libraryID)
+              : client.movies(page, query, libraryID, kind),
+            client.recent(kind),
           ]);
           if (active) {
             setItems(list.items);

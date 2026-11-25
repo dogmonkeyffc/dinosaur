@@ -9,7 +9,8 @@
     "@dinosaur/contracts": "0.1.0",
     "@dinosaur/playback-core": "0.1.0",
     "expo-secure-store": "56.0.4",
-    "expo-video": "56.1.4"
+    "expo-video": "56.1.4",
+    "expo-screen-orientation": "56.0.5"
   },
   "peerDependencies": {
     "react": "19.2.3",

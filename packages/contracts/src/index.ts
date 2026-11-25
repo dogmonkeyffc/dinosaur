@@ -47,7 +47,7 @@ export interface Page<T> {
   page: number;
   page_size: number;
 }
-export type MediaKind = 'movie' | 'tv';
+export type MediaKind = 'movie' | 'tv' | 'video';
 
 export interface MediaLibrary {
   id: number;

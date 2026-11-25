@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BackHandler, Text, View, useWindowDimensions } from 'react-native';
+import { BackHandler, Text, View } from 'react-native';
 import { VideoView } from 'expo-video';
 import type { Client } from '@dinosaur/client';
 import type { PlaybackInfo } from '@dinosaur/contracts';
@@ -8,7 +8,7 @@ import { Button, ErrorText } from '../components';
 import { styles } from '../theme';
 import { usePlayback } from './usePlayback';
 import { Subtitles } from './Subtitles';
-import { PhoneTransport, PlayerAction, phonePlayerStyles as phone } from './PhoneControls';
+import { PhonePlayer } from './PhonePlayer';
 
 export function Stage({
   client,
@@ -20,6 +20,7 @@ export function Stage({
   tv,
   track,
   selectSubtitle,
+  fullscreen,
 }: {
   client: Client;
   info: PlaybackInfo;
@@ -30,11 +31,10 @@ export function Stage({
   tv: boolean;
   track?: number;
   selectSubtitle: (track: number | undefined, position: number) => void;
+  fullscreen: { fullscreen: boolean; toggle: () => Promise<void> };
 }) {
   const [error, setError] = useState('');
   const [audio, setAudio] = useState('音轨');
-  const { width, height } = useWindowDimensions();
-  const portrait = height >= width;
   const compatible = info.plan.mode !== 'direct';
   const playback = usePlayback(
     client,
@@ -51,25 +51,27 @@ export function Stage({
       playback.player.pause();
       await playback.flush();
     } catch {
-      // A revoked or offline session must not trap the user in the player.
+      /* Offline sessions must not trap the user in the player. */
     } finally {
       close();
     }
   }
   useEffect(() => {
+    if (!tv) return;
     const listener = BackHandler.addEventListener('hardwareBackPress', () => {
-      exit();
+      void exit();
       return true;
     });
     return () => listener.remove();
-  }, [playback.player]);
+  }, [playback.player, tv]);
   function seek(delta: number) {
-    const target = Math.max(
-      0,
-      Math.min(Math.max(0, info.item.duration - 1), playback.position.current + delta),
-    );
+    const duration = info.item.duration || playback.player.duration;
+    const target = Math.max(0, Math.min(Math.max(0, duration - 1), playback.position.current + delta));
     if (compatible) restart(target, true);
-    else playback.player.currentTime = target;
+    else {
+      playback.player.currentTime = target;
+      playback.position.current = target;
+    }
   }
   function audioTrack() {
     const tracks = playback.player.availableAudioTracks;
@@ -87,35 +89,53 @@ export function Stage({
       playback.position.current,
     );
   }
-  const selected = info.subtitles.find((value) => value.id === track);
-  const toggle = () => {
-    if (playback.player.playing) playback.player.pause();
-    else playback.player.play();
-  };
-  async function nextEpisode() {
-    try {
-      await playback.flush();
-      next();
-    } catch {
-      setError('进度保存失败。');
-    }
+  function nextEpisode() {
+    playback.player.pause();
+    void playback.flush().catch(() => {});
+    next();
   }
+  const selected = info.subtitles.find((value) => value.id === track);
+  const toggle = () => (playback.player.playing ? playback.player.pause() : playback.player.play());
   const useCompatible = () => restart(playback.position.current, true);
+  const subtitles = (
+    <Subtitles
+      client={client}
+      id={info.item.id}
+      track={selected?.delivery === 'burn' ? undefined : track}
+      embedded={selected?.kind === 'embedded'}
+      time={playback.time}
+      failed={setError}
+    />
+  );
+  if (!tv)
+    return (
+      <PhonePlayer
+        info={info}
+        player={playback.player}
+        time={playback.time}
+        playing={playback.playing}
+        close={exit}
+        toggle={toggle}
+        seek={seek}
+        fullscreen={fullscreen}
+        next={info.next_episode ? nextEpisode : undefined}
+        audio={{ label: audio, press: audioTrack }}
+        subtitle={
+          info.subtitles.length ? { label: selected?.label || '字幕 · 关', press: subtitle } : undefined
+        }
+        compatible={!compatible ? useCompatible : undefined}
+        error={error || playback.error}
+      >
+        {subtitles}
+      </PhonePlayer>
+    );
   return (
-    <View style={[
-      styles.screen,
-      tv ? { padding: 28, gap: 14 } : phone.screen,
-      !tv && !portrait && { paddingTop: 16, gap: 4 },
-    ]}>
+    <View style={[styles.screen, { padding: 28, gap: 14 }]}>
       <View style={styles.row}>
-        {tv ? <Button onPress={exit}>返回</Button> : <PlayerAction label="返回" text="←" press={exit} />}
-        <Text numberOfLines={tv ? undefined : 1} style={[styles.subtitle, !tv && phone.title]}>
-          {info.item.title}
-        </Text>
+        <Button onPress={exit}>返回</Button>
+        <Text style={styles.subtitle}>{info.item.title}</Text>
       </View>
-      <View style={tv
-        ? { flex: 1, minHeight: 200, backgroundColor: '#000' }
-        : [phone.video, portrait ? phone.portraitVideo : phone.landscapeVideo]}>
+      <View style={{ flex: 1, minHeight: 200, backgroundColor: '#000' }}>
         <VideoView
           player={playback.player}
           nativeControls
@@ -125,41 +145,22 @@ export function Stage({
           contentFit="contain"
           surfaceType="textureView"
         />
-        <Subtitles
-          client={client}
-          id={info.item.id}
-          track={selected?.delivery === 'burn' ? undefined : track}
-          embedded={selected?.kind === 'embedded'}
-          time={playback.time}
-          failed={setError}
-        />
+        {subtitles}
       </View>
       <Text style={styles.muted}>
         {clock(playback.time)} / {clock(info.item.duration)} · {compatible ? '兼容播放' : '原片播放'}
       </Text>
-      {tv ? (
-        <View style={styles.row}>
-          <Button preferred onPress={toggle}>播放 / 暂停</Button>
-          <Button onPress={() => seek(-10)}>后退 10 秒</Button>
-          <Button onPress={() => seek(30)}>前进 30 秒</Button>
-          <Button onPress={audioTrack}>{audio}</Button>
-          {info.subtitles.length > 0 && <Button onPress={subtitle}>字幕：{selected?.label || '关闭'}</Button>}
-          {!compatible && <Button onPress={useCompatible}>兼容播放</Button>}
-          {info.next_episode && <Button onPress={nextEpisode}>下一集</Button>}
-        </View>
-      ) : (
-        <>
-          <PhoneTransport playing={playback.playing} toggle={toggle} seek={seek} />
-          <View style={phone.options}>
-            <PlayerAction label={`切换音轨，${audio}`} text="音轨" press={audioTrack} />
-            {info.subtitles.length > 0 && (
-              <PlayerAction label={`切换字幕，${selected?.label || '关闭'}`} text={selected ? `字幕 ${info.subtitles.indexOf(selected) + 1}/${info.subtitles.length}` : '字幕 · 关'} press={subtitle} />
-            )}
-            {!compatible && <PlayerAction label="兼容播放" text="兼容播放" press={useCompatible} />}
-            {info.next_episode && <PlayerAction label="下一集" text="下一集" press={nextEpisode} />}
-          </View>
-        </>
-      )}
+      <View style={styles.row}>
+        <Button preferred onPress={toggle}>
+          播放 / 暂停
+        </Button>
+        <Button onPress={() => seek(-10)}>后退 10 秒</Button>
+        <Button onPress={() => seek(30)}>前进 30 秒</Button>
+        <Button onPress={audioTrack}>{audio}</Button>
+        {info.subtitles.length > 0 && <Button onPress={subtitle}>字幕：{selected?.label || '关闭'}</Button>}
+        {!compatible && <Button onPress={useCompatible}>兼容播放</Button>}
+        {info.next_episode && <Button onPress={nextEpisode}>下一集</Button>}
+      </View>
       <ErrorText error={error || playback.error} />
     </View>
   );

@@ -20,12 +20,15 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
   const query = params.get('q') || '';
   const search = useDebounced(query);
   const choices = libraries.filter((item) => item.type === kind);
-  const title = choices.find((item) => String(item.id) === library)?.name || (tv ? '全部剧集' : '全部电影');
+  const title =
+    choices.find((item) => String(item.id) === library)?.name ||
+    (tv ? '全部剧集' : kind === 'video' ? '全部视频' : '全部电影');
   const scans = choices.filter((item) => activeJob(item.scan?.status));
   const scanSignature = choices
     .map((item) => `${item.id}:${item.scan?.status}:${item.scan?.processed}`)
     .join(',');
   const apiQuery = new URLSearchParams({ page: String(page), page_size: '24' });
+  if (!tv) apiQuery.set('type', kind);
   if (library) apiQuery.set('library_id', library);
   if (search.trim()) apiQuery.set('q', search.trim());
   const result = useResource<Page<Movie | Series>>(
@@ -60,7 +63,7 @@ export function CatalogPage({ kind }: { kind: MediaKind }) {
             value={query}
             onChange={(event) => change('q', event.target.value)}
             placeholder={`在「${title}」中搜索`}
-            aria-label={tv ? '搜索剧集' : '搜索电影'}
+            aria-label={tv ? '搜索剧集' : kind === 'video' ? '搜索视频' : '搜索电影'}
           />
         </label>
       </div>

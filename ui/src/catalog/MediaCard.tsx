@@ -19,7 +19,15 @@ export function Poster({ url, title, className }: { url?: string; title: string;
   ) : null;
 }
 
-export function MediaCard({ item, from, workSeason }: { item: Movie | Series; from?: string; workSeason?: number }) {
+export function MediaCard({
+  item,
+  from,
+  workSeason,
+}: {
+  item: Movie | Series;
+  from?: string;
+  workSeason?: number;
+}) {
   const location = useLocation();
   const movie = 'duration' in item ? item : null;
   const series = 'episode_count' in item ? item : null;
@@ -37,7 +45,7 @@ export function MediaCard({ item, from, workSeason }: { item: Movie | Series; fr
           from: from || location.pathname + location.search,
           backState: location.state,
         }}
-        className="movie-card"
+        className={`movie-card${movie?.type === 'video' ? ' video-card' : ''}`}
         aria-label={`查看 ${title}`}
       >
         <span className="movie-artwork">

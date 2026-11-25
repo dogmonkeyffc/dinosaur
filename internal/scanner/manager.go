@@ -57,7 +57,7 @@ func (m *Manager) startScan(ctx context.Context, id int64, assignments []televis
 	if err != nil {
 		return library.ScanJob{}, err
 	}
-	if item.Type != "movie" && item.Type != "tv" {
+	if item.Type != "movie" && item.Type != "tv" && item.Type != "video" {
 		return library.ScanJob{}, ErrUnsupported
 	}
 	if assignments != nil {

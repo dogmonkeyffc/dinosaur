@@ -9,7 +9,7 @@ export function useJobs(kind: MediaKind, onChange?: () => void) {
   const { user } = useAuth();
   const endpoint = kind === 'tv' ? '/api/admin/tv/metadata/jobs' : '/api/admin/metadata/jobs';
   const resource = useResource<{ jobs: Job[] }>(
-    user?.role === 'admin' ? endpoint + (kind === 'movie' ? '?type=movie' : '') : null,
+    user?.role === 'admin' && kind !== 'video' ? endpoint + (kind === 'movie' ? '?type=movie' : '') : null,
     3000,
   );
   const action = useAction();

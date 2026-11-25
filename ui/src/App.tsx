@@ -89,6 +89,7 @@ export function App() {
             }
           />
           <Route path="/movies" element={<CatalogPage key="movie" kind="movie" />} />
+          <Route path="/videos" element={<CatalogPage key="video" kind="video" />} />
           <Route path="/series" element={<CatalogPage key="tv" kind="tv" />} />
           <Route path="/movies/:id" element={<MovieDetailPage />} />
           <Route path="/series/:id" element={<SeriesDetailPage />} />

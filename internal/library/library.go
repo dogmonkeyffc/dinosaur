@@ -20,8 +20,8 @@ func Validate(item Library) (Library, error) {
 	if !utf8.ValidString(item.Name) || utf8.RuneCountInString(item.Name) < 1 || utf8.RuneCountInString(item.Name) > 80 {
 		return item, &ValidationError{"invalid_library_name", "library name must contain 1-80 characters"}
 	}
-	if item.Type != "movie" && item.Type != "tv" {
-		return item, &ValidationError{"invalid_library_type", "type must be movie or tv"}
+	if item.Type != "movie" && item.Type != "tv" && item.Type != "video" {
+		return item, &ValidationError{"invalid_library_type", "type must be movie, tv or video"}
 	}
 	if !filepath.IsAbs(item.RootPath) || len(item.RootPath) > 4096 {
 		return item, &ValidationError{"invalid_library_path", "media directory must be an absolute server path"}

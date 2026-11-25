@@ -53,6 +53,9 @@ func (m *Manager) index(item library.Library, relative string, old media.Item, e
 		return m.db.SetMediaPoster(m.ctx, old.ID, key)
 	}
 	title, year := media.ParseFilename(relative)
+	if item.Type == "video" {
+		title, year = filepath.Base(relative), 0
+	}
 	if item.Type == "tv" {
 		title, year = episode.Title, episode.Year
 	}

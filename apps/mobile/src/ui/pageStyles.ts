@@ -1,0 +1,55 @@
+import { StyleSheet } from 'react-native';
+import { compactStyles } from './density';
+import { palette } from '../catalog/homeStyles';
+
+export const pageStyles = StyleSheet.create(
+  compactStyles({
+    screen: { flex: 1, backgroundColor: palette.background },
+    toolbar: { flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12 },
+    back: { width: 48, height: 48, justifyContent: 'center', alignItems: 'center' },
+    backIcon: { color: palette.text, fontSize: 28 },
+    title: { color: palette.text, fontSize: 24, fontWeight: '500', flex: 1 },
+    content: { padding: 22, gap: 22, paddingBottom: 40 },
+    card: { backgroundColor: '#202125', borderRadius: 28, padding: 22, gap: 20 },
+    account: { flexDirection: 'row', gap: 16, alignItems: 'center' },
+    identity: { flex: 1, gap: 6 },
+    avatar: {
+      width: 54,
+      height: 54,
+      borderRadius: 27,
+      backgroundColor: palette.selected,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    initial: { color: palette.accent, fontSize: 24, fontWeight: '600' },
+    name: { color: palette.text, fontSize: 19, fontWeight: '500' },
+    server: { color: palette.muted, fontSize: 14 },
+    selection: { color: palette.accent, fontSize: 24 },
+    actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    button: {
+      minHeight: 48,
+      paddingHorizontal: 22,
+      paddingVertical: 12,
+      borderRadius: 26,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#303136',
+    },
+    primary: { backgroundColor: palette.accent },
+    buttonText: { color: palette.text, fontSize: 16, fontWeight: '500' },
+    primaryText: { color: '#14233b' },
+    dim: { opacity: 0.5 },
+    input: {
+      minHeight: 74,
+      borderRadius: 20,
+      backgroundColor: '#111215',
+      color: palette.text,
+      fontSize: 32,
+      letterSpacing: 10,
+      textAlign: 'center',
+      paddingHorizontal: 16,
+    },
+    device: { color: palette.accent, fontSize: 54, textAlign: 'center', paddingVertical: 18 },
+    message: { color: palette.text, fontSize: 20, lineHeight: 30, textAlign: 'center' },
+  }),
+);

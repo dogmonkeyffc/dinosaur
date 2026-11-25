@@ -155,7 +155,10 @@ function HomeSession({
           client={c.client}
           libraries={c.libraries}
           visibility={visibility}
-          close={() => setSettings(false)}
+          close={() => {
+            setSettings(false);
+            c.refresh();
+          }}
           accounts={accounts}
           pair={pair}
           loading={c.loading}

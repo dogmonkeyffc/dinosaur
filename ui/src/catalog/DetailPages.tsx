@@ -35,17 +35,20 @@ export function MovieDetailPage() {
           <article className="detail-copy">
             <h1>{item.title}</h1>
             <p className="detail-meta">
-              {item.year || '年份未知'} · {duration(item.duration)} · {resolution(item)}
+              {item.type !== 'video' && `${item.year || '年份未知'} · `}
+              {duration(item.duration)} · {resolution(item)}
             </p>
             <PlayActions item={item} reload={reload} />
-            <MetadataEditor
-              key={item.id}
-              id={item.id}
-              kind="movie"
-              year={item.year}
-              info={item.metadata}
-              reload={reload}
-            />
+            {item.type !== 'video' && (
+              <MetadataEditor
+                key={item.id}
+                id={item.id}
+                kind="movie"
+                year={item.year}
+                info={item.metadata}
+                reload={reload}
+              />
+            )}
             {item.probe_error && <p className="form-error">视频信息读取失败</p>}
             <TechnicalInfo item={item} />
           </article>

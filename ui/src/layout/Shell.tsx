@@ -49,7 +49,7 @@ export function Shell() {
       entries: libraries.map((library) => [
         libraryPath(library),
         library.name,
-        library.type === 'movie' ? 'film' : 'tv',
+        library.type === 'tv' ? 'tv' : library.type === 'video' ? 'play' : 'film',
       ]),
     },
     ...staticGroups,
@@ -58,7 +58,7 @@ export function Shell() {
   const libraryID =
     playing || detail ? activeLibrary : Number(new URLSearchParams(location.search).get('library_id'));
   const library = libraries.find((item) => item.id === libraryID);
-  const catalog = location.pathname === '/movies' || location.pathname === '/series';
+  const catalog = ['/movies', '/series', '/videos'].includes(location.pathname);
   const selected = library && (playing || detail || catalog) ? libraryPath(library) : location.pathname;
   const pageTitle = entries.find(([path]) => path === selected)?.[1] || '媒体空间';
   useEffect(() => {

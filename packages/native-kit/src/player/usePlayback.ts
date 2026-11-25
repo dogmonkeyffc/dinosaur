@@ -3,7 +3,7 @@ import { AppState } from 'react-native';
 import { useVideoPlayer } from 'expo-video';
 import type { Client } from '@dinosaur/client';
 import type { PlaybackInfo } from '@dinosaur/contracts';
-import { ProgressQueue, sourcePosition } from '@dinosaur/playback-core';
+import { completionPosition, ProgressQueue, sourcePosition } from '@dinosaur/playback-core';
 
 export function usePlayback(
   client: Client,
@@ -24,6 +24,8 @@ export function usePlayback(
   const position = useRef(start);
   const started = useRef(false);
   const ended = useRef(false);
+  const callbacks = useRef({ failed, next });
+  callbacks.current = { failed, next };
   const [time, setTime] = useState(start);
   const [playing, setPlaying] = useState(false);
   const [error, setError] = useState('');
@@ -37,7 +39,7 @@ export function usePlayback(
       if (active) setError(reason instanceof Error ? reason.message : '进度保存失败。');
     };
     const save = () => {
-      if (started.current) queue.save(position.current).catch(report);
+      if (started.current && !ended.current) queue.save(position.current).catch(report);
     };
     const listeners = [
       player.addListener('sourceLoad', ({ availableAudioTracks }) => {
@@ -62,22 +64,20 @@ export function usePlayback(
         if (!isPlaying) save();
       }),
       player.addListener('statusChange', ({ status }) => {
-        if (status === 'error') failed(position.current);
+        if (status === 'error') callbacks.current.failed(position.current);
       }),
       player.addListener('playToEnd', () => {
         if (ended.current) return;
-        if (info.item.duration > 0 && position.current < info.item.duration - 5) {
-          failed(position.current);
+        const completed = completionPosition(player.currentTime, player.duration, offset, info.item.duration);
+        if (completed === null) {
+          callbacks.current.failed(position.current);
           return;
         }
         ended.current = true;
-        position.current = info.item.duration || position.current;
-        queue
-          .save(position.current, true)
-          .then(() => {
-            if (active) next();
-          })
-          .catch(report);
+        position.current = completed;
+        setTime(completed);
+        queue.save(completed, true).catch(report);
+        if (active) callbacks.current.next();
       }),
     ];
     const app = AppState.addEventListener('change', (state) => {
@@ -98,7 +98,7 @@ export function usePlayback(
     };
   }, [player, queue, info.item.id]);
   async function flush() {
-    if (started.current) await queue.save(position.current);
+    if (started.current && !ended.current) await queue.save(position.current);
     else await queue.flush();
   }
   return { player, playing, time, error, flush, position };

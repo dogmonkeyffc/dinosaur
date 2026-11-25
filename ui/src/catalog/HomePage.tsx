@@ -31,17 +31,19 @@ export function HomePage() {
   const libraries = useLibraries();
   const movies = useResource<Page<Movie>>('/api/media?page_size=6');
   const series = useResource<Page<Series>>('/api/series?page_size=6');
+  const videos = useResource<Page<Movie>>('/api/media?type=video&page_size=6');
   const scanSignature = libraries.libraries
     .map((item) => `${item.id}:${item.media_count}:${item.scan?.status}`)
     .join(',');
   useEffect(() => {
     movies.reload();
     series.reload();
-  }, [scanSignature, movies.reload, series.reload]);
+    videos.reload();
+  }, [scanSignature, movies.reload, series.reload, videos.reload]);
   const featured = movies.data?.items.find((item) => item.position > 0 && !item.watched);
-  const loading = movies.loading || series.loading || libraries.loading;
-  const error = movies.error || series.error || libraries.error;
-  const hasMedia = Boolean(movies.data?.total || series.data?.total);
+  const loading = movies.loading || series.loading || videos.loading || libraries.loading;
+  const error = movies.error || series.error || videos.error || libraries.error;
+  const hasMedia = Boolean(movies.data?.total || series.data?.total || videos.data?.total);
   return (
     <section className="home-page">
       <Heading title="看片室" />
@@ -82,6 +84,7 @@ export function HomePage() {
       )}
       <Shelf title="电影" path="/movies" items={movies.data?.items || []} />
       <Shelf title="剧集" path="/series" items={series.data?.items || []} />
+      <Shelf title="普通视频" path="/videos" items={videos.data?.items || []} />
       {!loading && !hasMedia && !error && (
         <div className="empty-state">
           <Icon name="film" />

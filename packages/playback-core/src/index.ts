@@ -16,6 +16,17 @@ export function sourcePosition(currentTime: number, offset: number, duration: nu
   return duration > 0 ? Math.min(duration, position) : position;
 }
 
+export function completionPosition(
+  currentTime: number,
+  sourceDuration: number,
+  offset: number,
+  duration: number,
+) {
+  const end = Math.max(currentTime, sourceDuration) + offset;
+  if (duration > 0 && end < duration - Math.max(5, duration * 0.01)) return null;
+  return duration > 0 ? duration : Math.max(0, end);
+}
+
 export function clock(seconds: number) {
   const total = Math.floor(Math.max(0, seconds));
   return `${Math.floor(total / 3600) ? Math.floor(total / 3600) + ':' : ''}${String(Math.floor(total / 60) % 60).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;

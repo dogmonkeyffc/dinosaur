@@ -23,6 +23,10 @@
   background: var(--mui-palette-action-hover);
 }
 
+.video-card .movie-artwork {
+  aspect-ratio: 16 / 9;
+}
+
 .movie-poster,
 .detail-poster,
 .movie-placeholder,

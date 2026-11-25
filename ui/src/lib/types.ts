@@ -1,4 +1,4 @@
-export type MediaKind = 'movie' | 'tv';
+export type MediaKind = 'movie' | 'tv' | 'video';
 export interface User {
   id: number;
   username: string;

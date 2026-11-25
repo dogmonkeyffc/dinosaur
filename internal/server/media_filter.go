@@ -10,6 +10,11 @@ import (
 
 func mediaFilter(w http.ResponseWriter, r *http.Request) (media.Filter, bool) {
 	filter := media.Filter{Page: 1, PageSize: 24, Query: strings.TrimSpace(r.URL.Query().Get("q"))}
+	filter.Type = r.URL.Query().Get("type")
+	if filter.Type != "" && filter.Type != "movie" && filter.Type != "tv" && filter.Type != "video" {
+		fail(w, 400, "invalid_filter", "invalid media type")
+		return filter, false
+	}
 	for name, target := range map[string]*int{"page": &filter.Page, "page_size": &filter.PageSize} {
 		value := r.URL.Query().Get(name)
 		if value == "" {

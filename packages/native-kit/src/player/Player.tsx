@@ -6,6 +6,7 @@ import { Busy, Button, ErrorText } from '../components';
 import { styles } from '../theme';
 import { Stage } from './Stage';
 import { PlayerAction } from './PhoneControls';
+import { useFullscreen } from './useFullscreen';
 
 export function Player({
   client,
@@ -26,6 +27,7 @@ export function Player({
   const [target, setTarget] = useState<number>();
   const [source, setSource] = useState<{ info: PlaybackInfo; start: number }>();
   const [error, setError] = useState('');
+  const fullscreen = useFullscreen(setError);
   useEffect(() => {
     let active = true;
     setSource(undefined);
@@ -60,7 +62,7 @@ export function Player({
   }, [client, currentID, mode, target, revision]);
   if (!source)
     return (
-      <View style={styles.centered}>
+      <View style={[styles.centered, !tv && { backgroundColor: '#111113' }]}>
         {!error && <Busy />}
         <ErrorText error={error} />
         {tv ? <Button onPress={close}>返回</Button> : <PlayerAction label="返回" text="←" press={close} />}
@@ -73,6 +75,7 @@ export function Player({
       info={source.info}
       start={source.start}
       tv={tv}
+      fullscreen={fullscreen}
       track={subtitle ?? undefined}
       selectSubtitle={(id, position) => {
         const selected = source.info.subtitles.find((value) => value.id === id);
@@ -96,7 +99,7 @@ export function Player({
           setMode('original');
           setSubtitle(undefined);
           burnID.current = undefined;
-          setTarget(undefined);
+          setTarget(0);
           setCurrentID(source.info.next_episode.id);
         }
       }}

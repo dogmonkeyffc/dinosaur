@@ -60,6 +60,10 @@ func Open(ctx context.Context, path string) (*Store, error) {
 		db.Close()
 		return nil, err
 	}
+	if err := s.migrateVideoLibraries(ctx); err != nil {
+		db.Close()
+		return nil, err
+	}
 	return s, nil
 }
 func (s *Store) Close() error { return s.DB.Close() }

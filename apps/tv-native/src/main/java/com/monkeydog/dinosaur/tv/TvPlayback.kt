@@ -59,7 +59,8 @@ internal class TvPlayback(private val activity: TvActivity, private val api: Api
         open(mediaId)
     }
 
-    private fun open(mediaId: Long, start: Long? = null, advance: Boolean = false) {
+    private fun open(mediaId: Long, start: Long? = null, advance: Boolean = false,
+                     autoplay: Boolean = advance || (media?.playWhenReady ?: true)) {
         val request = ++revision
         detach()
         captions.reset()
@@ -82,17 +83,17 @@ internal class TvPlayback(private val activity: TvActivity, private val api: Api
         }
         controls.loading()
         activity.task(page, { api.request("/api/playback/$mediaId?$query") }, {
-            if (request == revision) controls.failure(it.message ?: "无法播放") { open(id, start) }
+            if (request == revision) controls.failure(it.message ?: "无法播放") { open(id, start, autoplay = autoplay) }
         }) { result ->
             if (request == revision) {
-                runCatching { prepare(result, start) }.onFailure {
-                    controls.failure(it.message ?: "无法播放") { open(id, start) }
+                runCatching { prepare(result, start, autoplay) }.onFailure {
+                    controls.failure(it.message ?: "无法播放") { open(id, start, autoplay = autoplay) }
                 }
             }
         }
     }
 
-    private fun prepare(result: JSONObject, requested: Long?) {
+    private fun prepare(result: JSONObject, requested: Long?, autoplay: Boolean) {
         info = result
         val item = result.getJSONObject("item")
         val start = requested ?: (result.optDouble("resume_position", 0.0) * 1000).toLong()
@@ -137,7 +138,7 @@ internal class TvPlayback(private val activity: TvActivity, private val api: Api
         player.setMediaItem(source, if (direct) start else 0)
         player.setPlaybackSpeed(speed)
         player.prepare()
-        if (activity.hasWindowFocus()) player.play()
+        if (autoplay && activity.started) player.play()
         activity.main.post(tick)
     }
 
@@ -181,7 +182,7 @@ internal class TvPlayback(private val activity: TvActivity, private val api: Api
 
     private fun toggle() {
         val player = media ?: return
-        if (ended) open(id, 0L)
+        if (ended) open(id, 0L, autoplay = true)
         else if (player.playWhenReady) pause() else player.play()
     }
 

@@ -88,7 +88,7 @@ internal class TvTransport(private val activity: TvActivity) {
         isReady = true
         heading.text = title
         actions.removeAllViews()
-        val play = button("暂停", toggle)
+        val play = button("播放", toggle)
         playButton = play
         button("后退 15 秒") { seek(-15000) }
         button("前进 15 秒") { seek(15000) }

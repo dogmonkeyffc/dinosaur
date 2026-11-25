@@ -32,6 +32,8 @@ class TvActivity : Activity() {
     private val login by lazy { TvLogin(this) }
     internal val artwork by lazy { TvArtwork(this) }
     internal var player: TvPlayback? = null
+    internal var started = false
+        private set
     internal val current get() = stack.lastOrNull()
 
     override fun onCreate(state: Bundle?) {
@@ -162,7 +164,13 @@ class TvActivity : Activity() {
         if (hasFocus) immersive()
     }
 
+    override fun onStart() {
+        super.onStart()
+        started = true
+    }
+
     override fun onStop() {
+        started = false
         player?.pause()
         super.onStop()
     }

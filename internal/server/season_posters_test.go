@@ -41,6 +41,10 @@ func TestSeasonPostersBackfillAndFallback(t *testing.T) {
 	if _, err = db.DB.ExecContext(ctx, `UPDATE tv_series SET metadata_json=json_object('tmdb_id',id+100,'status','matched')`); err != nil {
 		t.Fatal(err)
 	}
+	if _, err = db.DB.ExecContext(ctx, `UPDATE tv_series SET metadata_json=json_object('tmdb_id',0,'status','matched',
+		'ids',json_object('imdb','tt2356777')) WHERE id=2`); err != nil {
+		t.Fatal(err)
+	}
 	if _, err = db.DB.ExecContext(ctx, `UPDATE metadata_settings SET credential='test-key',credential_type='api_key'`); err != nil {
 		t.Fatal(err)
 	}
@@ -51,6 +55,8 @@ func TestSeasonPostersBackfillAndFallback(t *testing.T) {
 	s.tmdb.HTTP.Transport = metadataTransport(func(r *http.Request) (*http.Response, error) {
 		var body io.Reader
 		switch {
+		case r.URL.Path == "/3/find/tt2356777" && r.URL.Query().Get("external_source") == "imdb_id":
+			body = strings.NewReader(`{"tv_results":[{"id":102}]}`)
 		case strings.HasPrefix(r.URL.Path, "/3/tv/"):
 			body = strings.NewReader(fmt.Sprintf(`{"id":%s,"seasons":[{"season_number":1,"poster_path":"/Artwork.jpg"}]}`,
 				strings.TrimPrefix(r.URL.Path, "/3/tv/")))
@@ -62,7 +68,7 @@ func TestSeasonPostersBackfillAndFallback(t *testing.T) {
 		return &http.Response{StatusCode: 200, Body: io.NopCloser(body)}, nil
 	})
 	targets, err := db.PendingSeasonPosters(ctx, 8)
-	if err != nil || len(targets) != 2 {
+	if err != nil || len(targets) != 1 {
 		t.Fatalf("pending targets: %v %v", targets, err)
 	}
 	if err := s.RecoverInterruptedJobs(ctx); err != nil {
@@ -78,6 +84,10 @@ func TestSeasonPostersBackfillAndFallback(t *testing.T) {
 	}
 	if len(targets) != 0 {
 		t.Fatalf("posters were not processed: %v", targets)
+	}
+	var matched int
+	if err := db.DB.QueryRowContext(ctx, `SELECT tmdb_id FROM season_poster_matches WHERE imdb_id='tt2356777'`).Scan(&matched); err != nil || matched != 102 {
+		t.Fatalf("IMDb match: %d %v", matched, err)
 	}
 	for id := 1; id <= 2; id++ {
 		base := fmt.Sprintf("/api/series/%d", id)

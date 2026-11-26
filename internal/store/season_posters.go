@@ -7,7 +7,38 @@ import (
 	"dinosaur/internal/metadata"
 )
 
-const seriesTMDB = `CAST(COALESCE(json_extract(s.metadata_json,'$.tmdb_id'),0) AS INTEGER)`
+const seriesIMDb = `COALESCE(json_extract(s.metadata_json,'$.ids.imdb'),'')`
+const directSeriesTMDB = `COALESCE(NULLIF(CAST(json_extract(s.metadata_json,'$.tmdb_id') AS INTEGER),0),
+	NULLIF(CAST(json_extract(s.metadata_json,'$.ids.tmdb') AS INTEGER),0),0)`
+const seriesTMDB = `COALESCE(NULLIF(` + directSeriesTMDB + `,0),
+	(SELECT x.tmdb_id FROM season_poster_matches x WHERE x.imdb_id=` + seriesIMDb + `),0)`
+
+func (s *Store) PendingSeasonPosterMatches(ctx context.Context, limit int) ([]string, error) {
+	rows, err := s.DB.QueryContext(ctx, `SELECT DISTINCT `+seriesIMDb+`
+		FROM tv_series s LEFT JOIN season_poster_matches x ON x.imdb_id=`+seriesIMDb+`
+		WHERE `+directSeriesTMDB+`<=0 AND `+seriesIMDb+`<>'' AND `+seriesVisible+`
+		AND COALESCE(x.tmdb_id,0)=0 AND COALESCE(x.retry_at,0)<=? ORDER BY 1 LIMIT ?`, time.Now().Unix(), limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var ids []string
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, rows.Err()
+}
+
+func (s *Store) SaveSeasonPosterMatch(ctx context.Context, imdb string, id int64, retry time.Time) error {
+	_, err := s.DB.ExecContext(ctx, `INSERT INTO season_poster_matches(imdb_id,tmdb_id,retry_at) VALUES(?,?,?)
+		ON CONFLICT(imdb_id) DO UPDATE SET tmdb_id=excluded.tmdb_id,retry_at=excluded.retry_at
+		WHERE season_poster_matches.tmdb_id=0`, imdb, id, retry.Unix())
+	return err
+}
 
 func (s *Store) PendingSeasonPosters(ctx context.Context, limit int) ([]metadata.SeasonPosterTarget, error) {
 	rows, err := s.DB.QueryContext(ctx, `WITH targets AS (

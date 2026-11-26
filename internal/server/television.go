@@ -14,6 +14,7 @@ func (s *Server) mountTelevision(mux *http.ServeMux) {
 	mux.Handle("GET /api/series", s.require(false, http.HandlerFunc(s.listSeries)))
 	mux.Handle("GET /api/series/{id}", s.require(false, http.HandlerFunc(s.seriesDetail)))
 	mux.Handle("GET /api/series/{id}/poster", s.require(false, http.HandlerFunc(s.seriesPoster)))
+	mux.Handle("GET /api/series/{id}/seasons/{number}/poster", s.require(false, http.HandlerFunc(s.seasonPoster)))
 }
 
 func setSeriesPoster(item *television.Series) {
@@ -59,6 +60,11 @@ func (s *Server) seriesDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	setSeriesPoster(&item)
+	covers, err := s.store.SeriesSeasonCovers(r.Context(), id)
+	if err != nil {
+		s.internal(w, r, err)
+		return
+	}
 	result := television.Detail{Series: item, Folders: television.EpisodeFolders(episodes), Seasons: []television.Season{}}
 	for i := range episodes {
 		setPosterURL(&episodes[i])
@@ -67,7 +73,11 @@ func (s *Server) seriesDetail(w http.ResponseWriter, r *http.Request) {
 		}
 		number := episodes[i].SeasonNumber
 		if len(result.Seasons) == 0 || result.Seasons[len(result.Seasons)-1].Number != number {
-			result.Seasons = append(result.Seasons, television.Season{Number: number})
+			season := television.Season{Number: number}
+			if key := covers[number]; validPosterKey(key) {
+				season.PosterURL = r.URL.Path + "/seasons/" + strconv.Itoa(number) + "/poster?v=" + key
+			}
+			result.Seasons = append(result.Seasons, season)
 		}
 		season := &result.Seasons[len(result.Seasons)-1]
 		season.Episodes = append(season.Episodes, episodes[i])
@@ -94,6 +104,24 @@ func (s *Server) seriesPoster(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.servePoster(w, r, item.PosterKey)
+}
+
+func (s *Server) seasonPoster(w http.ResponseWriter, r *http.Request) {
+	id, ok := libraryID(w, r)
+	if !ok {
+		return
+	}
+	number, err := strconv.Atoi(r.PathValue("number"))
+	if err != nil || number < 0 {
+		fail(w, 400, "invalid_season", "invalid season number")
+		return
+	}
+	covers, err := s.store.SeriesSeasonCovers(r.Context(), id)
+	if err != nil {
+		s.internal(w, r, err)
+		return
+	}
+	s.servePoster(w, r, covers[number])
 }
 
 func (s *Server) seriesError(w http.ResponseWriter, r *http.Request, err error) bool {

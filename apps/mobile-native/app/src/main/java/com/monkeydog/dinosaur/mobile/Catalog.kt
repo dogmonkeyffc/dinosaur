@@ -7,13 +7,12 @@ import android.widget.LinearLayout
 import com.monkeydog.dinosaur.android.Api
 import com.monkeydog.dinosaur.android.rows
 import org.json.JSONObject
-import java.net.URLEncoder
 
 internal class Catalog(private val activity: MainActivity) {
     private val artwork = PhoneArtwork(activity)
     private val feed = CatalogFeed(activity, artwork)
     private val timeline = HistoryTimeline(activity, artwork)
-    private val details = MediaDetails(activity, artwork, ::play)
+    private val details = MediaDetails(activity, artwork) { id, close -> play(id, close, landscape = true) }
     private val handler = Handler(Looper.getMainLooper())
     private var pendingSearch: Runnable? = null
     private var owner: String? = null
@@ -22,6 +21,7 @@ internal class Catalog(private val activity: MainActivity) {
     private var searching = false
     private var pageNumber = 1
     private var savedScroll = 0
+    private var directory = ""
     private val selectedIds = LongArray(3)
     private var request = 0
 
@@ -54,6 +54,7 @@ internal class Catalog(private val activity: MainActivity) {
         searching = false
         pageNumber = 1
         savedScroll = 0
+        directory = ""
     }
 
     private fun showChrome(): Unit = with(activity) {
@@ -114,24 +115,12 @@ internal class Catalog(private val activity: MainActivity) {
         val typed = query.trim()
         val page = pageNumber
         val body = chrome.body
+        chrome.scroller.swipeLibrary = null
         body.removeAllViews()
         body.addView(loading())
+        val path = directory
         task({
-            val libraries = client.request("/api/libraries").rows("libraries")
-            val visible = if (destination == 0 && !search) libraries.filterNot { settings.hidden(it.getLong("id")) } else libraries
-            val selected = visible.firstOrNull { it.optLong("id") == wanted } ?: visible.firstOrNull()
-            val id = selected?.getLong("id") ?: 0
-            val kind = selected?.optString("type").orEmpty()
-            val route = if (kind == "tv") "series" else "media"
-            val encoded = URLEncoder.encode(typed, "UTF-8")
-            val data = if (selected == null) JSONObject() else
-                client.request("/api/$route?type=$kind&library_id=$id&page=$page&page_size=24&q=$encoded")
-            val recent = if (destination == 0 && !search && selected != null) {
-                val ids = visible.map { it.getLong("id") }.toSet()
-                runCatching { client.request("/api/playback/continue?type=$kind").rows("items") }
-                    .getOrDefault(emptyList()).filter { it.optLong("library_id") in ids }
-            } else emptyList()
-            CatalogPage(visible, selected, data, recent, kind)
+            client.catalogPage(destination == 1, search, wanted, typed, page, path, settings::hidden)
         }, { error ->
             if (revision == request) feedback(body, error.message ?: "无法加载片库") { catalog(chrome, toolbar, client) }
         }) { result ->
@@ -139,21 +128,46 @@ internal class Catalog(private val activity: MainActivity) {
             val id = result.selected?.optLong("id") ?: 0L
             if (id > 0) selectedIds[selection] = id
             val select = { next: Long ->
-                selectedIds[selection] = next
-                pageNumber = 1
-                savedScroll = 0
-                catalog(chrome, toolbar, client)
+                if (next != id) {
+                    selectedIds[selection] = next
+                    pageNumber = 1
+                    savedScroll = 0
+                    directory = ""
+                    catalog(chrome, toolbar, client)
+                }
+            }
+            val index = result.libraries.indexOfFirst { it.optLong("id") == id }
+            if (!search && index >= 0) chrome.scroller.swipeLibrary = { offset ->
+                result.libraries.getOrNull(index + offset)?.let { select(it.getLong("id")) }
             }
             val open: (JSONObject) -> Unit = { item ->
                 savedScroll = chrome.scroller.scrollY
                 getSystemService(InputMethodManager::class.java).hideSoftInputFromWindow(chrome.scroller.windowToken, 0)
-                details.open(item, result.kind) { showChrome() }
+                if (result.kind == "video") playVideo(item, client) else details.open(item, result.kind) { showChrome() }
             }
             toolbar.removeAllViews()
             body.removeAllViews()
             body.setPadding(0, 0, 0, ui(28))
             val items = result.data.rows("items")
-            if (destination == 1) {
+            val folder = result.folder
+            if (folder != null && result.selected != null) {
+                directory = folder.path
+                val openFolder = { next: String ->
+                    directory = next
+                    pageNumber = 1
+                    savedScroll = 0
+                    catalog(chrome, toolbar, client)
+                }
+                back = if (folder.path.isEmpty()) ({ show(0) }) else ({ openFolder(folder.path.substringBeforeLast('/', "")) })
+                renderVideoFolder(body, result.libraries, result.selected, folder, page, chrome.topInset, select, {
+                    savedScroll = chrome.scroller.scrollY
+                    settings.show()
+                }, openFolder) { mediaId ->
+                    savedScroll = chrome.scroller.scrollY
+                    play(mediaId, { showChrome() }, videos = folder.videos.map(VideoFile::id))
+                }
+            } else if (destination == 1) {
+                back = { show(0) }
                 feed.library(body, result.selected, result.libraries, items, client, chrome.topInset, select, {
                     savedScroll = chrome.scroller.scrollY
                     settings.show()
@@ -163,16 +177,17 @@ internal class Catalog(private val activity: MainActivity) {
                 if (search) feed.search(body, items, client, typed.isNotEmpty(), open)
                 else if (result.selected != null) feed.home(body, result.selected.optString("name"), items, result.recent, client, open, {
                     savedScroll = chrome.scroller.scrollY
-                    play(it.getLong("id")) { showChrome() }
+                    if (result.kind == "video") playVideo(it, client)
+                    else play(it.getLong("id"), { showChrome() }, landscape = true)
                 })
             }
-            if (items.isEmpty()) body.addView(status(when {
+            if (items.isEmpty() && folder == null) body.addView(status(when {
                 result.selected == null && destination == 0 && !search -> "暂无首页媒体库"
                 result.selected == null -> "暂无媒体库"
                 typed.isNotEmpty() -> "没有找到相关媒体"
                 else -> "暂无媒体"
             }))
-            if (destination == 1 || search) feed.pagination(body, result.data.optInt("total"), page) {
+            if (destination == 1 || search) feed.pagination(body, folder?.total ?: result.data.optInt("total"), page) {
                 pageNumber = it
                 savedScroll = 0
                 catalog(chrome, toolbar, client)
@@ -181,9 +196,17 @@ internal class Catalog(private val activity: MainActivity) {
         }
     }
 
-    private fun play(id: Long, close: () -> Unit) {
+    private fun playVideo(item: JSONObject, client: Api) = with(activity) {
+        val id = item.getLong("id")
+        val library = item.getLong("library_id")
+        task({ client.videoFolder(library, mediaId = id).videos.map(VideoFile::id) }) { videos ->
+            play(id, { showChrome() }, videos = videos)
+        }
+    }
+
+    private fun play(id: Long, close: () -> Unit, landscape: Boolean = false, videos: List<Long> = emptyList()) {
         activity.playback?.release()
-        activity.playback = PlaybackScreen(activity, activity.api, close).apply { open(id) }
+        activity.playback = PlaybackScreen(activity, activity.api, landscape, videos, close).apply { open(id) }
     }
 
     fun dispose() {
@@ -191,8 +214,4 @@ internal class Catalog(private val activity: MainActivity) {
         artwork.close()
     }
 
-    private data class CatalogPage(
-        val libraries: List<JSONObject>, val selected: JSONObject?, val data: JSONObject,
-        val recent: List<JSONObject>, val kind: String,
-    )
 }

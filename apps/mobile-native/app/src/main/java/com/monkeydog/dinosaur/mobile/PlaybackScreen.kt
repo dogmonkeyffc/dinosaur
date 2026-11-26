@@ -1,7 +1,6 @@
 package com.monkeydog.dinosaur.mobile
 
 import com.monkeydog.dinosaur.android.Api
-import com.monkeydog.dinosaur.android.json
 import com.monkeydog.dinosaur.android.rows
 import android.graphics.Color
 import android.os.Handler
@@ -17,7 +16,10 @@ import androidx.media3.ui.PlayerView
 import org.json.JSONObject
 
 @androidx.media3.common.util.UnstableApi
-internal class PlaybackScreen(private val activity: MainActivity, private val api: Api, private val close: () -> Unit) {
+internal class PlaybackScreen(
+    private val activity: MainActivity, private val api: Api, private val startLandscape: Boolean,
+    private val videos: List<Long>, private val close: () -> Unit,
+) {
     private val handler = Handler(Looper.getMainLooper())
     private var player: ExoPlayer? = null
     private var id = 0L
@@ -30,11 +32,12 @@ internal class PlaybackScreen(private val activity: MainActivity, private val ap
     private var offset = 0L
     private var duration = 0L
     private var completed = false
-    private var fullscreen = false
+    private var fullscreen = startLandscape
+    private val previousOrientation = activity.requestedOrientation
     private var rate = 1f
     private var revision = 0
     private var info = JSONObject()
-    private var lastSave = 0L
+    private val progress = PlaybackProgress(activity, api)
     private var chrome: PlaybackChrome? = null
     private lateinit var caption: TextView
     private val captions = PlaybackCaptions(activity, api)
@@ -44,12 +47,13 @@ internal class PlaybackScreen(private val activity: MainActivity, private val ap
             val position = position()
             caption.updateText(captions.at(id, subtitle, info, position))
             chrome?.tick(position, duration)
-            if (current.isPlaying && System.currentTimeMillis() - lastSave >= 10000) save()
+            if (current.isPlaying && progress.due()) save()
             handler.postDelayed(this, 500)
         }
     }
 
     fun open(mediaId: Long, start: Long? = null, nextEpisode: Boolean = false): Unit = with(activity) {
+        val initial = id == 0L
         val load = ++revision
         detach()
         captions.reset()
@@ -69,6 +73,7 @@ internal class PlaybackScreen(private val activity: MainActivity, private val ap
                 ?.let { append("&subtitle=${it.getInt("id")}") }
         }
         render()
+        if (initial && fullscreen) setPlaybackFullscreen(true, previousOrientation)
         task({ api.request("/api/playback/$mediaId?$parameters") }, {
             if (load == revision) chrome?.fail(it.message ?: "无法播放")
         }) { result ->
@@ -106,7 +111,7 @@ internal class PlaybackScreen(private val activity: MainActivity, private val ap
                 }
                 completed = true
                 save(true)
-                if (next > 0) open(next, 0L, true)
+                advance()
             }
 
             override fun onPlayerError(error: androidx.media3.common.PlaybackException) { recover() }
@@ -127,7 +132,7 @@ internal class PlaybackScreen(private val activity: MainActivity, private val ap
 
     private fun render(): Unit = with(activity) {
         generation++
-        back = { if (fullscreen) rotate() else exit() }
+        back = ::backFromPlayer
         chrome?.close()
         val root = playbackRoot { fullscreen }
         root.addView((layoutInflater.inflate(R.layout.video_surface, root, false) as PlayerView).apply {
@@ -135,18 +140,40 @@ internal class PlaybackScreen(private val activity: MainActivity, private val ap
             player = this@PlaybackScreen.player
             contentDescription = "显示播放控制"
             setOnClickListener { chrome?.tap() }
+            if (videos.isNotEmpty()) videoSwipe(this) { direction ->
+                adjacentVideo(direction)?.let { switchTo(it) }
+            }
         }, FrameLayout.LayoutParams(-1, -1))
         caption = TextView(this).apply { gravity = Gravity.CENTER; textSize = 18f; setTextColor(Color.WHITE) }
         root.addView(caption, FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM).apply { bottomMargin = dp(100) })
         val item = info.optJSONObject("item")
         val title = listOf(item?.optString("series_title"), item?.optString("title"))
             .filterNotNull().filter(String::isNotBlank).joinToString(" · ")
-        val advance = if (next > 0) ({ save(); open(next, 0L, true) }) else null
+        val advance = if (next > 0 || adjacentVideo(1) != null) ::advance else null
         chrome = PlaybackChrome(this, root, title, if (player == null) 0 else duration, advance,
-            { if (fullscreen) rotate() else exit() }, ::toggle, ::rotate, ::seek, settings()).apply {
+            ::backFromPlayer, ::toggle, ::rotate, ::seek, settings(), if (videos.isEmpty()) "下一集" else "下一个视频").apply {
             setFullscreen(fullscreen)
         }
         setContentView(root)
+    }
+
+    private fun adjacentVideo(direction: Int): Long? {
+        val index = videos.indexOf(id)
+        return if (index >= 0 && player != null) videos.getOrNull(index + direction) else null
+    }
+
+    private fun advance() {
+        val target = adjacentVideo(1) ?: next.takeIf { it > 0 } ?: return
+        switchTo(target)
+    }
+
+    private fun switchTo(target: Long) {
+        save()
+        open(target, if (videos.isEmpty()) 0L else null, true)
+    }
+
+    private fun backFromPlayer() {
+        if (fullscreen && !startLandscape) rotate() else exit()
     }
 
     private fun seek(position: Long) {
@@ -191,15 +218,10 @@ internal class PlaybackScreen(private val activity: MainActivity, private val ap
                 )
             },
             PlayerSetting(PlayerIcon.QUALITY, "分辨率", available) {
-                listOf("auto" to "自动", "original" to "原分辨率", "1080" to "1080p", "720" to "720p", "480" to "480p")
-                    .map { (value, label) ->
-                        PlayerOption(label, quality == value) { quality = value; open(id, position()) }
-                    }
+                qualityOptions(quality) { quality = it; open(id, position()) }
             },
             PlayerSetting(PlayerIcon.RATE, "倍速", available) {
-                listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f).map { value ->
-                    PlayerOption("${value}×", rate == value) { rate = value; player?.setPlaybackSpeed(value) }
-                }
+                speedOptions(rate) { rate = it; player?.setPlaybackSpeed(it) }
             },
         )
     }
@@ -212,18 +234,14 @@ internal class PlaybackScreen(private val activity: MainActivity, private val ap
 
     private fun rotate() {
         fullscreen = !fullscreen
-        activity.setPlaybackFullscreen(fullscreen)
+        activity.setPlaybackFullscreen(fullscreen, previousOrientation)
         chrome?.setFullscreen(fullscreen)
     }
 
     private fun position() = offset + (player?.currentPosition ?: 0)
     private fun save(watched: Boolean = false) {
         if (player == null || completed && !watched) return
-        lastSave = System.currentTimeMillis()
-        val path = "/api/playback/$id/progress"
-        val data = json("position" to (if (watched && duration > 0) duration else position()) / 1000.0)
-        if (watched) data.put("watched", true)
-        activity.worker.execute { runCatching { api.request(path, "PUT", data) } }
+        progress.save(id, if (watched && duration > 0) duration else position(), watched)
     }
     fun pause() { player?.pause(); save() }
     private fun detach() { handler.removeCallbacks(tick); player?.release(); player = null }

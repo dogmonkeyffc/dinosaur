@@ -120,8 +120,7 @@ internal class MediaDetails(
             }
             val seasons = data.rows("seasons").filter { it.optInt("number", -1) >= 0 }.map { season ->
                 val number = season.getInt("number")
-                val poster = season.rows("episodes").firstOrNull { it.optString("poster_url").isNotBlank() }
-                    ?.optString("poster_url") ?: series.optString("poster_url")
+                val poster = season.optString("poster_url")
                 JSONObject().put("number", number).put("title", seasonName(number)).put("poster_url", poster)
             }
             grid(seasons, client) { selected ->
@@ -140,7 +139,10 @@ internal class MediaDetails(
             val series = data.getJSONObject("series")
             val selected = data.rows("seasons").firstOrNull { it.optInt("number") == number }
             val episodes = selected?.rows("episodes").orEmpty()
-            content.addView(seasonSummary(series, title, episodes, artwork, client))
+            val cover = JSONObject().put("title", series.optString("title"))
+                .put("poster_url", selected?.optString("poster_url").orEmpty())
+                .put("metadata", series.optJSONObject("metadata"))
+            content.addView(seasonSummary(cover, title, episodes, artwork, client))
             episodes.forEach { item ->
                 content.addWithGap(episodeRow(item) {
                     val position = detailScroll().scrollY

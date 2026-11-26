@@ -167,6 +167,24 @@ internal class CatalogIcon(activity: MainActivity, private val name: String, col
             "library" -> listOf(2f, 14f).forEach { x ->
                 listOf(2f, 14f).forEach { y -> canvas.drawRoundRect(RectF(x, y, x + 8, y + 8), 1f, 1f, pen) }
             }
+            "folder" -> canvas.drawPath(Path().apply {
+                moveTo(3f, 6f)
+                lineTo(10f, 6f)
+                lineTo(12f, 8f)
+                lineTo(21f, 8f)
+                lineTo(21f, 19f)
+                lineTo(3f, 19f)
+                close()
+            }, pen)
+            "video" -> {
+                canvas.drawRoundRect(RectF(3f, 5f, 21f, 19f), 2f, 2f, pen)
+                canvas.drawPath(Path().apply {
+                    moveTo(10f, 9f)
+                    lineTo(15f, 12f)
+                    lineTo(10f, 15f)
+                    close()
+                }, pen)
+            }
             else -> canvas.drawPath(Path().apply {
                 moveTo(2f, 11f); lineTo(12f, 2f); lineTo(22f, 11f)
                 moveTo(4f, 9f); lineTo(4f, 22f); lineTo(20f, 22f); lineTo(20f, 9f)

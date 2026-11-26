@@ -35,22 +35,23 @@ type identity struct {
 	device bool
 }
 type Server struct {
-	config     config.Config
-	store      *store.Store
-	logger     *slog.Logger
-	hasher     *auth.Hasher
-	limiter    *auth.Limiter
-	dummyHash  string
-	handler    http.Handler
-	scanner    *scanner.Manager
-	transcoder *streaming.Transcoder
-	subtitles  *streaming.SubtitleExtractor
-	tmdb       *tmdb.Client
-	scraper    *scraping.Manager
-	tvScraper  *scraping.Manager
-	disks      disk.Reader
-	devices    deviceauth.Service
-	serverID   string
+	config            config.Config
+	store             *store.Store
+	logger            *slog.Logger
+	hasher            *auth.Hasher
+	limiter           *auth.Limiter
+	dummyHash         string
+	handler           http.Handler
+	scanner           *scanner.Manager
+	transcoder        *streaming.Transcoder
+	subtitles         *streaming.SubtitleExtractor
+	tmdb              *tmdb.Client
+	scraper           *scraping.Manager
+	tvScraper         *scraping.Manager
+	stopSeasonPosters func()
+	disks             disk.Reader
+	devices           deviceauth.Service
+	serverID          string
 }
 
 func New(c config.Config, db *store.Store, logger *slog.Logger) (*Server, error) {
@@ -90,6 +91,7 @@ func New(c config.Config, db *store.Store, logger *slog.Logger) (*Server, error)
 	mux.Handle("GET /api/admin/users", s.require(true, http.HandlerFunc(s.listUsers)))
 	mux.Handle("PATCH /api/admin/users/{id}", s.require(true, http.HandlerFunc(s.updateUser)))
 	mux.Handle("GET /api/libraries", s.require(false, http.HandlerFunc(s.listLibraries)))
+	mux.Handle("GET /api/libraries/{id}/videos", s.require(false, http.HandlerFunc(s.videoDirectory)))
 	mux.Handle("GET /api/admin/libraries", s.require(true, http.HandlerFunc(s.listLibraries)))
 	mux.Handle("GET /api/admin/libraries/directories", s.require(true, http.HandlerFunc(s.browseLibraryDirectories)))
 	mux.Handle("POST /api/admin/libraries", s.require(true, http.HandlerFunc(s.saveLibrary)))

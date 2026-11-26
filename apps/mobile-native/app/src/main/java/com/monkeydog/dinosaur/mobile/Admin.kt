@@ -9,7 +9,7 @@ internal class Admin(private val activity: MainActivity) {
     private val client get() = activity.api
 
     fun show() = with(activity) {
-        page("管理", { catalog.show() })
+        page("管理", { settings.show() })
         val api = client
         task({ api.request("/api/auth/me").getJSONObject("user") }) { user ->
             if (user.getString("role") != "admin") {
@@ -21,7 +21,7 @@ internal class Admin(private val activity: MainActivity) {
     }
 
     private fun libraries(): Unit = with(activity) {
-        page("管理", { catalog.show() }, toolbarAction = adminMenuButton(::destinations))
+        page("管理", { settings.show() }, toolbarAction = adminMenuButton(::destinations))
         content.addView(phoneRow().apply {
             addView(phoneText("媒体库", 24, bold = true), android.widget.LinearLayout.LayoutParams(0, -2, 1f))
             addView(phoneAction("添加媒体库", { editLibrary(null) }, color = PHONE_SELECTED, fill = PHONE_ACCENT))
@@ -117,7 +117,7 @@ internal class Admin(private val activity: MainActivity) {
     }
 
     private fun users(): Unit = with(activity) {
-        page("用户管理", { libraries() }, { catalog.show() })
+        page("用户管理", { libraries() }, { settings.show() })
         val api = client
         button("添加账号") {
             form("添加账号", listOf("用户名", "密码")) { input ->
@@ -145,7 +145,7 @@ internal class Admin(private val activity: MainActivity) {
     }
 
     private fun scraping(tv: Boolean = false): Unit = with(activity) {
-        page(if (tv) "剧集刮削" else "电影刮削", { libraries() }, { catalog.show() })
+        page(if (tv) "剧集刮削" else "电影刮削", { libraries() }, { settings.show() })
         button(if (tv) "电影刮削" else "剧集刮削") { scraping(!tv) }
         val path = if (tv) "/api/admin/tv/metadata/jobs" else "/api/admin/metadata/jobs"
         val api = client
@@ -165,7 +165,7 @@ internal class Admin(private val activity: MainActivity) {
     }
 
     private fun metadata(): Unit = with(activity) {
-        page("元数据设置", { libraries() }, { catalog.show() })
+        page("元数据设置", { libraries() }, { settings.show() })
         val path = "/api/admin/metadata/tmdb"
         val api = client
         task({ api.request(path) }) { data ->
@@ -189,7 +189,7 @@ internal class Admin(private val activity: MainActivity) {
     }
 
     private fun system(): Unit = with(activity) {
-        page("系统设置", { libraries() }, { catalog.show() })
+        page("系统设置", { libraries() }, { settings.show() })
         button("刷新") { system() }
         val api = client
         task({ api.request("/api/admin/system/disks") }) { data ->

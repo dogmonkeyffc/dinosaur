@@ -59,3 +59,11 @@ internal fun clock(ms: Long): String {
 internal fun TextView.updateText(value: String) {
     if (text.toString() != value) text = value
 }
+
+internal fun qualityOptions(current: String, select: (String) -> Unit) =
+    listOf("auto" to "自动", "original" to "原分辨率", "1080" to "1080p", "720" to "720p", "480" to "480p")
+        .map { (value, label) -> PlayerOption(label, current == value) { select(value) } }
+
+internal fun speedOptions(current: Float, select: (Float) -> Unit) =
+    listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
+        .map { value -> PlayerOption("${value}×", current == value) { select(value) } }

@@ -34,8 +34,9 @@ type Series struct {
 }
 
 type Season struct {
-	Number   int          `json:"number"`
-	Episodes []media.Item `json:"episodes"`
+	Number    int          `json:"number"`
+	PosterURL string       `json:"poster_url,omitempty"`
+	Episodes  []media.Item `json:"episodes"`
 }
 
 type Detail struct {

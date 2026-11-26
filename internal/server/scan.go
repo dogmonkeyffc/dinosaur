@@ -7,6 +7,8 @@ import (
 	"net/http"
 
 	"dinosaur/internal/scanner"
+	"dinosaur/internal/scraping"
+	"dinosaur/internal/tmdb"
 )
 
 func (s *Server) startScan(w http.ResponseWriter, r *http.Request) {
@@ -58,9 +60,18 @@ func (s *Server) RecoverInterruptedJobs(ctx context.Context) error {
 	if err := s.store.InterruptScrapes(ctx); err != nil {
 		return err
 	}
-	return s.store.InterruptScans(ctx)
+	if err := s.store.InterruptScans(ctx); err != nil {
+		return err
+	}
+	if s.stopSeasonPosters == nil {
+		s.stopSeasonPosters = scraping.StartSeasonPosters(s.store, tmdb.Television{Client: s.tmdb}, s.config.DataDir, s.logger)
+	}
+	return nil
 }
 func (s *Server) Close() {
+	if s.stopSeasonPosters != nil {
+		s.stopSeasonPosters()
+	}
 	s.scanner.Close()
 	s.scraper.Close()
 	s.tvScraper.Close()

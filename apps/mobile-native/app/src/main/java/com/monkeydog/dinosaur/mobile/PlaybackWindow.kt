@@ -18,9 +18,9 @@ internal fun MainActivity.playbackRoot(fullscreen: () -> Boolean) = FrameLayout(
     }
 }
 
-internal fun MainActivity.setPlaybackFullscreen(fullscreen: Boolean) {
+internal fun MainActivity.setPlaybackFullscreen(fullscreen: Boolean, previousOrientation: Int) {
     requestedOrientation = if (fullscreen) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-    else ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    else previousOrientation
     if (Build.VERSION.SDK_INT >= 30) {
         window.insetsController?.apply {
             systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE

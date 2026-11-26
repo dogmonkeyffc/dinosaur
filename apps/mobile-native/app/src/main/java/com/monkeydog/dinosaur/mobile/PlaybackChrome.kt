@@ -17,7 +17,7 @@ import android.widget.TextView
 internal class PlaybackChrome(
     private val activity: MainActivity, private val root: FrameLayout, title: String, duration: Long,
     next: (() -> Unit)?, goBack: () -> Unit, toggle: () -> Unit, rotate: () -> Unit, seek: (Long) -> Unit,
-    settings: List<PlayerSetting>,
+    settings: List<PlayerSetting>, nextLabel: String,
 ) {
     private val header = activity.phoneRow()
     private val controls = activity.column()
@@ -85,7 +85,7 @@ internal class PlaybackChrome(
                         val visible = if (right - left > dp(700)) View.VISIBLE else View.GONE
                         listOf(rewind, forward).forEach { if (it.visibility != visible) it.visibility = visible }
                     }
-                    next?.let { addView(PlayerAction(activity, PlayerIcon.NEXT, "下一集", it), controlSize()) }
+                    next?.let { addView(PlayerAction(activity, PlayerIcon.NEXT, nextLabel, it), controlSize()) }
                     addView(View(activity), LinearLayout.LayoutParams(0, 1, 1f))
                     settings.forEach { item ->
                         addView(PlayerAction(activity, item.icon, item.label) { open(item.options()) }.apply {

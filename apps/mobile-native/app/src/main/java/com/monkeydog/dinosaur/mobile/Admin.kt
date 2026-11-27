@@ -2,111 +2,15 @@ package com.monkeydog.dinosaur.mobile
 
 import com.monkeydog.dinosaur.android.json
 import com.monkeydog.dinosaur.android.rows
-import org.json.JSONArray
 import org.json.JSONObject
 
 internal class Admin(private val activity: MainActivity) {
     private val client get() = activity.api
 
-    fun show() = with(activity) {
-        page("管理", { settings.show() })
-        val api = client
-        task({ api.request("/api/auth/me").getJSONObject("user") }) { user ->
-            if (user.getString("role") != "admin") {
-                label("当前账号没有管理权限")
-            } else {
-                libraries()
-            }
-        }
-    }
+    fun libraries() = AdminLibraries(activity).show()
 
-    private fun libraries(): Unit = with(activity) {
-        page("管理", { settings.show() }, toolbarAction = adminMenuButton(::destinations))
-        content.addView(phoneRow().apply {
-            addView(phoneText("媒体库", 24, bold = true), android.widget.LinearLayout.LayoutParams(0, -2, 1f))
-            addView(phoneAction("添加媒体库", { editLibrary(null) }, color = PHONE_SELECTED, fill = PHONE_ACCENT))
-        })
-        val api = client
-        task({ api.request("/api/admin/libraries").rows("libraries") }) { rows ->
-            adminLibraryList(rows, ::scanName, ::library, { catalog.browseLibrary(it.getLong("id")) }, ::scan)
-        }
-    }
-
-    private fun destinations() = with(activity) {
-        val actions = listOf("媒体库设置" to { libraries() }, "刮削管理" to { scraping() },
-            "元数据设置" to { metadata() }, "用户管理" to { users() }, "系统设置" to { system() })
-        choose("管理导航", actions.map { it.first }) { actions[it].second() }
-    }
-
-    private fun scan(item: JSONObject) = with(activity) {
-        val api = client
-        task({ api.request("/api/admin/libraries/${item.getLong("id")}/scan", "POST", JSONObject()) }) {
-            message("已开始扫描")
-            libraries()
-        }
-    }
-
-    private fun scanName(status: String) = when (status) {
-        "queued" -> "等待扫描"
-        "scanning" -> "扫描中"
-        "completed" -> "扫描完成"
-        "failed" -> "扫描失败"
-        "interrupted" -> "扫描中断"
-        else -> ""
-    }
-
-    private fun library(item: JSONObject): Unit = with(activity) {
-        val id = item.getLong("id")
-        val path = "/api/admin/libraries/$id"
-        page(item.getString("name"), { libraries() })
-        label(item.optString("root_path"))
-        item.optJSONObject("scan")?.let { label(scanName(it.optString("status"))) }
-        button("编辑") { editLibrary(item) }
-        button("访问权限") { access(id) { library(item) } }
-        val api = client
-        button("重新扫描") { scan(item) }
-        button("刷新扫描状态") {
-            task({ api.request("/api/admin/libraries").rows("libraries").first { it.getLong("id") == id } }) { library(it) }
-        }
-        button("移除媒体库") {
-            confirm("移除媒体库 ${item.getString("name")}？") {
-                task({ api.request(path, "DELETE") }) { libraries() }
-            }
-        }
-    }
-
-    private fun editLibrary(item: JSONObject?) {
-        val previous = if (item == null) ::libraries else ({ library(item) })
-        LibraryEditor(activity, item, previous) { saved ->
-            if (item == null) libraries() else library(saved)
-        }.show()
-    }
-
-    private fun access(id: Long, previous: () -> Unit): Unit = with(activity) {
-        page("访问权限", previous)
-        val api = client
-        val path = "/api/admin/libraries/$id/access"
-        task({ api.request(path) }) { data ->
-            val current = data.getJSONObject("access")
-            var restricted = current.getBoolean("restricted")
-            val ids = current.optJSONArray("user_ids") ?: JSONArray()
-            val selected = (0 until ids.length()).map(ids::getLong).toMutableSet()
-            rowSwitch("限制访问", restricted) { value, _ -> restricted = value }
-            data.rows("accounts").forEach { item ->
-                val userId = item.getLong("id")
-                rowSwitch(item.getString("username"), userId in selected) { enabled, _ ->
-                    if (enabled) selected.add(userId) else selected.remove(userId)
-                }
-            }
-            button("保存") {
-                val body = json("restricted" to restricted, "user_ids" to JSONArray(selected.toList()))
-                task({ api.request(path, "PUT", body) }) { previous() }
-            }
-        }
-    }
-
-    private fun users(): Unit = with(activity) {
-        page("用户管理", { libraries() }, { settings.show() })
+    fun users(): Unit = with(activity) {
+        page("用户管理", { settings.show() })
         val api = client
         button("添加账号") {
             form("添加账号", listOf("用户名", "密码")) { input ->
@@ -133,8 +37,8 @@ internal class Admin(private val activity: MainActivity) {
         }
     }
 
-    private fun scraping(tv: Boolean = false): Unit = with(activity) {
-        page(if (tv) "剧集刮削" else "电影刮削", { libraries() }, { settings.show() })
+    fun scraping(tv: Boolean = false): Unit = with(activity) {
+        page(if (tv) "剧集刮削" else "电影刮削", { settings.show() })
         button(if (tv) "电影刮削" else "剧集刮削") { scraping(!tv) }
         val path = if (tv) "/api/admin/tv/metadata/jobs" else "/api/admin/metadata/jobs"
         val api = client
@@ -153,8 +57,8 @@ internal class Admin(private val activity: MainActivity) {
         }
     }
 
-    private fun metadata(): Unit = with(activity) {
-        page("元数据设置", { libraries() }, { settings.show() })
+    fun metadata(): Unit = with(activity) {
+        page("元数据设置", { settings.show() })
         val path = "/api/admin/metadata/tmdb"
         val api = client
         task({ api.request(path) }) { data ->
@@ -177,8 +81,8 @@ internal class Admin(private val activity: MainActivity) {
         }
     }
 
-    private fun system(): Unit = with(activity) {
-        page("系统设置", { libraries() }, { settings.show() })
+    fun system(): Unit = with(activity) {
+        page("系统设置", { settings.show() })
         button("刷新") { system() }
         val api = client
         task({ api.request("/api/admin/system/disks") }) { data ->

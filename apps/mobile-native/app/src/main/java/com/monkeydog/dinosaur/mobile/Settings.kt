@@ -44,28 +44,41 @@ internal class Settings(private val activity: MainActivity) {
         content.addWithGap(group().apply {
             addView(settingRow(R.drawable.settings_switch_account, "切换账号") { showAccounts(null) })
         }, ui(20))
-        val links = group()
-        renderLinks(links, canManage = false)
-        content.addWithGap(links, ui(20))
+        content.addWithGap(group().apply {
+            addRows(listOf(
+                settingRow(R.drawable.settings_tv, "登录电视") { PairTv(activity) { catalog.show() }.show() },
+                settingRow(R.drawable.settings_home, "首页显示") { libraries(false) },
+                settingRow(R.drawable.settings_history, "记录观看") { libraries(true) },
+            ))
+        }, ui(20))
+        val management = column().apply { visibility = View.GONE }
+        content.addWithGap(management, ui(20))
         val version = packageManager.getPackageInfo(packageName, 0).versionName
         content.addWithGap(phoneText("Dinosaur $version", 13, PHONE_MUTED).apply { gravity = Gravity.CENTER }, ui(32))
         val client = api
         task({ client.request("/api/auth/me").getJSONObject("user") }, { }) { user ->
-            if (user.getString("role") == "admin") renderLinks(links, canManage = true)
+            if (user.getString("role") == "admin") {
+                management.addView(phoneText("管理", 16, PHONE_MUTED, true).apply {
+                    setPadding(ui(20), 0, ui(20), ui(10))
+                })
+                management.addView(group().apply {
+                    addRows(listOf(
+                        settingRow(R.drawable.settings_library, "媒体库设置", admin::libraries),
+                        settingRow(R.drawable.settings_scrape, "刮削管理") { admin.scraping() },
+                        settingRow(R.drawable.settings_metadata, "元数据设置", admin::metadata),
+                        settingRow(R.drawable.settings_users, "用户管理", admin::users),
+                        settingRow(R.drawable.settings_manage, "系统设置", admin::system),
+                    ))
+                })
+                management.visibility = View.VISIBLE
+            }
         }
     }
 
-    private fun MainActivity.renderLinks(links: LinearLayout, canManage: Boolean) {
-        links.removeAllViews()
-        val rows = buildList {
-            add(settingRow(R.drawable.settings_tv, "登录电视") { PairTv(activity) { catalog.show() }.show() })
-            if (canManage) add(settingRow(R.drawable.settings_manage, "管理") { admin.show() })
-            add(settingRow(R.drawable.settings_home, "首页显示") { libraries(false) })
-            add(settingRow(R.drawable.settings_history, "记录观看") { libraries(true) })
-        }
+    private fun LinearLayout.addRows(rows: List<View>) {
         rows.forEachIndexed { index, row ->
-            if (index > 0) links.separator()
-            links.addView(row)
+            if (index > 0) separator()
+            addView(row)
         }
     }
 

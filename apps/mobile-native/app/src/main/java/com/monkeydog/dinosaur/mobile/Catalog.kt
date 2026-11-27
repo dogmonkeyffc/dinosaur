@@ -27,13 +27,6 @@ internal class Catalog(private val activity: MainActivity) {
     private val selectedIds = LongArray(3)
     private var request = 0
 
-    fun browseLibrary(id: Long) {
-        selectedIds[1] = id
-        tab = 1
-        reset()
-        show()
-    }
-
     fun show(destination: Int = tab): Unit = with(activity) {
         val accountKey = requireNotNull(account).key
         if (accountKey != owner) {
@@ -103,6 +96,8 @@ internal class Catalog(private val activity: MainActivity) {
             chrome.header.addView(heading)
             chrome.header.addView(toolbar)
             if (searching) back = { reset(); showChrome() }
+        } else {
+            chrome.header.addView(toolbar)
         }
         chrome.scroller.refresh = { savedScroll = 0; catalog(chrome, toolbar, client) }
         catalog(chrome, toolbar, client)
@@ -121,10 +116,30 @@ internal class Catalog(private val activity: MainActivity) {
         body.removeAllViews()
         body.addView(loading())
         val path = directory
+        val openFolder: (String) -> Unit = { next ->
+            directory = next
+            pageNumber = 1
+            savedScroll = 0
+            catalog(chrome, toolbar, client)
+        }
+        fun folderHeader(path: String) {
+            toolbar.removeAllViews()
+            if (path.isEmpty()) {
+                back = { show(0) }
+            } else {
+                val up = { openFolder(path.substringBeforeLast('/', "")) }
+                back = up
+                toolbar.addView(videoFolderHeading(path, chrome.topInset, up))
+            }
+        }
+        if (destination == 1) folderHeader(path)
         task({
             client.catalogPage(destination == 1, search, wanted, typed, page, path, settings::hidden)
         }, { error ->
-            if (revision == request) feedback(body, error.message ?: "无法加载片库") { catalog(chrome, toolbar, client) }
+            if (revision == request) {
+                if (destination == 1) folderHeader(path)
+                feedback(body, error.message ?: "无法加载片库") { catalog(chrome, toolbar, client) }
+            }
         }) { result ->
             if (revision != request) return@task
             val id = result.selected?.optLong("id") ?: 0L
@@ -139,7 +154,8 @@ internal class Catalog(private val activity: MainActivity) {
                 }
             }
             val index = result.libraries.indexOfFirst { it.optLong("id") == id }
-            if (!search && index >= 0) chrome.scroller.swipeLibrary = { offset ->
+            val folder = result.folder
+            if (!search && index >= 0 && folder?.path.isNullOrEmpty()) chrome.scroller.swipeLibrary = { offset ->
                 result.libraries.getOrNull(index + offset)?.let { select(it.getLong("id")) }
             }
             val open: (JSONObject) -> Unit = { item ->
@@ -151,16 +167,9 @@ internal class Catalog(private val activity: MainActivity) {
             body.removeAllViews()
             body.setPadding(0, 0, 0, ui(28))
             val items = result.data.rows("items")
-            val folder = result.folder
             if (folder != null && result.selected != null) {
                 directory = folder.path
-                val openFolder = { next: String ->
-                    directory = next
-                    pageNumber = 1
-                    savedScroll = 0
-                    catalog(chrome, toolbar, client)
-                }
-                back = if (folder.path.isEmpty()) ({ show(0) }) else ({ openFolder(folder.path.substringBeforeLast('/', "")) })
+                folderHeader(folder.path)
                 renderVideoFolder(body, result.libraries, result.selected, folder, page, chrome.topInset, select, {
                     savedScroll = chrome.scroller.scrollY
                     settings.show()
@@ -169,7 +178,8 @@ internal class Catalog(private val activity: MainActivity) {
                     play(mediaId, { showChrome() }, videos = folder.videos.map(VideoFile::id))
                 }
             } else if (destination == 1) {
-                back = { show(0) }
+                directory = ""
+                folderHeader(directory)
                 feed.library(body, result.selected, result.libraries, items, client, chrome.topInset, select, {
                     savedScroll = chrome.scroller.scrollY
                     settings.show()

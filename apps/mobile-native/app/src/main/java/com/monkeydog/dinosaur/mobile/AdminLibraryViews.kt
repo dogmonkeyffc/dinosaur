@@ -2,61 +2,93 @@ package com.monkeydog.dinosaur.mobile
 
 import android.text.InputType
 import android.view.Gravity
+import android.view.View
 import android.widget.EditText
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.TextView
 import org.json.JSONObject
 
-internal fun MainActivity.adminMenuButton(open: () -> Unit) = phoneText("☰", 24, PHONE_ACCENT).apply {
-    gravity = Gravity.CENTER
-    contentDescription = "管理导航"
-    onTap(open)
-}
-
-internal fun MainActivity.adminLibraryList(
-    rows: List<JSONObject>, scanName: (String) -> String,
-    more: (JSONObject) -> Unit, browse: (JSONObject) -> Unit, scan: (JSONObject) -> Unit,
+internal class AdminLibraryList(
+    private val activity: MainActivity,
+    initialType: String,
+    initialSearch: String,
+    private val menu: (View, JSONObject) -> Unit,
 ) {
-    val types = linkedMapOf("" to "全部 ${rows.size}", "movie" to "电影", "tv" to "电视剧", "video" to "普通视频")
-    val filters = phoneRow()
-    val list = column()
-    var type = ""
-    var search = ""
-    fun refresh() {
+    private val types = linkedMapOf("movie" to "电影", "tv" to "电视剧", "video" to "普通视频")
+    private val list = activity.column()
+    private val filters = activity.phoneRow()
+    private val chips = linkedMapOf<String, TextView>()
+    private var rows = emptyList<JSONObject>()
+    var type = initialType
+        private set
+    var search = initialSearch
+        private set
+
+    init {
+        with(activity) {
+            (listOf("" to "全部") + types.toList()).forEach { (key, title) ->
+                val chip = phoneAction(title, {
+                    type = key
+                    updateChips()
+                    render()
+                })
+                chips[key] = chip
+                filters.addView(chip, LinearLayout.LayoutParams(-2, -2).apply {
+                    if (filters.childCount > 0) leftMargin = ui(8)
+                })
+            }
+            updateChips()
+            content.addWithGap(adminSearch(search) {
+                search = it
+                render()
+            }, ui(16))
+            content.addWithGap(HorizontalScrollView(this).apply {
+                isHorizontalScrollBarEnabled = false
+                addView(filters)
+            }, ui(12))
+            content.addWithGap(list, ui(18))
+        }
+    }
+
+    fun setRows(source: List<JSONObject>) {
+        rows = source
+        chips.getValue("").text = "全部 ${rows.size}"
+        render()
+    }
+
+    fun setScan(id: Long, scan: JSONObject) {
+        rows.firstOrNull { it.optLong("id") == id }?.put("scan", scan)
+        render()
+    }
+
+    private fun updateChips() = with(activity) {
+        chips.forEach { (key, chip) -> styleAdminFilter(chip, key == type) }
+    }
+
+    private fun render() = with(activity) {
         list.removeAllViews()
+        val term = search.trim()
         rows.filter { item ->
-            (type.isEmpty() || item.optString("type") == type) && item.optString("name").contains(search.trim(), true)
+            (type.isEmpty() || item.optString("type") == type) && item.optString("name").contains(term, true)
         }.forEach { item ->
-            list.addWithGap(adminLibraryCard(item, types[item.optString("type")].orEmpty(), scanName,
-                { more(item) }, { browse(item) }, { scan(item) }), ui(16))
+            list.addWithGap(adminLibraryCard(item, types[item.optString("type")].orEmpty(), menu), ui(16))
         }
         if (list.childCount == 0) list.addView(phoneText(
-            if (rows.isEmpty()) "暂无媒体库" else "没有找到匹配的媒体库", 16, PHONE_MUTED))
+            if (rows.isEmpty()) "暂无媒体库" else "没有找到匹配的媒体库", 16, PHONE_MUTED,
+        ))
     }
-    types.forEach { (key, title) ->
-        filters.addView(phoneAction(title, {
-            type = key
-            for (index in 0 until filters.childCount) {
-                val chip = filters.getChildAt(index) as TextView
-                styleAdminFilter(chip, chip.tag == type)
-            }
-            refresh()
-        }).apply {
-            tag = key
-            styleAdminFilter(this, key == type)
-        }, LinearLayout.LayoutParams(-2, -2).apply { if (filters.childCount > 0) leftMargin = ui(8) })
-    }
-    content.addWithGap(adminSearch { query ->
-        search = query
-        refresh()
-    }, ui(16))
-    content.addWithGap(HorizontalScrollView(this).apply {
-        isHorizontalScrollBarEnabled = false
-        addView(filters)
-    }, ui(12))
-    content.addWithGap(list, ui(18))
-    refresh()
+}
+
+internal fun JSONObject.scanActive() = optJSONObject("scan")?.optString("status") in listOf("queued", "scanning")
+
+private fun scanName(status: String) = when (status) {
+    "queued" -> "等待扫描"
+    "scanning" -> "扫描中"
+    "completed" -> "扫描完成"
+    "failed" -> "扫描失败"
+    "interrupted" -> "扫描中断"
+    else -> ""
 }
 
 private fun MainActivity.styleAdminFilter(chip: TextView, selected: Boolean) {
@@ -65,7 +97,7 @@ private fun MainActivity.styleAdminFilter(chip: TextView, selected: Boolean) {
     chip.background = panel(if (selected) PHONE_SELECTED else PHONE_SURFACE, 25)
 }
 
-private fun MainActivity.adminSearch(update: (String) -> Unit) = phoneRow().apply {
+private fun MainActivity.adminSearch(search: String, update: (String) -> Unit) = phoneRow().apply {
     background = panel(PHONE_SURFACE, 30)
     setPadding(ui(18), 0, ui(12), 0)
     addView(CatalogIcon(this@adminSearch, "search", PHONE_MUTED), LinearLayout.LayoutParams(ui(24), ui(24)))
@@ -73,6 +105,7 @@ private fun MainActivity.adminSearch(update: (String) -> Unit) = phoneRow().appl
         setSingleLine()
         inputType = InputType.TYPE_CLASS_TEXT
         hint = "搜索媒体库"
+        setText(search)
         textSize = 17 * .85f
         setTextColor(PHONE_TEXT)
         setHintTextColor(PHONE_MUTED)
@@ -89,7 +122,7 @@ private fun MainActivity.adminSearch(update: (String) -> Unit) = phoneRow().appl
 }
 
 private fun MainActivity.adminLibraryCard(
-    item: JSONObject, type: String, scanName: (String) -> String, more: () -> Unit, browse: () -> Unit, scan: () -> Unit,
+    item: JSONObject, type: String, menu: (View, JSONObject) -> Unit,
 ) = phoneCard().apply {
     val name = item.getString("name")
     addView(phoneRow().apply {
@@ -97,7 +130,7 @@ private fun MainActivity.adminLibraryCard(
         addView(phoneText("⋯", 24, PHONE_ACCENT).apply {
             gravity = Gravity.CENTER
             contentDescription = "管理 $name"
-            onTap(more)
+            onTap { menu(this, item) }
         }, LinearLayout.LayoutParams(ui(48), ui(48)))
     })
     if (type.isNotBlank() && type != name) addView(phoneText(type, 13, PHONE_MUTED))
@@ -118,13 +151,4 @@ private fun MainActivity.adminLibraryCard(
         val processed = job?.optInt("processed") ?: 0
         addWithGap(phoneText("$summary · $processed 个$media", 14, PHONE_MUTED), ui(6))
     }
-    val scanning = status == "queued" || status == "scanning"
-    addWithGap(phoneRow().apply {
-        addView(phoneAction("查看$media ${item.optInt("media_count")}", browse, color = PHONE_ACCENT, fill = PHONE_SELECTED),
-            LinearLayout.LayoutParams(0, -2, 1f))
-        addView(phoneAction(if (scanning) "正在扫描…" else "重新扫描", scan, color = PHONE_TEXT).apply {
-            isEnabled = !scanning
-            if (scanning) alpha = .5f
-        }, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = ui(10) })
-    }, ui(16))
 }

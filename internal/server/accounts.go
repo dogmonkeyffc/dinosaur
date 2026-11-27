@@ -51,9 +51,8 @@ func (s *Server) createUser(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 201, map[string]any{"user": u})
 }
 func (s *Server) updateUser(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
-	if err != nil || id <= 0 {
-		fail(w, 400, "invalid_id", "invalid user ID")
+	id, ok := accountID(w, r)
+	if !ok {
 		return
 	}
 	var body struct {
@@ -66,7 +65,7 @@ func (s *Server) updateUser(w http.ResponseWriter, r *http.Request) {
 		fail(w, 400, "invalid_body", "disabled is required")
 		return
 	}
-	err = s.store.SetDisabled(r.Context(), id, *body.Disabled)
+	err := s.store.SetDisabled(r.Context(), id, *body.Disabled)
 	if errors.Is(err, sql.ErrNoRows) {
 		fail(w, 404, "not_found", "user not found")
 		return

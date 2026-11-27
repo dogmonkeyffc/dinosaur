@@ -9,33 +9,7 @@ internal class Admin(private val activity: MainActivity) {
 
     fun libraries() = AdminLibraries(activity).show()
 
-    fun users(): Unit = with(activity) {
-        page("用户管理", { settings.show() })
-        val api = client
-        button("添加账号") {
-            form("添加账号", listOf("用户名", "密码")) { input ->
-                task({ api.request("/api/admin/users", "POST", json("username" to input[0], "password" to input[1], "role" to "user")) }) {
-                    users()
-                }
-            }
-        }
-        task({ api.request("/api/admin/users").rows("users") }) { items ->
-            items.forEach { user ->
-                val id = user.getLong("id")
-                val name = user.getString("username")
-                val disabled = user.optBoolean("disabled")
-                label(name + if (user.optString("role") == "admin") " · 管理员" else "")
-                if (id != account?.user?.optLong("id")) {
-                    val action = if (disabled) "启用" else "停用"
-                    button("$action $name") {
-                        confirm("$action $name？") {
-                            task({ api.request("/api/admin/users/$id", "PATCH", json("disabled" to !disabled)) }) { users() }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    fun users() = AdminUsers(activity).show()
 
     fun scraping(tv: Boolean = false): Unit = with(activity) {
         page(if (tv) "剧集刮削" else "电影刮削", { settings.show() })

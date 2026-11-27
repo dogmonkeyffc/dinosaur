@@ -60,7 +60,7 @@ func (s *Store) ChangePassword(ctx context.Context, id int64, hash string) error
 		return err
 	}
 	defer tx.Rollback()
-	if _, err = tx.ExecContext(ctx, `UPDATE users SET password_hash=? WHERE id=?`, hash, id); err != nil {
+	if err = tx.QueryRowContext(ctx, `UPDATE users SET password_hash=? WHERE id=? RETURNING id`, hash, id).Scan(&id); err != nil {
 		return err
 	}
 	if _, err = tx.ExecContext(ctx, `DELETE FROM sessions WHERE user_id=?`, id); err != nil {

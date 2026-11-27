@@ -170,7 +170,7 @@ internal class Catalog(private val activity: MainActivity) {
             if (folder != null && result.selected != null) {
                 directory = folder.path
                 folderHeader(folder.path)
-                renderVideoFolder(body, result.libraries, result.selected, folder, page, chrome.topInset, select, {
+                renderVideoFolder(body, result.libraries, result.selected, folder, page, chrome.topInset, artwork, client, select, {
                     savedScroll = chrome.scroller.scrollY
                     settings.show()
                 }, openFolder) { mediaId ->
@@ -185,13 +185,22 @@ internal class Catalog(private val activity: MainActivity) {
                     settings.show()
                 }, open)
             } else {
-                toolbar.addView(libraryTabs(result.libraries, id, select))
-                if (search) feed.search(body, items, client, typed.isNotEmpty(), open)
-                else if (result.selected != null) feed.home(body, result.selected.optString("name"), items, result.recent, client, open, {
-                    savedScroll = chrome.scroller.scrollY
-                    if (result.kind == "video") playVideo(it, client)
-                    else play(it.getLong("id"), { showChrome() }, landscape = true)
-                })
+                val tabs = libraryTabs(result.libraries, id, select)
+                if (search) {
+                    toolbar.addView(tabs)
+                    feed.search(body, items, client, typed.isNotEmpty(), open)
+                } else if (result.selected != null) {
+                    if (result.recent.isNotEmpty()) body.addView(feed.continueShelf(result.recent, client) { item ->
+                        savedScroll = chrome.scroller.scrollY
+                        if (item.optString("type") == "video") playVideo(item, client)
+                        else play(item.getLong("id"), { showChrome() }, landscape = true)
+                    })
+                    body.addView(tabs)
+                    body.addView(column().apply {
+                        setPadding(0, ui(22), 0, 0)
+                        feed.home(this, result.selected.optString("name"), items, client, open)
+                    })
+                }
             }
             if (items.isEmpty() && folder == null) body.addView(status(when {
                 result.selected == null && destination == 0 && !search -> "暂无首页媒体库"

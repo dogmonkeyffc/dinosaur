@@ -33,14 +33,28 @@ internal class PhoneArtwork(private val activity: MainActivity) {
         }
     }
 
-    fun image(item: JSONObject, client: Api, blur: Boolean = false) = ImageView(activity).apply {
+    fun preview(path: String, client: Api) = with(activity) {
+        FrameLayout(this).apply {
+            background = panel(0xff1b202a.toInt(), 14)
+            clipToOutline = true
+            addView(CatalogIcon(this@with, "video", PHONE_MUTED).apply {
+                importantForAccessibility = ImageView.IMPORTANT_FOR_ACCESSIBILITY_NO
+            }, FrameLayout.LayoutParams(ui(28), ui(28), Gravity.CENTER))
+            addView(image(path, client),
+                FrameLayout.LayoutParams(-1, -1))
+        }
+    }
+
+    fun image(item: JSONObject, client: Api, blur: Boolean = false) = image(item.optString("poster_url"), client, blur)
+
+    private fun image(path: String, client: Api, blur: Boolean = false) = ImageView(activity).apply {
         scaleType = ImageView.ScaleType.CENTER_CROP
         importantForAccessibility = ImageView.IMPORTANT_FOR_ACCESSIBILITY_NO
         if (blur && Build.VERSION.SDK_INT >= 31) {
             val radius = activity.ui(18).toFloat()
             setRenderEffect(RenderEffect.createBlurEffect(radius, radius, Shader.TileMode.CLAMP))
         }
-        val path = item.optString("poster_url").takeIf { it.isNotBlank() && it != "null" } ?: return@apply
+        if (path.isBlank() || path == "null") return@apply
         val account = activity.account?.key
         val url = runCatching { URL(client.resource(path).toString()) }.getOrNull() ?: return@apply
         val key = "$account:$url"

@@ -6,12 +6,13 @@ android {
     namespace 'com.monkeydog.dinosaur.mobile'
     compileSdk 36
     sourceSets.main.java.srcDir rootProject.file('../android-common/src/main/kotlin')
+    sourceSets.main.res.srcDir rootProject.file('../android-common/src/main/res')
     defaultConfig {
         applicationId 'com.monkeydog.dinosaur.mobile'
         minSdk 26
         targetSdk 35
-        versionCode 20
-        versionName '1.0.8'
+        versionCode 21
+        versionName '1.0.9'
     }
     signingConfigs {
         preview {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"dinosaur/internal/library"
@@ -36,13 +37,25 @@ func TestVideoDirectoryShowsActualChildrenAndRespectsLibraryAccess(t *testing.T)
 	if err != nil {
 		t.Fatal(err)
 	}
+	posterKey := strings.Repeat("a", 64)
+	posters := filepath.Join(s.config.DataDir, "posters")
+	if err := os.MkdirAll(posters, 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(posters, posterKey+".jpg"), []byte("test preview"), 0600); err != nil {
+		t.Fatal(err)
+	}
 	for _, relative := range []string{"Root.mp4", filepath.Join("Take_1%", "Raw clip.mp4"), "Missing.mp4"} {
 		if relative != "Missing.mp4" {
 			if err := os.WriteFile(filepath.Join(root, relative), nil, 0600); err != nil {
 				t.Fatal(err)
 			}
 		}
-		if err := db.SaveMedia(ctx, media.Item{LibraryID: lib.ID, RelativePath: relative, Title: "Indexed title"}, 1); err != nil {
+		item := media.Item{LibraryID: lib.ID, RelativePath: relative, Title: "Indexed title"}
+		if strings.Contains(relative, "Raw clip") {
+			item.PosterKey = posterKey
+		}
+		if err := db.SaveMedia(ctx, item, 1); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -57,12 +70,21 @@ func TestVideoDirectoryShowsActualChildrenAndRespectsLibraryAccess(t *testing.T)
 		}
 		return folder
 	}
-	if value := read(""); len(value.Folders) != 2 || len(value.Videos) != 1 || value.Videos[0].Name != "Root.mp4" {
+	if value := read(""); len(value.Folders) != 2 || len(value.Videos) != 1 || value.Videos[0].Name != "Root.mp4" || value.Videos[0].PosterURL != "" {
 		t.Fatalf("unexpected root: %+v", value)
 	}
 	nested := read("?path=Take_1%25")
 	if nested.Path != "Take_1%" || len(nested.Videos) != 1 || nested.Videos[0].Name != "Raw clip.mp4" {
 		t.Fatalf("unexpected child: %+v", nested)
+	}
+	preview := nested.Videos[0].PosterURL
+	expected := fmt.Sprintf("/api/media/%d/poster?v=%s", nested.Videos[0].ID, posterKey)
+	if preview != expected {
+		t.Fatalf("missing preview: %q", preview)
+	}
+	image := request(t, s, "GET", preview, nil, &admin, nil)
+	if image.Code != 200 || image.Header().Get("Content-Type") != "image/jpeg" || image.Body.String() != "test preview" {
+		t.Fatalf("unexpected preview response: %d", image.Code)
 	}
 	if located := read(fmt.Sprintf("?media_id=%d", nested.Videos[0].ID)); located.Path != nested.Path {
 		t.Fatalf("wrong directory for media: %+v", located)
@@ -72,5 +94,6 @@ func TestVideoDirectoryShowsActualChildrenAndRespectsLibraryAccess(t *testing.T)
 		t.Fatal(err)
 	}
 	status(t, request(t, s, "GET", base, nil, &viewer, nil), 404)
+	status(t, request(t, s, "GET", preview, nil, &viewer, nil), 404)
 	status(t, request(t, s, "GET", base, nil, nil, nil), 401)
 }

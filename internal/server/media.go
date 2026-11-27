@@ -92,9 +92,14 @@ func (s *Server) servePoster(w http.ResponseWriter, r *http.Request, key string)
 	http.ServeContent(w, r, "poster.jpg", info.ModTime(), file)
 }
 func setPosterURL(item *media.Item) {
-	if validPosterKey(item.PosterKey) {
-		item.PosterURL = "/api/media/" + strconv.FormatInt(item.ID, 10) + "/poster?v=" + item.PosterKey
+	item.PosterURL = mediaPosterURL(item.ID, item.PosterKey)
+}
+
+func mediaPosterURL(id int64, key string) string {
+	if !validPosterKey(key) {
+		return ""
 	}
+	return "/api/media/" + strconv.FormatInt(id, 10) + "/poster?v=" + key
 }
 func validPosterKey(key string) bool {
 	if len(key) != 64 {

@@ -97,13 +97,19 @@ func (s *Server) savePlaybackProgress(w http.ResponseWriter, r *http.Request) {
 }
 func (s *Server) continueWatching(w http.ResponseWriter, r *http.Request) {
 	kind := r.URL.Query().Get("type")
-	if kind != "" && kind != "movie" && kind != "tv" && kind != "video" {
+	if kind != "" && kind != "movie" && kind != "tv" && kind != "video" && kind != "all" {
 		fail(w, 400, "invalid_filter", "invalid media type")
 		return
 	}
 	var items []media.Item
 	var err error
-	if kind == "tv" {
+	if kind == "all" {
+		libraries, valid := resumeLibraryIDs(w, r)
+		if !valid {
+			return
+		}
+		items, err = s.store.ContinueHome(r.Context(), current(r).user.ID, libraries)
+	} else if kind == "tv" {
 		items, err = s.store.ContinueSeries(r.Context(), current(r).user.ID)
 	} else {
 		items, err = s.store.ContinueWatching(r.Context(), current(r).user.ID, kind)

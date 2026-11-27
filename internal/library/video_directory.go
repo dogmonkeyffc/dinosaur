@@ -6,9 +6,16 @@ import (
 	"path/filepath"
 )
 
+type IndexedVideo struct {
+	ID        int64
+	PosterKey string
+}
+
 type VideoFile struct {
-	ID   int64  `json:"id"`
-	Name string `json:"name"`
+	ID        int64  `json:"id"`
+	Name      string `json:"name"`
+	PosterKey string `json:"-"`
+	PosterURL string `json:"poster_url,omitempty"`
 }
 
 type VideoDirectory struct {
@@ -19,7 +26,7 @@ type VideoDirectory struct {
 
 // ReadVideoDirectory lists only real children of the selected directory and
 // intersects its regular files with the media index. The API uses slash paths.
-func ReadVideoDirectory(rootPath, directory string, indexed map[string]int64) (VideoDirectory, error) {
+func ReadVideoDirectory(rootPath, directory string, indexed map[string]IndexedVideo) (VideoDirectory, error) {
 	result := VideoDirectory{Path: directory, Folders: []string{}, Videos: []VideoFile{}}
 	name := directory
 	if name == "" {
@@ -47,8 +54,8 @@ func ReadVideoDirectory(rootPath, directory string, indexed map[string]int64) (V
 	for _, entry := range entries {
 		if entry.IsDir() {
 			result.Folders = append(result.Folders, entry.Name())
-		} else if id := indexed[entry.Name()]; id > 0 && entry.Type().IsRegular() {
-			result.Videos = append(result.Videos, VideoFile{ID: id, Name: entry.Name()})
+		} else if video := indexed[entry.Name()]; video.ID > 0 && entry.Type().IsRegular() {
+			result.Videos = append(result.Videos, VideoFile{ID: video.ID, Name: entry.Name(), PosterKey: video.PosterKey})
 		}
 	}
 	return result, nil

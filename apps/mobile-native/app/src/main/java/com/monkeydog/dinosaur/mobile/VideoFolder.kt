@@ -2,12 +2,14 @@ package com.monkeydog.dinosaur.mobile
 
 import android.text.TextUtils
 import android.widget.LinearLayout
+import com.monkeydog.dinosaur.android.Api
+import com.monkeydog.dinosaur.android.VideoFile
 import com.monkeydog.dinosaur.android.VideoFolder
 import org.json.JSONObject
 
 internal fun MainActivity.renderVideoFolder(
     body: LinearLayout, libraries: List<JSONObject>, selected: JSONObject, folder: VideoFolder,
-    page: Int, inset: Int, select: (Long) -> Unit, settings: () -> Unit, directory: (String) -> Unit, play: (Long) -> Unit,
+    page: Int, inset: Int, artwork: PhoneArtwork, client: Api, select: (Long) -> Unit, settings: () -> Unit, directory: (String) -> Unit, play: (Long) -> Unit,
 ) {
     if (folder.path.isEmpty()) {
         body.addView(phoneRow().apply {
@@ -24,10 +26,10 @@ internal fun MainActivity.renderVideoFolder(
             if (index < folder.folders.size) {
                 val name = folder.folders[index]
                 val path = listOf(folder.path, name).filter(String::isNotEmpty).joinToString("/")
-                addWithGap(directoryRow("folder", name) { directory(path) }, ui(10))
+                addWithGap(folderRow(name) { directory(path) }, ui(10))
             } else {
                 val video = folder.videos[index - folder.folders.size]
-                addWithGap(directoryRow("video", video.name) { play(video.id) }, ui(10))
+                addWithGap(videoCard(video, artwork, client) { play(video.id) }, ui(10))
             }
         }
         if (folder.total == 0) addWithGap(status("此目录为空"), ui(10))
@@ -44,14 +46,25 @@ internal fun MainActivity.videoFolderHeading(path: String, inset: Int, up: () ->
     }, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = ui(8) })
 }
 
-private fun MainActivity.directoryRow(icon: String, title: String, open: () -> Unit) = phoneRow().apply {
+private fun MainActivity.folderRow(title: String, open: () -> Unit) = phoneRow().apply {
     minimumHeight = ui(58)
     setPadding(ui(16), ui(10), ui(16), ui(10))
     background = panel(PHONE_SURFACE, 18)
-    addView(CatalogIcon(this@directoryRow, icon, PHONE_ACCENT), LinearLayout.LayoutParams(ui(24), ui(24)))
+    addView(CatalogIcon(this@folderRow, "folder", PHONE_ACCENT), LinearLayout.LayoutParams(ui(24), ui(24)))
     addView(phoneText(title, 16).apply { maxLines = 2 }, LinearLayout.LayoutParams(0, -2, 1f)
         .apply { leftMargin = ui(14) })
-    val action = if (icon == "folder") "打开文件夹" else "播放"
-    contentDescription = "$action $title"
+    contentDescription = "打开文件夹 $title"
     onTap(open)
+}
+
+private fun MainActivity.videoCard(video: VideoFile, artwork: PhoneArtwork, client: Api, play: () -> Unit) = phoneRow().apply {
+    background = panel(PHONE_SURFACE, 18)
+    setPadding(ui(8), ui(8), ui(16), ui(8))
+    addView(artwork.preview(video.preview, client), LinearLayout.LayoutParams(ui(140), ui(79)))
+    addView(phoneText(video.name, 16).apply {
+        maxLines = 3
+        ellipsize = TextUtils.TruncateAt.END
+    }, LinearLayout.LayoutParams(0, -2, 1f).apply { leftMargin = ui(14) })
+    contentDescription = "播放 ${video.name}"
+    onTap(play)
 }

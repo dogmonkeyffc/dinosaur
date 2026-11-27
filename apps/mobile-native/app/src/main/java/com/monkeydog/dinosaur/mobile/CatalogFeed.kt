@@ -12,12 +12,13 @@ import org.json.JSONObject
 import kotlin.math.roundToInt
 
 internal class CatalogFeed(private val activity: MainActivity, private val artwork: PhoneArtwork) {
+    fun continueShelf(items: List<JSONObject>, api: Api, play: (JSONObject) -> Unit) =
+        shelf("继续观看", items.take(8), api, play).apply { setPadding(0, activity.ui(16), 0, activity.ui(18)) }
+
     fun home(
-        body: LinearLayout, title: String, items: List<JSONObject>, recent: List<JSONObject>, api: Api,
-        open: (JSONObject) -> Unit, play: (JSONObject) -> Unit,
+        body: LinearLayout, title: String, items: List<JSONObject>, api: Api,
+        open: (JSONObject) -> Unit,
     ) = with(activity) {
-        body.setPadding(0, ui(22), 0, ui(22))
-        if (recent.isNotEmpty()) body.addWithGap(shelf("继续观看", recent.take(8), api, play), ui(28))
         if (items.isNotEmpty()) body.addWithGap(shelf(title, items.take(10), api, open), ui(28))
         items.firstOrNull { it.optString("poster_url").let { url -> url.isNotBlank() && url != "null" } }?.let { item ->
             body.addView(feature(item, api, open), LinearLayout.LayoutParams(-1, -2).apply {

@@ -3,6 +3,7 @@ package com.monkeydog.dinosaur.mobile
 import com.monkeydog.dinosaur.android.VideoFolder
 import com.monkeydog.dinosaur.android.videoFolder
 import com.monkeydog.dinosaur.android.Api
+import com.monkeydog.dinosaur.android.ApiFailure
 import com.monkeydog.dinosaur.android.continueWatching
 import com.monkeydog.dinosaur.android.rows
 import org.json.JSONObject
@@ -30,10 +31,18 @@ internal fun Api.catalogPage(
     val route = if (kind == "tv") "series" else "media"
     val encoded = URLEncoder.encode(typed, "UTF-8")
     val data = request("/api/$route?type=$kind&library_id=$id&page=$page&page_size=24&q=$encoded")
-    val recent = if (browse || search) emptyList() else {
-        val ids = visible.map { it.getLong("id") }.toSet()
-        runCatching { continueWatching(kind) }
-            .getOrDefault(emptyList()).filter { it.optLong("library_id") in ids }
-    }
+    val recent = if (browse || search) emptyList() else homeResume(visible)
     return CatalogPage(visible, selected, data, recent, kind, null)
+}
+
+private fun Api.homeResume(libraries: List<JSONObject>): List<JSONObject> {
+    val ids = libraries.map { it.getLong("id") }.toSet()
+    return runCatching {
+        request("/api/playback/continue?type=all&library_ids=${ids.joinToString(",")}").rows("items")
+    }.recoverCatching { error ->
+        if (error !is ApiFailure || error.status != 400) throw error
+        listOf("movie", "tv", "video").flatMap { type ->
+            runCatching { continueWatching(type) }.getOrDefault(emptyList())
+        }.sortedWith(compareByDescending<JSONObject> { it.optLong("last_played_at") }.thenByDescending { it.optLong("id") })
+    }.getOrDefault(emptyList()).filter { it.optLong("library_id") in ids }
 }

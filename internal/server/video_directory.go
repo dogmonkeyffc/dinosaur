@@ -52,6 +52,10 @@ func (s *Server) videoDirectory(w http.ResponseWriter, r *http.Request) {
 	}
 	result, err := library.ReadVideoDirectory(root, directory, index)
 	if !s.videoDirectoryError(w, r, err) {
+		for i := range result.Videos {
+			file := &result.Videos[i]
+			file.PosterURL = mediaPosterURL(file.ID, file.PosterKey)
+		}
 		writeJSON(w, http.StatusOK, result)
 	}
 }

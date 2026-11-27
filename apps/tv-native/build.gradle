@@ -6,12 +6,13 @@ android {
     namespace 'com.monkeydog.dinosaur.tv'
     compileSdk 36
     sourceSets.main.java.srcDir rootProject.file('../android-common/src/main/kotlin')
+    sourceSets.main.res.srcDir rootProject.file('../android-common/src/main/res')
     defaultConfig {
         applicationId 'com.monkeydog.dinosaur.tv'
         minSdk 24
         targetSdk 35
-        versionCode 5
-        versionName '1.0.2'
+        versionCode 6
+        versionName '1.0.3'
     }
     signingConfigs {
         preview {

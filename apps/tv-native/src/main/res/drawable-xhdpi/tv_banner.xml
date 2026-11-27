@@ -1,0 +1,14 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <size android:width="160dp" android:height="90dp" />
+            <solid android:color="@color/launcher_background" />
+        </shape>
+    </item>
+    <item android:drawable="@drawable/launcher_dinosaur"
+        android:left="3dp" android:width="70dp" android:height="70dp"
+        android:gravity="left|center_vertical" />
+    <item android:drawable="@drawable/tv_banner_wordmark"
+        android:right="7dp" android:width="94dp" android:height="22dp"
+        android:gravity="right|center_vertical" />
+</layer-list>

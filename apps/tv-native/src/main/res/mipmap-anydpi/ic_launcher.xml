@@ -1,0 +1,10 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape>
+            <size android:width="80dp" android:height="80dp" />
+            <solid android:color="@color/launcher_background" />
+        </shape>
+    </item>
+    <item android:drawable="@drawable/launcher_dinosaur"
+        android:width="80dp" android:height="80dp" android:gravity="center" />
+</layer-list>

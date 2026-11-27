@@ -2,6 +2,7 @@ package com.monkeydog.dinosaur.tv
 
 import android.widget.LinearLayout
 import com.monkeydog.dinosaur.android.Api
+import com.monkeydog.dinosaur.android.playback
 import com.monkeydog.dinosaur.android.json
 import com.monkeydog.dinosaur.android.rows
 import org.json.JSONObject
@@ -19,7 +20,7 @@ internal class TvDetails(private val activity: TvActivity, private val api: Api)
         content.addControl(play)
         play.requestFocus()
         page.resume = {
-            activity.task(page, { api.request("/api/playback/$id") }, {}) {
+            activity.task(page, { api.playback(id) }, {}) {
                 play.text = if (it.optDouble("resume_position", 0.0) > 0) "继续观看" else "播放"
             }
         }
@@ -56,7 +57,7 @@ internal class TvDetails(private val activity: TvActivity, private val api: Api)
         val seasons = data.rows("seasons")
         val cards = seasons.map { season ->
             val number = season.getInt("number")
-            json("title" to seasonTitle(number), "number" to number, "poster_url" to item.optString("poster_url"))
+            json("title" to seasonTitle(number), "number" to number, "poster_url" to season.optString("poster_url"))
         }
         activity.tvGrid(content, cards, api) { card -> episodes(id, item.getString("title"), card.getInt("number")) }
         if (seasons.isEmpty()) content.addView(activity.label("暂无季度", color = muted))

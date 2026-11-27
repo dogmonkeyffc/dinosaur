@@ -9,18 +9,24 @@ import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import com.monkeydog.dinosaur.android.Api
-import com.monkeydog.dinosaur.android.json
+import com.monkeydog.dinosaur.android.playback
+import com.monkeydog.dinosaur.android.savePlaybackProgress
 import com.monkeydog.dinosaur.android.rows
 import org.json.JSONObject
 
 @androidx.media3.common.util.UnstableApi
-internal class TvPlayback(private val activity: TvActivity, private val api: Api) {
+internal class TvPlayback(
+    private val activity: TvActivity,
+    private val api: Api,
+    private val videos: List<Long> = emptyList(),
+) {
     private val controls = TvTransport(activity)
     private val page = TvPage(controls.root)
     private val captions = TvCaptions(activity, api, page)
     private var media: ExoPlayer? = null
     private var id = 0L
     private var next = 0L
+    private var previous = 0L
     private var revision = 0
     private var offset = 0L
     private var duration = 0L
@@ -66,6 +72,7 @@ internal class TvPlayback(private val activity: TvActivity, private val api: Api
         captions.reset()
         id = mediaId
         next = 0
+        previous = 0
         ended = false
         if (advance) {
             audio = null
@@ -82,7 +89,7 @@ internal class TvPlayback(private val activity: TvActivity, private val api: Api
             }
         }
         controls.loading()
-        activity.task(page, { api.request("/api/playback/$mediaId?$query") }, {
+        activity.task(page, { api.playback(mediaId, query) }, {
             if (request == revision) controls.failure(it.message ?: "无法播放") { open(id, start, autoplay = autoplay) }
         }) { result ->
             if (request == revision) {
@@ -101,7 +108,13 @@ internal class TvPlayback(private val activity: TvActivity, private val api: Api
         offset = if (direct) 0 else start
         sourceDuration = item.optDouble("duration", 0.0).takeIf { it.isFinite() && it > 0 } ?: 0.0
         duration = (sourceDuration * 1000).toLong()
-        next = result.optJSONObject("next_episode")?.optLong("id") ?: 0L
+        val index = videos.indexOf(id)
+        if (index >= 0) {
+            next = videos.getOrNull(index + 1) ?: 0L
+            previous = videos.getOrNull(index - 1) ?: 0L
+        } else {
+            next = result.optJSONObject("next_episode")?.optLong("id") ?: 0L
+        }
         if (autoSubtitle) {
             subtitle = if (result.isNull("selected_subtitle")) null else result.getInt("selected_subtitle")
             autoSubtitle = false
@@ -111,7 +124,11 @@ internal class TvPlayback(private val activity: TvActivity, private val api: Api
         val player = ExoPlayer.Builder(activity).setMediaSourceFactory(DefaultMediaSourceFactory(http)).build()
         media = player
         controls.view.player = player
-        controls.ready(item.getString("title"), next > 0, ::toggle, ::seek, ::next, ::audioMenu, ::subtitleMenu, ::options)
+        controls.ready(
+            item.getString("title"), if (videos.isEmpty()) "下一集" else "下一个",
+            if (next > 0) ::next else null, if (previous > 0) ::previous else null,
+            ::toggle, ::seek, ::audioMenu, ::subtitleMenu, ::options,
+        )
         player.addListener(object : Player.Listener {
             override fun onPlaybackStateChanged(state: Int) {
                 if (state != Player.STATE_ENDED || ended || media !== player) return
@@ -159,11 +176,9 @@ internal class TvPlayback(private val activity: TvActivity, private val api: Api
         if (media == null || (ended && !completed)) return
         val seconds = if (completed && sourceDuration > 0) sourceDuration else position() / 1000.0
         if (!completed && seconds <= 0) return
-        val path = "/api/playback/$id/progress"
-        val body = json("position" to seconds)
-        if (completed) body.put("watched", true)
+        val mediaId = id
         lastSave = System.currentTimeMillis()
-        activity.worker.execute { runCatching { api.request(path, "PUT", body) } }
+        activity.worker.execute { runCatching { api.savePlaybackProgress(mediaId, seconds, completed) } }
     }
 
     private fun seek(delta: Long) {
@@ -174,10 +189,13 @@ internal class TvPlayback(private val activity: TvActivity, private val api: Api
         if (direct) player.seekTo(target) else open(id, target)
     }
 
-    private fun next() {
-        if (next <= 0) return
+    private fun next() = advance(next)
+    private fun previous() = advance(previous)
+
+    private fun advance(target: Long) {
+        if (target <= 0) return
         save()
-        open(next, 0L, advance = true)
+        open(target, if (videos.isEmpty()) 0L else null, advance = true)
     }
 
     private fun toggle() {
@@ -186,47 +204,34 @@ internal class TvPlayback(private val activity: TvActivity, private val api: Api
         else if (player.playWhenReady) pause() else player.play()
     }
 
-    private fun audioMenu() {
-        val tracks = info.rows("audio_tracks")
-        val names = tracks.map {
-            it.optString("title").ifBlank { it.optString("language").ifBlank { "音轨 ${it.getInt("index")}" } }
-        }
-        controls.pick("音轨", names) {
-            audio = tracks[it].getInt("index")
-            compatible = true
+    private fun audioMenu() = controls.audio(info.rows("audio_tracks")) {
+        audio = it
+        compatible = true
+        open(id, position())
+    }
+
+    private fun subtitleMenu() = controls.subtitles(info.rows("subtitles")) {
+        autoSubtitle = false
+        subtitle = it
+        open(id, position())
+    }
+
+    private fun options() = controls.settings(
+        mode = {
+            compatible = it
             open(id, position())
-        }
-    }
-
-    private fun subtitleMenu() {
-        val tracks = info.rows("subtitles")
-        controls.pick("字幕", listOf("关闭字幕") + tracks.map { it.getString("label") }) {
-            autoSubtitle = false
-            subtitle = tracks.getOrNull(it - 1)?.getInt("id")
+        },
+        quality = {
+            quality = it
             open(id, position())
-        }
-    }
+        },
+        speed = {
+            speed = it
+            media?.setPlaybackSpeed(speed)
+        },
+    )
 
-    private fun options() {
-        controls.pick("播放设置", listOf("播放方式", "分辨率", "倍速")) { option ->
-            when (option) {
-                0 -> controls.pick("播放方式", listOf("原片", "兼容播放")) {
-                    compatible = it == 1
-                    open(id, position())
-                }
-                1 -> controls.pick("分辨率", listOf("自动", "原分辨率", "1080p", "720p", "480p")) {
-                    quality = listOf("auto", "original", "1080", "720", "480")[it]
-                    open(id, position())
-                }
-                2 -> controls.pick("倍速", listOf("0.5×", "0.75×", "1×", "1.25×", "1.5×", "2×")) {
-                    speed = listOf(.5f, .75f, 1f, 1.25f, 1.5f, 2f)[it]
-                    media?.setPlaybackSpeed(speed)
-                }
-            }
-        }
-    }
-
-    fun key(event: KeyEvent) = controls.key(event, ::toggle, ::seek, ::next)
+    fun key(event: KeyEvent) = controls.key(event, ::toggle, ::seek, ::next, ::previous)
 
     fun pause() {
         media?.pause()

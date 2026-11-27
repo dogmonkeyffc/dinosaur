@@ -8,6 +8,8 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
+import com.monkeydog.dinosaur.android.historySettings
+import com.monkeydog.dinosaur.android.setHistoryRecording
 import com.monkeydog.dinosaur.android.json
 import com.monkeydog.dinosaur.android.rows
 import org.json.JSONArray
@@ -141,7 +143,7 @@ internal class Settings(private val activity: MainActivity) {
         val group = group()
         content.addView(group)
         val client = api
-        task({ client.request(if (record) "/api/history/settings" else "/api/libraries").rows("libraries") }) { items ->
+        task({ if (record) client.historySettings() else client.request("/api/libraries").rows("libraries") }) { items ->
             if (items.isEmpty()) label("暂无媒体库")
             items.forEachIndexed { index, item ->
                 if (index > 0) group.separator()
@@ -151,7 +153,7 @@ internal class Settings(private val activity: MainActivity) {
                         control.isChecked = !value
                         val save = {
                             control.isEnabled = false
-                            task({ client.request("/api/history/settings/$id", "PUT", json("record_history" to value)) }, {
+                            task({ client.setHistoryRecording(id, value) }, {
                                 control.isEnabled = true
                                 message(it.message ?: "保存失败")
                             }) {

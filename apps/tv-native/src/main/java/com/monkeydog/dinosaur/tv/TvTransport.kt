@@ -8,8 +8,10 @@ import android.view.KeyEvent
 import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import androidx.media3.ui.PlayerView
+import org.json.JSONObject
 
 @androidx.media3.common.util.UnstableApi
 internal class TvTransport(private val activity: TvActivity) {
@@ -31,6 +33,7 @@ internal class TvTransport(private val activity: TvActivity) {
         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
     }
     private val actions = activity.row()
+    private val options = activity.row()
     private val overlay = activity.column().apply {
         setBackgroundColor(0xf012191b.toInt())
         setPadding(activity.dp(38), activity.dp(14), activity.dp(38), activity.dp(22))
@@ -38,6 +41,7 @@ internal class TvTransport(private val activity: TvActivity) {
         addView(position)
         addView(bar)
         addView(actions)
+        addView(options)
     }
     val root = FrameLayout(activity).apply {
         setBackgroundColor(Color.BLACK)
@@ -69,6 +73,7 @@ internal class TvTransport(private val activity: TvActivity) {
         bar.progress = 0
         subtitle.text = ""
         actions.removeAllViews()
+        options.removeAllViews()
         val back = activity.control("返回", activity::back)
         actions.addControl(back, horizontal = true)
         reveal(false)
@@ -77,10 +82,11 @@ internal class TvTransport(private val activity: TvActivity) {
 
     fun ready(
         title: String,
-        hasNext: Boolean,
+        nextLabel: String,
+        next: (() -> Unit)?,
+        previous: (() -> Unit)?,
         toggle: () -> Unit,
         seek: (Long) -> Unit,
-        next: () -> Unit,
         audio: () -> Unit,
         subtitles: () -> Unit,
         settings: () -> Unit,
@@ -88,14 +94,16 @@ internal class TvTransport(private val activity: TvActivity) {
         isReady = true
         heading.text = title
         actions.removeAllViews()
+        options.removeAllViews()
         val play = button("播放", toggle)
         playButton = play
-        button("后退 15 秒") { seek(-15000) }
-        button("前进 15 秒") { seek(15000) }
-        if (hasNext) button("下一集", next)
-        button("音轨", audio)
-        button("字幕", subtitles)
-        button("播放设置", settings)
+        button("后退 15 秒", { seek(-15000) })
+        button("前进 15 秒", { seek(15000) })
+        if (previous != null) button("上一个", previous)
+        if (next != null) button(nextLabel, next)
+        button("音轨", audio, options)
+        button("字幕", subtitles, options)
+        button("播放设置", settings, options)
         reveal()
         play.requestFocus()
     }
@@ -106,10 +114,10 @@ internal class TvTransport(private val activity: TvActivity) {
         button("重试", retry).requestFocus()
     }
 
-    private fun button(title: String, action: () -> Unit) = activity.control(title) {
+    private fun button(title: String, action: () -> Unit, row: LinearLayout = actions) = activity.control(title) {
         postpone()
         action()
-    }.also { actions.addControl(it, horizontal = true) }
+    }.also { row.addControl(it, horizontal = true) }
 
     fun update(time: Long, duration: Long) {
         val value = "${clock(time)} / ${clock(duration)}"
@@ -139,7 +147,7 @@ internal class TvTransport(private val activity: TvActivity) {
 
     private fun subtitleMargin(raised: Boolean) {
         val params = subtitle.layoutParams as FrameLayout.LayoutParams
-        val margin = activity.dp(if (raised) 162 else 42)
+        val margin = activity.dp(if (raised) 207 else 42)
         if (params.bottomMargin != margin) {
             params.bottomMargin = margin
             subtitle.layoutParams = params
@@ -165,12 +173,42 @@ internal class TvTransport(private val activity: TvActivity) {
         postpone()
     }
 
-    fun key(event: KeyEvent, toggle: () -> Unit, seek: (Long) -> Unit, next: () -> Unit): Boolean {
+    fun audio(tracks: List<JSONObject>, select: (Int) -> Unit) {
+        val names = tracks.map {
+            it.optString("title").ifBlank { it.optString("language").ifBlank { "音轨 ${it.getInt("index")}" } }
+        }
+        pick("音轨", names) { select(tracks[it].getInt("index")) }
+    }
+
+    fun subtitles(tracks: List<JSONObject>, select: (Int?) -> Unit) {
+        pick("字幕", listOf("关闭字幕") + tracks.map { it.getString("label") }) {
+            select(tracks.getOrNull(it - 1)?.getInt("id"))
+        }
+    }
+
+    fun settings(mode: (Boolean) -> Unit, quality: (String) -> Unit, speed: (Float) -> Unit) {
+        pick("播放设置", listOf("播放方式", "分辨率", "倍速")) { option ->
+            when (option) {
+                0 -> pick("播放方式", listOf("原片", "兼容播放")) { mode(it == 1) }
+                1 -> pick("分辨率", listOf("自动", "原分辨率", "1080p", "720p", "480p")) {
+                    quality(listOf("auto", "original", "1080", "720", "480")[it])
+                }
+                2 -> pick("倍速", listOf("0.5×", "0.75×", "1×", "1.25×", "1.5×", "2×")) {
+                    speed(listOf(.5f, .75f, 1f, 1.25f, 1.5f, 2f)[it])
+                }
+            }
+        }
+    }
+
+    fun key(
+        event: KeyEvent, toggle: () -> Unit, seek: (Long) -> Unit, next: () -> Unit, previous: () -> Unit,
+    ): Boolean {
         if (dialog != null || !isReady) return false
         val code = event.keyCode
         val handled = when (code) {
             KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE -> toggle
             KeyEvent.KEYCODE_MEDIA_NEXT -> next
+            KeyEvent.KEYCODE_MEDIA_PREVIOUS -> previous
             KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> ({ seek(15000) })
             KeyEvent.KEYCODE_MEDIA_REWIND -> ({ seek(-15000) })
             else -> null

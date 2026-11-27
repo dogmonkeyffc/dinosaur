@@ -1,6 +1,7 @@
 package com.monkeydog.dinosaur.mobile
 
 import com.monkeydog.dinosaur.android.Api
+import com.monkeydog.dinosaur.android.playback
 import com.monkeydog.dinosaur.android.rows
 import android.graphics.Color
 import android.os.Handler
@@ -74,7 +75,7 @@ internal class PlaybackScreen(
         }
         render()
         if (initial && fullscreen) setPlaybackFullscreen(true, previousOrientation)
-        task({ api.request("/api/playback/$mediaId?$parameters") }, {
+        task({ api.playback(mediaId, parameters) }, {
             if (load == revision) chrome?.fail(it.message ?: "无法播放")
         }) { result ->
             if (load == revision) prepare(result, start)
@@ -225,7 +226,6 @@ internal class PlaybackScreen(
             },
         )
     }
-
     private fun changeSubtitle(track: Int?) {
         subtitle = track
         autoSubtitle = false

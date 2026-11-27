@@ -1,6 +1,9 @@
 package com.monkeydog.dinosaur.mobile
 
+import com.monkeydog.dinosaur.android.VideoFolder
+import com.monkeydog.dinosaur.android.videoFolder
 import com.monkeydog.dinosaur.android.Api
+import com.monkeydog.dinosaur.android.continueWatching
 import com.monkeydog.dinosaur.android.rows
 import org.json.JSONObject
 import java.net.URLEncoder
@@ -29,7 +32,7 @@ internal fun Api.catalogPage(
     val data = request("/api/$route?type=$kind&library_id=$id&page=$page&page_size=24&q=$encoded")
     val recent = if (browse || search) emptyList() else {
         val ids = visible.map { it.getLong("id") }.toSet()
-        runCatching { request("/api/playback/continue?type=$kind").rows("items") }
+        runCatching { continueWatching(kind) }
             .getOrDefault(emptyList()).filter { it.optLong("library_id") in ids }
     }
     return CatalogPage(visible, selected, data, recent, kind, null)

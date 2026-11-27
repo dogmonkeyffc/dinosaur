@@ -4,6 +4,8 @@ import android.os.Handler
 import android.os.Looper
 import android.view.inputmethod.InputMethodManager
 import android.widget.LinearLayout
+import com.monkeydog.dinosaur.android.VideoFile
+import com.monkeydog.dinosaur.android.videoFolder
 import com.monkeydog.dinosaur.android.Api
 import com.monkeydog.dinosaur.android.rows
 import org.json.JSONObject

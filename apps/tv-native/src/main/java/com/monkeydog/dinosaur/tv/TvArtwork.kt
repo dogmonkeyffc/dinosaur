@@ -13,18 +13,13 @@ import org.json.JSONObject
 
 internal class TvArtwork(private val activity: TvActivity) {
     private val worker = Executors.newFixedThreadPool(3)
-    private val cache = object : LruCache<String, Bitmap>(12 * 1024 * 1024) {
-        override fun sizeOf(key: String, value: Bitmap) = value.byteCount
+    private val cache = object : LruCache<Pair<Api, String>, Bitmap>(12 * 1024 * 1024) {
+        override fun sizeOf(key: Pair<Api, String>, value: Bitmap) = value.byteCount
     }
 
     fun tile(item: JSONObject, api: Api, activate: () -> Unit): LinearLayout = with(activity) {
         val title = item.optString("title").ifBlank { item.optString("name") }
-        val image = ImageView(this).apply {
-            scaleType = ImageView.ScaleType.CENTER_CROP
-            setBackgroundColor(surface)
-        }
-        val path = item.optString("poster_url")
-        if (path.isNotBlank()) load(api, path, image)
+        val image = poster(item, api)
         column().apply {
             background = focusSurface()
             isFocusable = true
@@ -43,8 +38,18 @@ internal class TvArtwork(private val activity: TvActivity) {
         }
     }
 
+    fun poster(item: JSONObject, api: Api): ImageView = with(activity) {
+        val image = ImageView(this).apply {
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            setBackgroundColor(surface)
+        }
+        val path = item.optString("poster_url")
+        if (path.isNotBlank()) load(api, path, image)
+        image
+    }
+
     private fun load(api: Api, path: String, view: ImageView) {
-        val key = api.origin + path
+        val key = api to path
         cache.get(key)?.let { view.setImageBitmap(it); return }
         worker.execute {
             val bitmap = runCatching {

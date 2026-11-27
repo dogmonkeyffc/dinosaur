@@ -4,6 +4,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import com.monkeydog.dinosaur.android.Account
 import com.monkeydog.dinosaur.android.Api
+import com.monkeydog.dinosaur.android.continueWatching
 import com.monkeydog.dinosaur.android.rows
 import java.net.URLEncoder
 import org.json.JSONObject
@@ -11,6 +12,8 @@ import org.json.JSONObject
 internal class TvCatalog(private val activity: TvActivity, private val account: Account) {
     private val api = account.api
     private val details = TvDetails(activity, api)
+    private val videos = TvVideoFolders(activity, api)
+    private val history = TvHistory(activity, api)
     private var kind = "movie"
     private var query = ""
     private var library = 0L
@@ -55,6 +58,7 @@ internal class TvCatalog(private val activity: TvActivity, private val account: 
             buttons[value] = destination
             nav.addControl(destination)
         }
+        nav.addControl(control("观看记录", history::show))
         nav.addView(column(), LinearLayout.LayoutParams(1, 0, 1f))
         nav.addControl(control("退出登录") { logout(page, account) })
         toolbar.addControl(search, horizontal = true)
@@ -80,15 +84,18 @@ internal class TvCatalog(private val activity: TvActivity, private val account: 
         val request = ++revision
         val type = kind
         val number = pageNumber
+        val folders = type == "video" && query.isBlank()
         val path = if (type == "tv") "series" else "media"
         val encoded = URLEncoder.encode(query, "UTF-8")
         val filter = if (library > 0) "&library_id=$library" else ""
         val recent = query.isBlank() && number == 1
+        page.resume = {}
         listing.removeAllViews()
         val status = label("正在加载", color = muted)
         listing.addView(status)
         task(page, {
-            val catalog = api.request("/api/$path?type=$type&page=$number&page_size=24&q=$encoded$filter")
+            val catalog = if (folders) api.request("/api/libraries")
+            else api.request("/api/$path?type=$type&page=$number&page_size=24&q=$encoded$filter")
             val resume = if (recent) runCatching { recent(type) }.getOrDefault(emptyList()) else emptyList()
             catalog to resume
         }, {
@@ -98,15 +105,15 @@ internal class TvCatalog(private val activity: TvActivity, private val account: 
                 listing.removeAllViews()
                 val recentPane = column()
                 listing.addView(recentPane)
-                renderRecent(recentPane, resume)
-                val first = render(listing, catalog, type) {
+                renderRecent(page, recentPane, resume, type)
+                val first = if (folders) renderVideoLibraries(listing, catalog) else render(page, listing, catalog, type) {
                     pageNumber = it
                     refresh(page, listing)
                 }
                 page.resume = {
                     if (recent && request == revision) task(page, { recent(type) }, {}) { updates ->
                         val focus = page.view.findFocus()?.tag as? RecentFocus
-                        val replacement = renderRecent(recentPane, updates)[focus?.mediaId]
+                        val replacement = renderRecent(page, recentPane, updates, type)[focus?.mediaId]
                         if (focus != null) (replacement ?: first ?: page.focus)?.requestFocus()
                     }
                 }
@@ -116,19 +123,33 @@ internal class TvCatalog(private val activity: TvActivity, private val account: 
 
     private data class RecentFocus(val mediaId: Long)
 
-    private fun recent(type: String) = api.request("/api/playback/continue?type=$type").rows("items")
+    private fun recent(type: String) = api.continueWatching(type)
 
-    private fun renderRecent(pane: LinearLayout, media: List<JSONObject>) = with(activity) {
+    private fun renderRecent(page: TvPage, pane: LinearLayout, media: List<JSONObject>, type: String) = with(activity) {
         val items = media.filter { library == 0L || it.optLong("library_id") == library }
         pane.removeAllViews()
         if (items.isNotEmpty()) {
             pane.addView(label("继续观看", 22f, bold = true).apply { setPadding(0, dp(14), 0, dp(10)) })
         }
-        tvGrid(pane, items, api) { details.play(it.getLong("id")) }.mapKeys { it.key.getLong("id") }
+        tvGrid(pane, items, api) {
+            if (type == "video") videos.play(page, it) else details.play(it.getLong("id"))
+        }.mapKeys { it.key.getLong("id") }
             .also { views -> views.forEach { (id, view) -> view.tag = RecentFocus(id) } }
     }
 
+    private fun renderVideoLibraries(listing: LinearLayout, catalog: JSONObject) = with(activity) {
+        listing.addView(label("普通视频", 25f, bold = true).apply { setPadding(0, dp(14), 0, dp(10)) })
+        val items = catalog.rows("libraries").filter {
+            it.optString("type") == "video" && (library == 0L || library == it.optLong("id"))
+        }
+        if (items.isEmpty()) listing.addView(label("暂无媒体库", color = muted))
+        items.map { item ->
+            control(item.getString("name")) { videos.library(item) }.also { listing.addControl(it) }
+        }.firstOrNull()
+    }
+
     private fun render(
+        page: TvPage,
         listing: LinearLayout,
         catalog: JSONObject,
         type: String,
@@ -142,6 +163,7 @@ internal class TvCatalog(private val activity: TvActivity, private val account: 
             val id = item.getLong("id")
             val work = item.optLong("work_id")
             when {
+                type == "video" -> videos.play(page, item)
                 type != "tv" -> details.movie(id)
                 work > 0 -> details.work(work)
                 else -> details.series(id)

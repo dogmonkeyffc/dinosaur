@@ -9,6 +9,7 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import com.monkeydog.dinosaur.android.historyPage
 import com.monkeydog.dinosaur.android.Api
 import com.monkeydog.dinosaur.android.rows
 import org.json.JSONObject
@@ -38,7 +39,7 @@ internal class HistoryTimeline(private val activity: MainActivity, private val a
             failure = null
             val spinner = loading()
             chrome.body.addView(spinner)
-            task({ client.request("/api/history?page=$number&page_size=24") }, { error ->
+            task({ client.historyPage(number) }, { error ->
                 loadingPage = false
                 chrome.body.removeView(spinner)
                 failure = column().apply { feedback(this, error.message ?: "无法加载观看记录", ::load) }

@@ -75,22 +75,11 @@ internal class Admin(private val activity: MainActivity) {
         }
     }
 
-    private fun editLibrary(item: JSONObject?): Unit = with(activity) {
-        val names = listOf("电影", "电视剧", "普通视频")
-        val types = listOf("movie", "tv", "video")
-        choose("媒体类型", names, types.indexOf(item?.optString("type"))) { index ->
-            fun edit(root: String) = form("媒体库", listOf("名称", "服务器媒体目录"), listOf(item?.optString("name").orEmpty(), root)) { values ->
-                val api = client
-                val path = "/api/admin/libraries" + (item?.let { "/${it.getLong("id")}" } ?: "")
-                val body = json("name" to values[0], "root_path" to values[1], "type" to types[index])
-                task({ api.request(path, if (item == null) "POST" else "PUT", body) }) { libraries() }
-            }
-            val root = item?.optString("root_path").orEmpty()
-            choose("服务器媒体目录", listOf("输入路径", "浏览目录")) { choice ->
-                if (choice == 0) edit(root)
-                else DirectoryPicker(activity).show(root, previous = { libraries() }) { path -> edit(path) }
-            }
-        }
+    private fun editLibrary(item: JSONObject?) {
+        val previous = if (item == null) ::libraries else ({ library(item) })
+        LibraryEditor(activity, item, previous) { saved ->
+            if (item == null) libraries() else library(saved)
+        }.show()
     }
 
     private fun access(id: Long, previous: () -> Unit): Unit = with(activity) {

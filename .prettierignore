@@ -1,5 +1,2 @@
-apps/*/android/
-apps/*/ios/
-apps/*/dist/
 web/dist/
 ui/public/assets/vendor/
